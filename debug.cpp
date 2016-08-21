@@ -7,15 +7,17 @@
 #define BREAKPOINT_HASH(p) ( ((unsigned long)(p)->FileName) ^ (((p)->Line << 16) | ((p)->CharacterPos << 16)) )
 
 /* initialise the debugger by clearing the breakpoint table */
-void DebugInit(Picoc *pc)
+void Picoc::DebugInit()
 {
+	Picoc *pc = this;
     TableInitTable(&pc->BreakpointTable, &pc->BreakpointHashTable[0], BREAKPOINT_TABLE_SIZE, TRUE);
     pc->BreakpointCount = 0;
 }
 
 /* free the contents of the breakpoint table */
-void DebugCleanup(Picoc *pc)
+void Picoc::DebugCleanup()
 {
+	Picoc *pc = this;
     struct TableEntry *Entry;
     struct TableEntry *NextEntry;
     int Count;
@@ -25,7 +27,7 @@ void DebugCleanup(Picoc *pc)
         for (Entry = pc->BreakpointHashTable[Count]; Entry != NULL; Entry = NextEntry)
         {
             NextEntry = Entry->Next;
-            HeapFreeMem(pc, Entry);
+            HeapFreeMem( Entry);
         }
     }
 }
@@ -57,9 +59,9 @@ void DebugSetBreakpoint(struct ParseState *Parser)
     if (FoundEntry == NULL)
     {   
         /* add it to the table */
-        struct TableEntry *NewEntry = HeapAllocMem(pc, sizeof(struct TableEntry));
+		struct TableEntry *NewEntry = static_cast<TableEntry*>(pc->HeapAllocMem( sizeof(struct TableEntry)));
         if (NewEntry == NULL)
-            ProgramFailNoParser(pc, "out of memory");
+            pc->ProgramFailNoParser( "out of memory");
             
         NewEntry->p.b.FileName = Parser->FileName;
         NewEntry->p.b.Line = Parser->Line;
@@ -83,7 +85,7 @@ int DebugClearBreakpoint(struct ParseState *Parser)
         if (DeleteEntry->p.b.FileName == Parser->FileName && DeleteEntry->p.b.Line == Parser->Line && DeleteEntry->p.b.CharacterPos == Parser->CharacterPos)
         {
             *EntryPtr = DeleteEntry->Next;
-            HeapFreeMem(pc, DeleteEntry);
+            pc->HeapFreeMem( DeleteEntry);
             pc->BreakpointCount--;
 
             return TRUE;
@@ -116,7 +118,7 @@ void DebugCheckStatement(struct ParseState *Parser)
     if (DoBreak)
     {
         PlatformPrintf(pc->CStdOut, "Handling a break\n");
-        PicocParseInteractiveNoStartPrompt(pc, FALSE);
+        pc->PicocParseInteractiveNoStartPrompt( FALSE);
     }
 }
 

@@ -4,17 +4,18 @@
 #include "interpreter.h"
 
 /* deallocate any memory */
-void ParseCleanup(Picoc *pc)
+void Picoc::ParseCleanup()
 {
+	Picoc *pc = this;
     while (pc->CleanupTokenList != NULL)
     {
         struct CleanupTokenNode *Next = pc->CleanupTokenList->Next;
         
-        HeapFreeMem(pc, pc->CleanupTokenList->Tokens);
+        HeapFreeMem( pc->CleanupTokenList->Tokens);
         if (pc->CleanupTokenList->SourceText != NULL)
-            HeapFreeMem(pc, (void *)pc->CleanupTokenList->SourceText);
+            HeapFreeMem( (void *)pc->CleanupTokenList->SourceText);
             
-        HeapFreeMem(pc, pc->CleanupTokenList);
+        HeapFreeMem( pc->CleanupTokenList);
         pc->CleanupTokenList = Next;
     }
 }
@@ -29,7 +30,7 @@ enum ParseResult ParseStatementMaybeRun(struct ParseState *Parser, int Condition
         Parser->Mode = RunModeSkip;
         Result = ParseStatement(Parser, CheckTrailingSemicolon);
         Parser->Mode = OldMode;
-        return Result;
+		return static_cast<ParseResult>(Result);
     }
     else
         return ParseStatement(Parser, CheckTrailingSemicolon);
@@ -77,7 +78,7 @@ struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueTyp
     if (ParamCount > PARAMETER_MAX)
         ProgramFail(Parser, "too many parameters (%d allowed)", PARAMETER_MAX);
     
-    FuncValue = VariableAllocValueAndData(pc, Parser, sizeof(struct FuncDef) + sizeof(struct ValueType *) * ParamCount + sizeof(const char *) * ParamCount, FALSE, NULL, TRUE);
+    FuncValue = pc->VariableAllocValueAndData( Parser, sizeof(struct FuncDef) + sizeof(struct ValueType *) * ParamCount + sizeof(const char *) * ParamCount, FALSE, NULL, TRUE);
     FuncValue->Typ = &pc->FunctionType;
     FuncValue->Val->FuncDef.ReturnType = ReturnType;
     FuncValue->Val->FuncDef.NumParams = ParamCount;
@@ -147,7 +148,7 @@ struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueTyp
             ProgramFail(Parser, "function definition expected");
 
         FuncValue->Val->FuncDef.Body = FuncBody;
-        FuncValue->Val->FuncDef.Body.Pos = LexCopyTokens(&FuncBody, Parser);
+		FuncValue->Val->FuncDef.Body.Pos = static_cast<unsigned char*>(LexCopyTokens(&FuncBody, Parser));
 
         /* is this function already in the global table? */
         if (TableGet(&pc->GlobalTable, Identifier, &OldFuncValue, NULL, NULL, NULL))
@@ -155,14 +156,14 @@ struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueTyp
             if (OldFuncValue->Val->FuncDef.Body.Pos == NULL)
             {
                 /* override an old function prototype */
-                VariableFree(pc, TableDelete(pc, &pc->GlobalTable, Identifier));
+                pc->VariableFree( pc->TableDelete( &pc->GlobalTable, Identifier));
             }
             else
                 ProgramFail(Parser, "'%s' is already defined", Identifier);
         }
     }
 
-    if (!TableSet(pc, &pc->GlobalTable, Identifier, FuncValue, (char *)Parser->FileName, Parser->Line, Parser->CharacterPos))
+    if (!pc->TableSet( &pc->GlobalTable, Identifier, FuncValue, (char *)Parser->FileName, Parser->Line, Parser->CharacterPos))
         ProgramFail(Parser, "'%s' is already defined", Identifier);
         
     return FuncValue;
@@ -189,7 +190,7 @@ int ParseArrayInitialiser(struct ParseState *Parser, struct Value *NewVariable, 
 
         if (NewVariable->Typ->ArraySize == 0)
         {
-            NewVariable->Typ = TypeGetMatching(Parser->pc, Parser, NewVariable->Typ->FromType, NewVariable->Typ->Base, NumElements, NewVariable->Typ->Identifier, TRUE);
+			NewVariable->Typ = Parser->pc->TypeGetMatching(Parser, NewVariable->Typ->FromType, NewVariable->Typ->Base, NumElements, NewVariable->Typ->Identifier, TRUE);
             VariableRealloc(Parser, NewVariable, TypeSizeValue(NewVariable, FALSE));
         }
         #ifdef DEBUG_ARRAY_INITIALIZER
@@ -385,7 +386,7 @@ void ParseMacroDefinition(struct ParseState *Parser)
         
         ParserCopy(&ParamParser, Parser);
         NumParams = ParseCountParams(&ParamParser);
-        MacroValue = VariableAllocValueAndData(Parser->pc, Parser, sizeof(struct MacroDef) + sizeof(const char *) * NumParams, FALSE, NULL, TRUE);
+		MacroValue = Parser->pc->VariableAllocValueAndData(Parser, sizeof(struct MacroDef) + sizeof(const char *) * NumParams, FALSE, NULL, TRUE);
         MacroValue->Val->MacroDef.NumParams = NumParams;
         MacroValue->Val->MacroDef.ParamName = (char **)((char *)MacroValue->Val + sizeof(struct MacroDef));
 
@@ -411,7 +412,7 @@ void ParseMacroDefinition(struct ParseState *Parser)
     else
     {
         /* allocate a simple unparameterised macro */
-        MacroValue = VariableAllocValueAndData(Parser->pc, Parser, sizeof(struct MacroDef), FALSE, NULL, TRUE);
+		MacroValue = Parser->pc->VariableAllocValueAndData(Parser, sizeof(struct MacroDef), FALSE, NULL, TRUE);
         MacroValue->Val->MacroDef.NumParams = 0;
     }
     
@@ -419,9 +420,9 @@ void ParseMacroDefinition(struct ParseState *Parser)
     ParserCopy(&MacroValue->Val->MacroDef.Body, Parser);
     MacroValue->Typ = &Parser->pc->MacroType;
     LexToEndOfLine(Parser);
-    MacroValue->Val->MacroDef.Body.Pos = LexCopyTokens(&MacroValue->Val->MacroDef.Body, Parser);
+	MacroValue->Val->MacroDef.Body.Pos = static_cast<unsigned char*>(LexCopyTokens(&MacroValue->Val->MacroDef.Body, Parser));
     
-    if (!TableSet(Parser->pc, &Parser->pc->GlobalTable, MacroNameStr, MacroValue, (char *)Parser->FileName, Parser->Line, Parser->CharacterPos))
+	if (!Parser->pc->TableSet( &Parser->pc->GlobalTable, MacroNameStr, MacroValue, (char *)Parser->FileName, Parser->Line, Parser->CharacterPos))
         ProgramFail(Parser, "'%s' is already defined", MacroNameStr);
 }
 
@@ -560,7 +561,7 @@ void ParseTypedef(struct ParseState *Parser)
         TypPtr = &Typ;
         InitValue.Typ = &Parser->pc->TypeType;
         InitValue.Val = (union AnyValue *)TypPtr;
-        VariableDefine(Parser->pc, Parser, TypeName, &InitValue, NULL, FALSE);
+		Parser->pc->VariableDefine(Parser, TypeName, &InitValue, NULL, FALSE);
     }
 }
 
@@ -589,9 +590,9 @@ enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemi
             
         case TokenIdentifier:
             /* might be a typedef-typed variable declaration or it might be an expression */
-            if (VariableDefined(Parser->pc, LexerValue->Val->Identifier))
+			if (Parser->pc->VariableDefined(LexerValue->Val->Identifier))
             {
-                VariableGet(Parser->pc, Parser, LexerValue->Val->Identifier, &VarValue);
+				Parser->pc->VariableGet( Parser, LexerValue->Val->Identifier, &VarValue);
                 if (VarValue->Typ->Base == Type_Type)
                 {
                     *Parser = PreState;
@@ -782,7 +783,7 @@ enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemi
             if (LexGetToken(Parser, &LexerValue, TRUE) != TokenStringConstant)
                 ProgramFail(Parser, "\"filename.h\" expected");
             
-            IncludeFile(Parser->pc, (char *)LexerValue->Val->Pointer);
+			Parser->pc->IncludeFile((char *)LexerValue->Val->Pointer);
             CheckTrailingSemicolon = FALSE;
             break;
 #endif
@@ -865,7 +866,7 @@ enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemi
                         ProgramFail(Parser, "value required in return");
                     
                     if (!Parser->pc->TopStackFrame) /* return from top-level program? */
-                        PlatformExit(Parser->pc, ExpressionCoerceInteger(CValue));
+						Parser->pc->PlatformExit(ExpressionCoerceInteger(CValue));
                     else
                         ExpressionAssign(Parser, Parser->pc->TopStackFrame->ReturnValue, CValue, TRUE, NULL, 0, FALSE);
 
@@ -908,12 +909,12 @@ enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemi
             if (Parser->Mode == RunModeRun)
             { 
                 /* delete this variable or function */
-                CValue = TableDelete(Parser->pc, &Parser->pc->GlobalTable, LexerValue->Val->Identifier);
+				CValue = Parser->pc->TableDelete(&Parser->pc->GlobalTable, LexerValue->Val->Identifier);
 
                 if (CValue == NULL)
                     ProgramFail(Parser, "'%s' is not defined", LexerValue->Val->Identifier);
                 
-                VariableFree(Parser->pc, CValue);
+				Parser->pc->VariableFree( CValue);
             }
             break;
         }
@@ -933,21 +934,22 @@ enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemi
 }
 
 /* quick scan a source file for definitions */
-void PicocParse(Picoc *pc, const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource, int EnableDebugger)
+void Picoc::PicocParse( const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource, int EnableDebugger)
 {
+	Picoc *pc = this;
     struct ParseState Parser;
     enum ParseResult Ok;
     struct CleanupTokenNode *NewCleanupNode;
-    char *RegFileName = TableStrRegister(pc, FileName);
+    char *RegFileName = TableStrRegister(FileName);
     
-    void *Tokens = LexAnalyse(pc, RegFileName, Source, SourceLen, NULL);
+    void *Tokens = LexAnalyse( RegFileName, Source, SourceLen, NULL);
     
     /* allocate a cleanup node so we can clean up the tokens later */
     if (!CleanupNow)
     {
-        NewCleanupNode = HeapAllocMem(pc, sizeof(struct CleanupTokenNode));
+		NewCleanupNode = static_cast<CleanupTokenNode*>(HeapAllocMem( sizeof(struct CleanupTokenNode)));
         if (NewCleanupNode == NULL)
-            ProgramFailNoParser(pc, "out of memory");
+            ProgramFailNoParser("out of memory");
         
         NewCleanupNode->Tokens = Tokens;
         if (CleanupSource)
@@ -971,24 +973,25 @@ void PicocParse(Picoc *pc, const char *FileName, const char *Source, int SourceL
     
     /* clean up */
     if (CleanupNow)
-        HeapFreeMem(pc, Tokens);
+        HeapFreeMem( Tokens);
 }
 
 /* parse interactively */
-void PicocParseInteractiveNoStartPrompt(Picoc *pc, int EnableDebugger)
+void Picoc::PicocParseInteractiveNoStartPrompt( int EnableDebugger)
 {
+	Picoc *pc = this;
     struct ParseState Parser;
     enum ParseResult Ok;
     
     LexInitParser(&Parser, pc, NULL, NULL, pc->StrEmpty, TRUE, EnableDebugger);
     PicocPlatformSetExitPoint(pc);
-    LexInteractiveClear(pc, &Parser);
+    LexInteractiveClear( &Parser);
 
     do
     {
-        LexInteractiveStatementPrompt(pc);
+        LexInteractiveStatementPrompt();
         Ok = ParseStatement(&Parser, TRUE);
-        LexInteractiveCompleted(pc, &Parser);
+        LexInteractiveCompleted( &Parser);
         
     } while (Ok == ParseResultOk);
     
@@ -999,8 +1002,9 @@ void PicocParseInteractiveNoStartPrompt(Picoc *pc, int EnableDebugger)
 }
 
 /* parse interactively, showing a startup message */
-void PicocParseInteractive(Picoc *pc)
+void Picoc::PicocParseInteractive()
 {
+	Picoc *pc = this;
     PlatformPrintf(pc->CStdOut, INTERACTIVE_PROMPT_START);
-    PicocParseInteractiveNoStartPrompt(pc, TRUE);
+    PicocParseInteractiveNoStartPrompt( TRUE);
 }

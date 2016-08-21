@@ -34,16 +34,16 @@ extern int PicocExitBuf[];
 #endif
 
 /* parse.c */
-void PicocParse(Picoc *pc, const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource, int EnableDebugger);
-void PicocParseInteractive(Picoc *pc);
+//void PicocParse(Picoc *pc, const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource, int EnableDebugger);
+//void PicocParseInteractive(Picoc *pc);
 
 /* platform.c */
-void PicocCallMain(Picoc *pc, int argc, char **argv);
-void PicocInitialise(Picoc *pc, int StackSize);
-void PicocCleanup(Picoc *pc);
-void PicocPlatformScanFile(Picoc *pc, const char *FileName);
+//void PicocCallMain(Picoc *pc, int argc, char **argv);
+//void PicocInitialise(Picoc *pc, int StackSize);
+//void PicocCleanup(Picoc *pc);
+//void PicocPlatformScanFile(Picoc *pc, const char *FileName);
 
 /* include.c */
-void PicocIncludeAllSystemHeaders(Picoc *pc);
+//void PicocIncludeAllSystemHeaders(Picoc *pc);
 
 #endif /* PICOC_H */

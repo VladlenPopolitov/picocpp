@@ -6,8 +6,9 @@
 #include "interpreter.h"
 
 #ifdef DEBUG_HEAP
-void ShowBigList(Picoc *pc)
+void Picoc::ShowBigList()
 {
+	Picoc *pc=this;
     struct AllocNode *LPos;
     
     printf("Heap: bottom=0x%lx 0x%lx-0x%lx, big freelist=", (long)pc->HeapBottom, (long)&(pc->HeapMemory)[0], (long)&(pc->HeapMemory)[HEAP_SIZE]);
@@ -19,13 +20,14 @@ void ShowBigList(Picoc *pc)
 #endif
 
 /* initialise the stack and heap storage */
-void HeapInit(Picoc *pc, int StackOrHeapSize)
+void Picoc::HeapInit( int StackOrHeapSize)
 {
+	Picoc *pc = this;
     int Count;
     int AlignOffset = 0;
     
 #ifdef USE_MALLOC_STACK
-    pc->HeapMemory = malloc(StackOrHeapSize);
+	pc->HeapMemory = static_cast<unsigned char*>(malloc(StackOrHeapSize));
     pc->HeapBottom = NULL;                     /* the bottom of the (downward-growing) heap */
     pc->StackFrame = NULL;                     /* the current stack frame */
     pc->HeapStackTop = NULL;                          /* the top of the stack */
@@ -55,8 +57,9 @@ void HeapInit(Picoc *pc, int StackOrHeapSize)
         pc->FreeListBucket[Count] = NULL;
 }
 
-void HeapCleanup(Picoc *pc)
+void Picoc::HeapCleanup()
 {
+	Picoc *pc = this;
 #ifdef USE_MALLOC_STACK
     free(pc->HeapMemory);
 #endif
@@ -64,9 +67,10 @@ void HeapCleanup(Picoc *pc)
 
 /* allocate some space on the stack, in the current stack frame
  * clears memory. can return NULL if out of stack space */
-void *HeapAllocStack(Picoc *pc, int Size)
+void *Picoc::HeapAllocStack( int Size)
 {
-    char *NewMem = pc->HeapStackTop;
+	Picoc *pc = this;
+	char *NewMem = static_cast<char*>(pc->HeapStackTop);
     char *NewTop = (char *)pc->HeapStackTop + MEM_ALIGN(Size);
 #ifdef DEBUG_HEAP
     printf("HeapAllocStack(%ld) at 0x%lx\n", (unsigned long)MEM_ALIGN(Size), (unsigned long)pc->HeapStackTop);
@@ -80,8 +84,9 @@ void *HeapAllocStack(Picoc *pc, int Size)
 }
 
 /* allocate some space on the stack, in the current stack frame */
-void HeapUnpopStack(Picoc *pc, int Size)
+void Picoc::HeapUnpopStack( int Size)
 {
+	Picoc *pc=this;
 #ifdef DEBUG_HEAP
     printf("HeapUnpopStack(%ld) at 0x%lx\n", (unsigned long)MEM_ALIGN(Size), (unsigned long)pc->HeapStackTop);
 #endif
@@ -89,8 +94,9 @@ void HeapUnpopStack(Picoc *pc, int Size)
 }
 
 /* free some space at the top of the stack */
-int HeapPopStack(Picoc *pc, void *Addr, int Size)
+int Picoc::HeapPopStack( void *Addr, int Size)
 {
+	Picoc *pc = this;
     int ToLose = MEM_ALIGN(Size);
     if (ToLose > ((char *)pc->HeapStackTop - (char *)&(pc->HeapMemory)[0]))
         return FALSE;
@@ -99,14 +105,15 @@ int HeapPopStack(Picoc *pc, void *Addr, int Size)
     printf("HeapPopStack(0x%lx, %ld) back to 0x%lx\n", (unsigned long)Addr, (unsigned long)MEM_ALIGN(Size), (unsigned long)pc->HeapStackTop - ToLose);
 #endif
     pc->HeapStackTop = (void *)((char *)pc->HeapStackTop - ToLose);
-    assert(Addr == NULL || pc->HeapStackTop == Addr);
+    assert(Addr == nullptr || pc->HeapStackTop == Addr);
     
     return TRUE;
 }
 
 /* push a new stack frame on to the stack */
-void HeapPushStackFrame(Picoc *pc)
+void Picoc::HeapPushStackFrame()
 {
+	Picoc *pc = this;
 #ifdef DEBUG_HEAP
     printf("Adding stack frame at 0x%lx\n", (unsigned long)pc->HeapStackTop);
 #endif
@@ -116,9 +123,10 @@ void HeapPushStackFrame(Picoc *pc)
 }
 
 /* pop the current stack frame, freeing all memory in the frame. can return NULL */
-int HeapPopStackFrame(Picoc *pc)
+int Picoc::HeapPopStackFrame()
 {
-    if (*(void **)pc->StackFrame != NULL)
+	Picoc *pc = this;
+    if (*(void **)pc->StackFrame != nullptr)
     {
         pc->HeapStackTop = pc->StackFrame;
         pc->StackFrame = *(void **)pc->StackFrame;
@@ -132,8 +140,9 @@ int HeapPopStackFrame(Picoc *pc)
 }
 
 /* allocate some dynamically allocated memory. memory is cleared. can return NULL if out of memory */
-void *HeapAllocMem(Picoc *pc, int Size)
+void *Picoc::HeapAllocMem( int Size)
 {
+	Picoc *pc = this;
 #ifdef USE_MALLOC_HEAP
     return calloc(Size, 1);
 #else
@@ -223,8 +232,9 @@ void *HeapAllocMem(Picoc *pc, int Size)
 }
 
 /* free some dynamically allocated memory */
-void HeapFreeMem(Picoc *pc, void *Mem)
+void Picoc::HeapFreeMem( void *Mem)
 {
+	Picoc *pc = this;
 #ifdef USE_MALLOC_HEAP
     free(Mem);
 #else

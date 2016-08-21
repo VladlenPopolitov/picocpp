@@ -6,42 +6,44 @@
 
 
 /* initialise everything */
-void PicocInitialise(Picoc *pc, int StackSize)
+void Picoc::PicocInitialise( int StackSize)
 {
+	Picoc *pc = this;
     memset(pc, '\0', sizeof(*pc));
-    PlatformInit(pc);
-    BasicIOInit(pc);
-    HeapInit(pc, StackSize);
-    TableInit(pc);
-    VariableInit(pc);
-    LexInit(pc);
-    TypeInit(pc);
+    PlatformInit();
+    BasicIOInit();
+    HeapInit( StackSize);
+    TableInit();
+    VariableInit();
+    LexInit();
+    TypeInit();
 #ifndef NO_HASH_INCLUDE
-    IncludeInit(pc);
+    IncludeInit();
 #endif
-    LibraryInit(pc);
+    LibraryInit();
 #ifdef BUILTIN_MINI_STDLIB
     LibraryAdd(pc, &GlobalTable, "c library", &CLibrary[0]);
     CLibraryInit(pc);
 #endif
-    PlatformLibraryInit(pc);
-    DebugInit(pc);
+    PlatformLibraryInit();
+    DebugInit();
 }
 
 /* free memory */
-void PicocCleanup(Picoc *pc)
+void Picoc::PicocCleanup()
 {
-    DebugCleanup(pc);
+	//Picoc *pc = this;
+    DebugCleanup();
 #ifndef NO_HASH_INCLUDE
-    IncludeCleanup(pc);
+    IncludeCleanup();
 #endif
-    ParseCleanup(pc);
-    LexCleanup(pc);
-    VariableCleanup(pc);
-    TypeCleanup(pc);
-    TableStrFree(pc);
-    HeapCleanup(pc);
-    PlatformCleanup(pc);
+    ParseCleanup();
+    LexCleanup();
+    VariableCleanup();
+    TypeCleanup();
+    TableStrFree();
+    HeapCleanup();
+    PlatformCleanup();
 }
 
 /* platform-dependent code for running programs */
@@ -52,40 +54,41 @@ void PicocCleanup(Picoc *pc)
 #define CALL_MAIN_NO_ARGS_RETURN_INT "__exit_value = main();"
 #define CALL_MAIN_WITH_ARGS_RETURN_INT "__exit_value = main(__argc,__argv);"
 
-void PicocCallMain(Picoc *pc, int argc, char **argv)
+void Picoc::PicocCallMain(int argc, char **argv)
 {
+	Picoc *pc = this;
     /* check if the program wants arguments */
     struct Value *FuncValue = NULL;
 
-    if (!VariableDefined(pc, TableStrRegister(pc, "main")))
-        ProgramFailNoParser(pc, "main() is not defined");
+    if (!VariableDefined( TableStrRegister( "main")))
+        ProgramFailNoParser( "main() is not defined");
         
-    VariableGet(pc, NULL, TableStrRegister(pc, "main"), &FuncValue);
+    VariableGet( nullptr, TableStrRegister( "main"), &FuncValue);
     if (FuncValue->Typ->Base != TypeFunction)
-        ProgramFailNoParser(pc, "main is not a function - can't call it");
+        ProgramFailNoParser( "main is not a function - can't call it");
 
     if (FuncValue->Val->FuncDef.NumParams != 0)
     {
         /* define the arguments */
-        VariableDefinePlatformVar(pc, NULL, "__argc", &pc->IntType, (union AnyValue *)&argc, FALSE);
-        VariableDefinePlatformVar(pc, NULL, "__argv", pc->CharPtrPtrType, (union AnyValue *)&argv, FALSE);
+        VariableDefinePlatformVar( NULL, "__argc", &pc->IntType, (union AnyValue *)&argc, FALSE);
+        VariableDefinePlatformVar( NULL, "__argv", pc->CharPtrPtrType, (union AnyValue *)&argv, FALSE);
     }
 
     if (FuncValue->Val->FuncDef.ReturnType == &pc->VoidType)
     {
         if (FuncValue->Val->FuncDef.NumParams == 0)
-            PicocParse(pc, "startup", CALL_MAIN_NO_ARGS_RETURN_VOID, strlen(CALL_MAIN_NO_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
+            PicocParse( "startup", CALL_MAIN_NO_ARGS_RETURN_VOID, strlen(CALL_MAIN_NO_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
         else
-            PicocParse(pc, "startup", CALL_MAIN_WITH_ARGS_RETURN_VOID, strlen(CALL_MAIN_WITH_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
+            PicocParse( "startup", CALL_MAIN_WITH_ARGS_RETURN_VOID, strlen(CALL_MAIN_WITH_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
     }
     else
     {
-        VariableDefinePlatformVar(pc, NULL, "__exit_value", &pc->IntType, (union AnyValue *)&pc->PicocExitValue, TRUE);
+        VariableDefinePlatformVar( NULL, "__exit_value", &pc->IntType, (union AnyValue *)&pc->PicocExitValue, TRUE);
     
         if (FuncValue->Val->FuncDef.NumParams == 0)
-            PicocParse(pc, "startup", CALL_MAIN_NO_ARGS_RETURN_INT, strlen(CALL_MAIN_NO_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
+            PicocParse( "startup", CALL_MAIN_NO_ARGS_RETURN_INT, strlen(CALL_MAIN_NO_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
         else
-            PicocParse(pc, "startup", CALL_MAIN_WITH_ARGS_RETURN_INT, strlen(CALL_MAIN_WITH_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
+            PicocParse( "startup", CALL_MAIN_WITH_ARGS_RETURN_INT, strlen(CALL_MAIN_WITH_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
     }
 }
 #endif
@@ -140,23 +143,25 @@ void ProgramFail(struct ParseState *Parser, const char *Message, ...)
     PlatformVPrintf(Parser->pc->CStdOut, Message, Args);
     va_end(Args);
     PlatformPrintf(Parser->pc->CStdOut, "\n");
-    PlatformExit(Parser->pc, 1);
+	Parser->pc->PlatformExit(1);
 }
 
 /* exit with a message, when we're not parsing a program */
-void ProgramFailNoParser(Picoc *pc, const char *Message, ...)
+void Picoc::ProgramFailNoParser( const char *Message, ...)
 {
+	Picoc *pc = this;
     va_list Args;
 
     va_start(Args, Message);
     PlatformVPrintf(pc->CStdOut, Message, Args);
     va_end(Args);
     PlatformPrintf(pc->CStdOut, "\n");
-    PlatformExit(pc, 1);
+    PlatformExit( 1);
 }
 
 /* like ProgramFail() but gives descriptive error messages for assignment */
-void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType *Type1, struct ValueType *Type2, int Num1, int Num2, const char *FuncName, int ParamNo)
+void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType *Type1, struct ValueType *Type2, 
+	int Num1, int Num2, const char *FuncName, int ParamNo)
 {
     IOFILE *Stream = Parser->pc->CStdOut;
     
@@ -172,12 +177,13 @@ void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType 
         PlatformPrintf(Stream, " in argument %d of call to %s()", ParamNo, FuncName);
     
     PlatformPrintf(Stream, "\n");
-    PlatformExit(Parser->pc, 1);
+	Parser->pc->PlatformExit(1);
 }
 
 /* exit lexing with a message */
-void LexFail(Picoc *pc, struct LexState *Lexer, const char *Message, ...)
+void Picoc::LexFail( struct LexState *Lexer, const char *Message, ...)
 {
+	Picoc *pc = this;
     va_list Args;
 
     PrintSourceTextErrorLine(pc->CStdOut, Lexer->FileName, Lexer->SourceText, Lexer->Line, Lexer->CharacterPos);
@@ -185,7 +191,7 @@ void LexFail(Picoc *pc, struct LexState *Lexer, const char *Message, ...)
     PlatformVPrintf(pc->CStdOut, Message, Args);
     va_end(Args);
     PlatformPrintf(pc->CStdOut, "\n");
-    PlatformExit(pc, 1);
+    PlatformExit( 1);
 }
 
 /* printf for compiler error reporting */
@@ -227,8 +233,9 @@ void PlatformVPrintf(IOFILE *Stream, const char *Format, va_list Args)
 
 /* make a new temporary name. takes a static buffer of char [7] as a parameter. should be initialised to "XX0000"
  * where XX can be any characters */
-char *PlatformMakeTempName(Picoc *pc, char *TempNameBuffer)
+char *Picoc::PlatformMakeTempName( char *TempNameBuffer)
 {
+	Picoc *pc = this;
     int CPos = 5;
     
     while (CPos > 1)
@@ -236,7 +243,7 @@ char *PlatformMakeTempName(Picoc *pc, char *TempNameBuffer)
         if (TempNameBuffer[CPos] < '9')
         {
             TempNameBuffer[CPos]++;
-            return TableStrRegister(pc, TempNameBuffer);
+            return TableStrRegister( TempNameBuffer);
         }
         else
         {
@@ -245,5 +252,5 @@ char *PlatformMakeTempName(Picoc *pc, char *TempNameBuffer)
         }
     }
 
-    return TableStrRegister(pc, TempNameBuffer);
+    return TableStrRegister( TempNameBuffer);
 }

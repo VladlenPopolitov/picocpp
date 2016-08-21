@@ -4,11 +4,11 @@
 /* mark where to end the program for platforms which require this */
 jmp_buf PicocExitBuf;
 
-void PlatformInit(Picoc *pc)
+void Picoc::PlatformInit()
 {
 }
 
-void PlatformCleanup(Picoc *pc)
+void Picoc::PlatformCleanup()
 {
 }
 
@@ -36,8 +36,9 @@ void PlatformPutc(unsigned char OutCh, union OutputStreamInfo *Stream)
 }
 
 /* read a file into memory */
-char *PlatformReadFile(Picoc *pc, const char *FileName)
+char *Picoc::PlatformReadFile( const char *FileName)
 {
+	Picoc *pc = this;
     struct stat FileInfo;
     char *ReadText;
     FILE *InFile;
@@ -45,19 +46,19 @@ char *PlatformReadFile(Picoc *pc, const char *FileName)
     char *p;
     
     if (stat(FileName, &FileInfo))
-        ProgramFailNoParser(pc, "can't read file %s\n", FileName);
+        ProgramFailNoParser( "can't read file %s\n", FileName);
     
-    ReadText = malloc(FileInfo.st_size + 1);
+	ReadText = static_cast<char*>(malloc(FileInfo.st_size + 1));
     if (ReadText == NULL)
-        ProgramFailNoParser(pc, "out of memory\n");
+        ProgramFailNoParser("out of memory\n");
         
     InFile = fopen(FileName, "r");
     if (InFile == NULL)
-        ProgramFailNoParser(pc, "can't read file %s\n", FileName);
+        ProgramFailNoParser( "can't read file %s\n", FileName);
     
     BytesRead = fread(ReadText, 1, FileInfo.st_size, InFile);
     if (BytesRead == 0)
-        ProgramFailNoParser(pc, "can't read file %s\n", FileName);
+        ProgramFailNoParser( "can't read file %s\n", FileName);
 
     ReadText[BytesRead] = '\0';
     fclose(InFile);
@@ -74,15 +75,16 @@ char *PlatformReadFile(Picoc *pc, const char *FileName)
 }
 
 /* read and scan a file for definitions */
-void PicocPlatformScanFile(Picoc *pc, const char *FileName)
+void Picoc::PicocPlatformScanFile( const char *FileName)
 {
-    char *SourceStr = PlatformReadFile(pc, FileName);
-    PicocParse(pc, FileName, SourceStr, strlen(SourceStr), TRUE, FALSE, TRUE, TRUE);
+    char *SourceStr = PlatformReadFile( FileName);
+    PicocParse( FileName, SourceStr, strlen(SourceStr), TRUE, FALSE, TRUE, TRUE);
 }
 
 /* exit the program */
-void PlatformExit(Picoc *pc, int RetVal)
+void Picoc::PlatformExit( int RetVal)
 {
+	Picoc *pc = this;
     pc->PicocExitValue = RetVal;
     longjmp(pc->PicocExitBuf, 1);
 }

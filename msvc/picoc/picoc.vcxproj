@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -10,9 +10,7 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
-  <PropertyGroup Label="Globals">
-    <VCTargetsPath Condition="'$(VCTargetsPath11)' != '' and '$(VSVersion)' == '' and '$(VisualStudioVersion)' == ''">$(VCTargetsPath11)</VCTargetsPath>
-  </PropertyGroup>
+  <PropertyGroup Label="Globals" />
   <PropertyGroup Label="Globals">
     <ProjectGuid>{C0156FB3-55AB-4F82-8A97-A776DFC57951}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -22,13 +20,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v110</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -77,28 +75,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\clibrary.c" />
-    <ClCompile Include="..\..\cstdlib\ctype.c" />
-    <ClCompile Include="..\..\cstdlib\errno.c" />
-    <ClCompile Include="..\..\cstdlib\math.c" />
-    <ClCompile Include="..\..\cstdlib\stdbool.c" />
-    <ClCompile Include="..\..\cstdlib\stdio.c" />
-    <ClCompile Include="..\..\cstdlib\stdlib.c" />
-    <ClCompile Include="..\..\cstdlib\string.c" />
-    <ClCompile Include="..\..\cstdlib\time.c" />
-    <ClCompile Include="..\..\debug.c" />
-    <ClCompile Include="..\..\expression.c" />
-    <ClCompile Include="..\..\heap.c" />
-    <ClCompile Include="..\..\include.c" />
-    <ClCompile Include="..\..\lex.c" />
-    <ClCompile Include="..\..\parse.c" />
-    <ClCompile Include="..\..\picoc.c" />
-    <ClCompile Include="..\..\platform.c" />
-    <ClCompile Include="..\..\platform\library_msvc.c" />
-    <ClCompile Include="..\..\platform\platform_msvc.c" />
-    <ClCompile Include="..\..\table.c" />
-    <ClCompile Include="..\..\type.c" />
-    <ClCompile Include="..\..\variable.c" />
+    <ClCompile Include="..\..\clibrary.cpp" />
+    <ClCompile Include="..\..\cstdlib\ctype.cpp" />
+    <ClCompile Include="..\..\cstdlib\errno.cpp" />
+    <ClCompile Include="..\..\cstdlib\math.cpp" />
+    <ClCompile Include="..\..\cstdlib\stdbool.cpp" />
+    <ClCompile Include="..\..\cstdlib\stdio.cpp" />
+    <ClCompile Include="..\..\cstdlib\stdlib.cpp" />
+    <ClCompile Include="..\..\cstdlib\string.cpp" />
+    <ClCompile Include="..\..\cstdlib\time.cpp" />
+    <ClCompile Include="..\..\debug.cpp" />
+    <ClCompile Include="..\..\expression.cpp" />
+    <ClCompile Include="..\..\heap.cpp" />
+    <ClCompile Include="..\..\include.cpp" />
+    <ClCompile Include="..\..\lex.cpp" />
+    <ClCompile Include="..\..\parse.cpp" />
+    <ClCompile Include="..\..\picoc.cpp" />
+    <ClCompile Include="..\..\platform.cpp" />
+    <ClCompile Include="..\..\platform\library_msvc.cpp" />
+    <ClCompile Include="..\..\platform\platform_msvc.cpp" />
+    <ClCompile Include="..\..\table.cpp" />
+    <ClCompile Include="..\..\type.cpp" />
+    <ClCompile Include="..\..\variable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\interpreter.h" />

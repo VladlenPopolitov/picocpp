@@ -23,8 +23,8 @@ struct LibraryFunction MsvcFunctions[] =
     { NULL,         NULL }
 };
 
-void PlatformLibraryInit(Picoc *pc)
+void Picoc::PlatformLibraryInit()
 {
-    IncludeRegister(pc, "picoc_msvc.h", &MsvcSetupFunc, &MsvcFunctions[0], NULL);
+    IncludeRegister( "picoc_msvc.h", &MsvcSetupFunc, &MsvcFunctions[0], NULL);
 }
 

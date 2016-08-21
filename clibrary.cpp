@@ -12,41 +12,42 @@ static int LittleEndian;
 
 
 /* global initialisation for libraries */
-void LibraryInit(Picoc *pc)
+void Picoc::LibraryInit()
 {
-    
+	Picoc *pc = this;
     /* define the version number macro */
-    pc->VersionString = TableStrRegister(pc, PICOC_VERSION);
-    VariableDefinePlatformVar(pc, NULL, "PICOC_VERSION", pc->CharPtrType, (union AnyValue *)&pc->VersionString, FALSE);
+    pc->VersionString = TableStrRegister( PICOC_VERSION);
+    VariableDefinePlatformVar( nullptr, "PICOC_VERSION", pc->CharPtrType, (union AnyValue *)&pc->VersionString, FALSE);
 
     /* define endian-ness macros */
     BigEndian = ((*(char*)&__ENDIAN_CHECK__) == 0);
     LittleEndian = ((*(char*)&__ENDIAN_CHECK__) == 1);
 
-    VariableDefinePlatformVar(pc, NULL, "BIG_ENDIAN", &pc->IntType, (union AnyValue *)&BigEndian, FALSE);
-    VariableDefinePlatformVar(pc, NULL, "LITTLE_ENDIAN", &pc->IntType, (union AnyValue *)&LittleEndian, FALSE);
+    VariableDefinePlatformVar( nullptr, "BIG_ENDIAN", &pc->IntType, (union AnyValue *)&BigEndian, FALSE);
+    VariableDefinePlatformVar( nullptr, "LITTLE_ENDIAN", &pc->IntType, (union AnyValue *)&LittleEndian, FALSE);
 }
 
 /* add a library */
-void LibraryAdd(Picoc *pc, struct Table *GlobalTable, const char *LibraryName, struct LibraryFunction *FuncList)
+void Picoc::LibraryAdd( struct Table *GlobalTable, const char *LibraryName, struct LibraryFunction *FuncList)
 {
+	Picoc *pc = this;
     struct ParseState Parser;
     int Count;
     char *Identifier;
     struct ValueType *ReturnType;
     struct Value *NewValue;
     void *Tokens;
-    char *IntrinsicName = TableStrRegister(pc, "c library");
+    char *IntrinsicName = TableStrRegister( "c library");
     
     /* read all the library definitions */
     for (Count = 0; FuncList[Count].Prototype != NULL; Count++)
     {
-        Tokens = LexAnalyse(pc, IntrinsicName, FuncList[Count].Prototype, strlen((char *)FuncList[Count].Prototype), NULL);
+        Tokens = LexAnalyse( IntrinsicName, FuncList[Count].Prototype, strlen((char *)FuncList[Count].Prototype), NULL);
         LexInitParser(&Parser, pc, FuncList[Count].Prototype, Tokens, IntrinsicName, TRUE, FALSE);
         TypeParse(&Parser, &ReturnType, &Identifier, NULL);
         NewValue = ParseFunctionDefinition(&Parser, ReturnType, Identifier);
         NewValue->Val->FuncDef.Intrinsic = FuncList[Count].Func;
-        HeapFreeMem(pc, Tokens);
+        HeapFreeMem( Tokens);
     }
 }
 
@@ -99,12 +100,13 @@ void BasicIOInit(Picoc *pc)
 }
 
 /* initialise the C library */
-void CLibraryInit(Picoc *pc)
+void CLibraryInit()
 {
+	Picoc *pc=this;
     /* define some constants */
-    VariableDefinePlatformVar(pc, NULL, "NULL", &IntType, (union AnyValue *)&ZeroValue, FALSE);
-    VariableDefinePlatformVar(pc, NULL, "TRUE", &IntType, (union AnyValue *)&TRUEValue, FALSE);
-    VariableDefinePlatformVar(pc, NULL, "FALSE", &IntType, (union AnyValue *)&ZeroValue, FALSE);
+    VariableDefinePlatformVar( nullptr, "NULL", &IntType, (union AnyValue *)&ZeroValue, FALSE);
+    VariableDefinePlatformVar( nullptr, "TRUE", &IntType, (union AnyValue *)&TRUEValue, FALSE);
+    VariableDefinePlatformVar( nullptr, "FALSE", &IntType, (union AnyValue *)&ZeroValue, FALSE);
 }
 
 /* stream for writing into strings */

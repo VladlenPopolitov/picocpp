@@ -11,14 +11,14 @@
 #include <stdio.h>
 #include <string.h>
 
-#define PICOC_STACK_SIZE (128*1024)              /* space for the the stack */
+              /* space for the the stack */
 
 int main(int argc, char **argv)
 {
     int ParamCount = 1;
     int DontRunMain = FALSE;
-    int StackSize = getenv("STACKSIZE") ? atoi(getenv("STACKSIZE")) : PICOC_STACK_SIZE;
-    Picoc pc;
+	int StackSize = getenv("STACKSIZE") ? atoi(getenv("STACKSIZE")) : picocStackSize;
+	Picoc pc(StackSize);
     
     if (argc < 2)
     {
@@ -28,36 +28,33 @@ int main(int argc, char **argv)
         exit(1);
     }
     
-    PicocInitialise(&pc, StackSize);
     
     if (strcmp(argv[ParamCount], "-s") == 0 || strcmp(argv[ParamCount], "-m") == 0)
     {
         DontRunMain = TRUE;
-        PicocIncludeAllSystemHeaders(&pc);
+        pc.PicocIncludeAllSystemHeaders();
         ParamCount++;
     }
         
     if (argc > ParamCount && strcmp(argv[ParamCount], "-i") == 0)
     {
-        PicocIncludeAllSystemHeaders(&pc);
-        PicocParseInteractive(&pc);
+        pc.PicocIncludeAllSystemHeaders();
+        pc.PicocParseInteractive();
     }
     else
     {
         if (PicocPlatformSetExitPoint(&pc))
         {
-            PicocCleanup(&pc);
             return pc.PicocExitValue;
         }
         
         for (; ParamCount < argc && strcmp(argv[ParamCount], "-") != 0; ParamCount++)
-            PicocPlatformScanFile(&pc, argv[ParamCount]);
+            pc.PicocPlatformScanFile( argv[ParamCount]);
         
         if (!DontRunMain)
-            PicocCallMain(&pc, argc - ParamCount, &argv[ParamCount]);
+            pc.PicocCallMain( argc - ParamCount, &argv[ParamCount]);
     }
     
-    PicocCleanup(&pc);
     return pc.PicocExitValue;
 }
 #else

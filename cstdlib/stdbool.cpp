@@ -13,10 +13,10 @@ const char StdboolDefs[] = "typedef int bool;";
 /* creates various system-dependent definitions */
 void StdboolSetupFunc(Picoc *pc)
 {
-    /* defines */
-    VariableDefinePlatformVar(pc, NULL, "true", &pc->IntType, (union AnyValue *)&trueValue, FALSE);
-    VariableDefinePlatformVar(pc, NULL, "false", &pc->IntType, (union AnyValue *)&falseValue, FALSE);
-    VariableDefinePlatformVar(pc, NULL, "__bool_true_false_are_defined", &pc->IntType, (union AnyValue *)&trueValue, FALSE);
+	/* defines */
+	pc->VariableDefinePlatformVar( NULL, "true", &pc->IntType, (union AnyValue *)&trueValue, FALSE);
+	pc->VariableDefinePlatformVar( NULL, "false", &pc->IntType, (union AnyValue *)&falseValue, FALSE);
+	pc->VariableDefinePlatformVar( NULL, "__bool_true_false_are_defined", &pc->IntType, (union AnyValue *)&trueValue, FALSE);
 }
 
 #endif /* !BUILTIN_MINI_STDLIB */

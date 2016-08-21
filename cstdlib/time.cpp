@@ -16,7 +16,7 @@ static int CLK_TCKValue = CLK_TCK;
 
 void StdAsctime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = asctime(Param[0]->Val->Pointer);
+	ReturnValue->Val->Pointer = asctime(static_cast<tm*>(Param[0]->Val->Pointer));
 }
 
 void StdClock(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -26,7 +26,7 @@ void StdClock(struct ParseState *Parser, struct Value *ReturnValue, struct Value
 
 void StdCtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = ctime(Param[0]->Val->Pointer);
+	ReturnValue->Val->Pointer = ctime(static_cast<time_t*>(Param[0]->Val->Pointer));
 }
 
 #ifndef NO_FP
@@ -38,27 +38,28 @@ void StdDifftime(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 
 void StdGmtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = gmtime(Param[0]->Val->Pointer);
+	ReturnValue->Val->Pointer = gmtime(static_cast<time_t*>(Param[0]->Val->Pointer));
 }
 
 void StdLocaltime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = localtime(Param[0]->Val->Pointer);
+	ReturnValue->Val->Pointer = localtime(static_cast<time_t*>(Param[0]->Val->Pointer));
 }
 
 void StdMktime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = (int)mktime(Param[0]->Val->Pointer);
+	ReturnValue->Val->Integer = (int)mktime(static_cast<tm*>(Param[0]->Val->Pointer));
 }
 
 void StdTime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = (int)time(Param[0]->Val->Pointer);
+	ReturnValue->Val->Integer = (int)time(static_cast<time_t*>(Param[0]->Val->Pointer));
 }
 
 void StdStrftime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = strftime(Param[0]->Val->Pointer, Param[1]->Val->Integer, Param[2]->Val->Pointer, Param[3]->Val->Pointer);
+	ReturnValue->Val->Integer = strftime(static_cast<char*>(Param[0]->Val->Pointer), Param[1]->Val->Integer, Param[2]->Val->PointerChar, 
+		static_cast<tm*>(Param[3]->Val->Pointer));
 }
 
 #ifndef WIN32
@@ -113,15 +114,15 @@ struct LibraryFunction StdTimeFunctions[] =
 void StdTimeSetupFunc(Picoc *pc)
 {
     /* make a "struct tm" which is the same size as a native tm structure */
-    TypeCreateOpaqueStruct(pc, NULL, TableStrRegister(pc, "tm"), sizeof(struct tm));
+    pc->TypeCreateOpaqueStruct( NULL, pc->TableStrRegister( "tm"), sizeof(struct tm));
     
     /* define CLK_PER_SEC etc. */
-    VariableDefinePlatformVar(pc, NULL, "CLOCKS_PER_SEC", &pc->IntType, (union AnyValue *)&CLOCKS_PER_SECValue, FALSE);
+    pc->VariableDefinePlatformVar( NULL, "CLOCKS_PER_SEC", &pc->IntType, (union AnyValue *)&CLOCKS_PER_SECValue, FALSE);
 #ifdef CLK_PER_SEC
-    VariableDefinePlatformVar(pc, NULL, "CLK_PER_SEC", &pc->IntType, (union AnyValue *)&CLK_PER_SECValue, FALSE);
+    pc->VariableDefinePlatformVar( NULL, "CLK_PER_SEC", &pc->IntType, (union AnyValue *)&CLK_PER_SECValue, FALSE);
 #endif
 #ifdef CLK_TCK
-    VariableDefinePlatformVar(pc, NULL, "CLK_TCK", &pc->IntType, (union AnyValue *)&CLK_TCKValue, FALSE);
+    pc->VariableDefinePlatformVar( NULL, "CLK_TCK", &pc->IntType, (union AnyValue *)&CLK_TCKValue, FALSE);
 #endif
 }
 
