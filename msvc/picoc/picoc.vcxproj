@@ -88,6 +88,7 @@
     <ClCompile Include="..\..\expression.cpp" />
     <ClCompile Include="..\..\heap.cpp" />
     <ClCompile Include="..\..\include.cpp" />
+    <ClCompile Include="..\..\interpreter.cpp" />
     <ClCompile Include="..\..\lex.cpp" />
     <ClCompile Include="..\..\parse.cpp" />
     <ClCompile Include="..\..\picoc.cpp" />

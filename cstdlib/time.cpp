@@ -117,12 +117,12 @@ void StdTimeSetupFunc(Picoc *pc)
     pc->TypeCreateOpaqueStruct( NULL, pc->TableStrRegister( "tm"), sizeof(struct tm));
     
     /* define CLK_PER_SEC etc. */
-    pc->VariableDefinePlatformVar( NULL, "CLOCKS_PER_SEC", &pc->IntType, (union AnyValue *)&CLOCKS_PER_SECValue, FALSE);
+    pc->VariableDefinePlatformVar( NULL, "CLOCKS_PER_SEC", &pc->IntType, (UnionAnyValue *)&CLOCKS_PER_SECValue, FALSE);
 #ifdef CLK_PER_SEC
-    pc->VariableDefinePlatformVar( NULL, "CLK_PER_SEC", &pc->IntType, (union AnyValue *)&CLK_PER_SECValue, FALSE);
+    pc->VariableDefinePlatformVar( NULL, "CLK_PER_SEC", &pc->IntType, (UnionAnyValue *)&CLK_PER_SECValue, FALSE);
 #endif
 #ifdef CLK_TCK
-    pc->VariableDefinePlatformVar( NULL, "CLK_TCK", &pc->IntType, (union AnyValue *)&CLK_TCKValue, FALSE);
+    pc->VariableDefinePlatformVar( NULL, "CLK_TCK", &pc->IntType, (UnionAnyValue *)&CLK_TCKValue, FALSE);
 #endif
 }
 

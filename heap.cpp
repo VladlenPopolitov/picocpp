@@ -50,7 +50,7 @@ void Picoc::HeapInit( int StackOrHeapSize)
         
     pc->StackFrame = &(pc->HeapMemory)[AlignOffset];
     pc->HeapStackTop = &(pc->HeapMemory)[AlignOffset];
-    *(void **)(pc->StackFrame) = NULL;
+    *static_cast<void **>(pc->StackFrame) = nullptr;
     pc->HeapBottom = &(pc->HeapMemory)[StackOrHeapSize-sizeof(ALIGN_TYPE)+AlignOffset];
     pc->FreeListBig = NULL;
     for (Count = 0; Count < FREELIST_BUCKETS; Count++)

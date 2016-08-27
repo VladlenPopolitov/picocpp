@@ -13,49 +13,56 @@
 
               /* space for the the stack */
 
-int main(int argc, char **argv)
+int main(int argcc, char **argvc)
 {
-    int ParamCount = 1;
-    int DontRunMain = FALSE;
-	int StackSize = getenv("STACKSIZE") ? atoi(getenv("STACKSIZE")) : picocStackSize;
-	Picoc pc(StackSize);
-    
-    if (argc < 2)
-    {
-        printf("Format: picoc <csource1.c>... [- <arg1>...]    : run a program (calls main() to start it)\n"
-               "        picoc -s <csource1.c>... [- <arg1>...] : script mode - runs the program without calling main()\n"
-               "        picoc -i                               : interactive mode\n");
-        exit(1);
-    }
-    
-    
-    if (strcmp(argv[ParamCount], "-s") == 0 || strcmp(argv[ParamCount], "-m") == 0)
-    {
-        DontRunMain = TRUE;
-        pc.PicocIncludeAllSystemHeaders();
-        ParamCount++;
-    }
-        
-    if (argc > ParamCount && strcmp(argv[ParamCount], "-i") == 0)
-    {
-        pc.PicocIncludeAllSystemHeaders();
-        pc.PicocParseInteractive();
-    }
-    else
-    {
-        if (PicocPlatformSetExitPoint(&pc))
-        {
-            return pc.PicocExitValue;
-        }
-        
-        for (; ParamCount < argc && strcmp(argv[ParamCount], "-") != 0; ParamCount++)
-            pc.PicocPlatformScanFile( argv[ParamCount]);
-        
-        if (!DontRunMain)
-            pc.PicocCallMain( argc - ParamCount, &argv[ParamCount]);
-    }
-    
-    return pc.PicocExitValue;
+	try{
+		int DontRunMain = FALSE;
+		int StackSize = getenv("STACKSIZE") ? atoi(getenv("STACKSIZE")) : picocStackSize;
+
+		if (argcc < 2)
+		{
+			printf("Format: picoc <csource1.c>... [- <arg1>...]    : run a program (calls main() to start it)\n"
+				"        picoc -s <csource1.c>... [- <arg1>...] : script mode - runs the program without calling main()\n"
+				"        picoc -i                               : interactive mode\n");
+			exit(1);
+		}
+		for (int i = 0; i < 10000; ++i){
+			int ParamCount = 1;
+			int argc = argcc;
+			char **argv = argvc;
+			Picoc pc(StackSize);
+
+			if (strcmp(argv[ParamCount], "-s") == 0 || strcmp(argv[ParamCount], "-m") == 0)
+			{
+				DontRunMain = TRUE;
+				pc.PicocIncludeAllSystemHeaders();
+				ParamCount++;
+			}
+
+			if (argc > ParamCount && strcmp(argv[ParamCount], "-i") == 0)
+			{
+				pc.PicocIncludeAllSystemHeaders();
+				pc.PicocParseInteractive();
+			}
+			else
+			{
+				if (PicocPlatformSetExitPoint(&pc))
+				{
+					return pc.PicocExitValue;
+				}
+
+				for (; ParamCount < argc && strcmp(argv[ParamCount], "-") != 0; ParamCount++)
+					pc.PicocPlatformScanFile(argv[ParamCount]);
+
+				if (!DontRunMain)
+					pc.PicocCallMain(argc - ParamCount, &argv[ParamCount]);
+			}
+		}
+		return 0; // pc.PicocExitValue;
+	}
+	catch (...){
+		return 0;
+	}
 }
 #else
 # ifdef SURVEYOR_HOST

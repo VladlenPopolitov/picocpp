@@ -10,8 +10,9 @@
 void Picoc::DebugInit()
 {
 	Picoc *pc = this;
-    TableInitTable(&pc->BreakpointTable, &pc->BreakpointHashTable[0], BREAKPOINT_TABLE_SIZE, TRUE);
-    pc->BreakpointCount = 0;
+	pc->BreakpointTable.TableInitTable(&pc->BreakpointHashTable[0], BREAKPOINT_TABLE_SIZE, TRUE);
+	pc->BreakpointTable.TableInitTable(&pc->BreakpointMapTable);
+	pc->BreakpointCount = 0;
 }
 
 /* free the contents of the breakpoint table */

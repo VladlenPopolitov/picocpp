@@ -168,19 +168,19 @@ struct LibraryFunction MathFunctions[] =
 /* creates various system-dependent definitions */
 void MathSetupFunc(Picoc *pc)
 {
-     pc->VariableDefinePlatformVar( NULL, "M_E", &pc->FPType, (union AnyValue *)&M_EValue, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_LOG2E", &pc->FPType, (union AnyValue *)&M_LOG2EValue, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_LOG10E", &pc->FPType, (union AnyValue *)&M_LOG10EValue, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_LN2", &pc->FPType, (union AnyValue *)&M_LN2Value, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_LN10", &pc->FPType, (union AnyValue *)&M_LN10Value, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_PI", &pc->FPType, (union AnyValue *)&M_PIValue, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_PI_2", &pc->FPType, (union AnyValue *)&M_PI_2Value, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_PI_4", &pc->FPType, (union AnyValue *)&M_PI_4Value, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_1_PI", &pc->FPType, (union AnyValue *)&M_1_PIValue, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_2_PI", &pc->FPType, (union AnyValue *)&M_2_PIValue, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_2_SQRTPI", &pc->FPType, (union AnyValue *)&M_2_SQRTPIValue, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_SQRT2", &pc->FPType, (union AnyValue *)&M_SQRT2Value, FALSE);
-	 pc->VariableDefinePlatformVar(NULL, "M_SQRT1_2", &pc->FPType, (union AnyValue *)&M_SQRT1_2Value, FALSE);
+     pc->VariableDefinePlatformVar( NULL, "M_E", &pc->FPType, (UnionAnyValue *)&M_EValue, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_LOG2E", &pc->FPType, (UnionAnyValue *)&M_LOG2EValue, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_LOG10E", &pc->FPType, (UnionAnyValue *)&M_LOG10EValue, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_LN2", &pc->FPType, (UnionAnyValue *)&M_LN2Value, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_LN10", &pc->FPType, (UnionAnyValue *)&M_LN10Value, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_PI", &pc->FPType, (UnionAnyValue *)&M_PIValue, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_PI_2", &pc->FPType, (UnionAnyValue *)&M_PI_2Value, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_PI_4", &pc->FPType, (UnionAnyValue *)&M_PI_4Value, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_1_PI", &pc->FPType, (UnionAnyValue *)&M_1_PIValue, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_2_PI", &pc->FPType, (UnionAnyValue *)&M_2_PIValue, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_2_SQRTPI", &pc->FPType, (UnionAnyValue *)&M_2_SQRTPIValue, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_SQRT2", &pc->FPType, (UnionAnyValue *)&M_SQRT2Value, FALSE);
+	 pc->VariableDefinePlatformVar(NULL, "M_SQRT1_2", &pc->FPType, (UnionAnyValue *)&M_SQRT1_2Value, FALSE);
 }
 
 #endif /* !NO_FP */

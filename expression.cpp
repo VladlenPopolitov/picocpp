@@ -314,7 +314,7 @@ void ExpressionStackPushValue(struct ParseState *Parser, struct ExpressionStack 
 void ExpressionStackPushLValue(struct ParseState *Parser, struct ExpressionStack **StackTop, struct Value *PushValue, int Offset)
 {
     struct Value *ValueLoc = VariableAllocValueShared(Parser, PushValue);
-	ValueLoc->Val = static_cast< AnyValue*>(static_cast<void*>((static_cast<char *>(static_cast<void*>(ValueLoc->Val)) + Offset)));
+	ValueLoc->Val = static_cast< UnionAnyValue*>(static_cast<void*>((static_cast<char *>(static_cast<void*>(ValueLoc->Val)) + Offset)));
     ExpressionStackPushValueNode(Parser, StackTop, ValueLoc);
 }
 
@@ -329,7 +329,7 @@ void ExpressionStackPushDereference(struct ParseState *Parser, struct Expression
     if (DerefDataLoc == NULL)
         ProgramFail(Parser, "NULL pointer dereference");
 
-    ValueLoc = VariableAllocValueFromExistingData(Parser, DerefType, (union AnyValue *)DerefDataLoc, DerefIsLValue, DerefVal);
+    ValueLoc = VariableAllocValueFromExistingData(Parser, DerefType, (UnionAnyValue *)DerefDataLoc, DerefIsLValue, DerefVal);
     ExpressionStackPushValueNode(Parser, StackTop, ValueLoc);
 }
 
@@ -518,7 +518,7 @@ void ExpressionColonOperator(struct ParseState *Parser, struct ExpressionStack *
 void ExpressionPrefixOperator(struct ParseState *Parser, struct ExpressionStack **StackTop, enum LexToken Op, struct Value *TopValue)
 {
     struct Value *Result;
-    union AnyValue *ValPtr;
+    UnionAnyValue *ValPtr;
 
     debugf("ExpressionPrefixOperator()\n");
     switch (Op)
@@ -704,8 +704,8 @@ void ExpressionInfixOperator(struct ParseState *Parser, struct ExpressionStack *
         /* make the array element result */
         switch (BottomValue->Typ->Base)
         {
-            case TypeArray:   Result = VariableAllocValueFromExistingData(Parser, BottomValue->Typ->FromType, (union AnyValue *)(&BottomValue->Val->ArrayMem[0] + TypeSize(BottomValue->Typ, ArrayIndex, TRUE)), BottomValue->IsLValue, BottomValue->LValueFrom); break;
-            case TypePointer: Result = VariableAllocValueFromExistingData(Parser, BottomValue->Typ->FromType, (union AnyValue *)((char *)BottomValue->Val->Pointer + TypeSize(BottomValue->Typ->FromType, 0, TRUE) * ArrayIndex), BottomValue->IsLValue, BottomValue->LValueFrom); break;
+            case TypeArray:   Result = VariableAllocValueFromExistingData(Parser, BottomValue->Typ->FromType, (UnionAnyValue *)(&BottomValue->Val->ArrayMem[0] + TypeSize(BottomValue->Typ, ArrayIndex, TRUE)), BottomValue->IsLValue, BottomValue->LValueFrom); break;
+            case TypePointer: Result = VariableAllocValueFromExistingData(Parser, BottomValue->Typ->FromType, (UnionAnyValue *)((char *)BottomValue->Val->Pointer + TypeSize(BottomValue->Typ->FromType, 0, TRUE) * ArrayIndex), BottomValue->IsLValue, BottomValue->LValueFrom); break;
             default:          ProgramFail(Parser, "this %t is not an array", BottomValue->Typ);
         }
         
@@ -1062,7 +1062,7 @@ void ExpressionGetStructElement(struct ParseState *Parser, struct ExpressionStac
         if (StructType->Base != TypeStruct && StructType->Base != TypeUnion)
             ProgramFail(Parser, "can't use '%s' on something that's not a struct or union %s : it's a %t", (Token == TokenDot) ? "." : "->", (Token == TokenArrow) ? "pointer" : "", ParamVal->Typ);
             
-        if (!TableGet(StructType->Members, Ident->Val->Identifier, &MemberValue, NULL, NULL, NULL))
+		if (!StructType->Members->TableGet(Ident->Val->Identifier, &MemberValue, NULL, NULL, NULL))
             ProgramFail(Parser, "doesn't have a member called '%s'", Ident->Val->Identifier);
         
         /* pop the value - assume it'll still be there until we're done */
@@ -1071,7 +1071,7 @@ void ExpressionGetStructElement(struct ParseState *Parser, struct ExpressionStac
         
         /* make the result value for this member only */
         Result = VariableAllocValueFromExistingData(Parser, MemberValue->Typ, 
-			static_cast<AnyValue*>(static_cast<void*>(DerefDataLoc + MemberValue->Val->Integer)), TRUE, (StructVal != NULL) ? StructVal->LValueFrom : NULL);
+			static_cast<UnionAnyValue*>(static_cast<void*>(DerefDataLoc + MemberValue->Val->Integer)), TRUE, (StructVal != NULL) ? StructVal->LValueFrom : NULL);
         ExpressionStackPushValueNode(Parser, StackTop, Result);
     }
 }
@@ -1119,7 +1119,7 @@ int ExpressionParse(struct ParseState *Parser, struct Value **Result)
                     {
                         /* it's a cast - get the new type */
                         struct ValueType *CastType;
-                        char *CastIdentifier;
+                        const char *CastIdentifier;
                         struct Value *CastTypeValue;
                         
                         TypeParse(Parser, &CastType, &CastIdentifier, NULL);
@@ -1305,7 +1305,7 @@ int ExpressionParse(struct ParseState *Parser, struct Value **Result)
         {
             /* it's a type. push it on the stack like a value. this is used in sizeof() */
             struct ValueType *Typ;
-            char *Identifier;
+            const char *Identifier;
             struct Value *TypeValue;
             
             if (!PrefixState)

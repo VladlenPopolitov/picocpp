@@ -9,7 +9,7 @@
 void Picoc::PicocInitialise( int StackSize)
 {
 	Picoc *pc = this;
-    memset(pc, '\0', sizeof(*pc));
+    //memset(pc, '\0', sizeof(*pc));
     PlatformInit();
     BasicIOInit();
     HeapInit( StackSize);
@@ -70,8 +70,8 @@ void Picoc::PicocCallMain(int argc, char **argv)
     if (FuncValue->Val->FuncDef.NumParams != 0)
     {
         /* define the arguments */
-        VariableDefinePlatformVar( NULL, "__argc", &pc->IntType, (union AnyValue *)&argc, FALSE);
-        VariableDefinePlatformVar( NULL, "__argv", pc->CharPtrPtrType, (union AnyValue *)&argv, FALSE);
+        VariableDefinePlatformVar( NULL, "__argc", &pc->IntType, (UnionAnyValue *)&argc, FALSE);
+        VariableDefinePlatformVar( NULL, "__argv", pc->CharPtrPtrType, (UnionAnyValue *)&argv, FALSE);
     }
 
     if (FuncValue->Val->FuncDef.ReturnType == &pc->VoidType)
@@ -83,7 +83,7 @@ void Picoc::PicocCallMain(int argc, char **argv)
     }
     else
     {
-        VariableDefinePlatformVar( NULL, "__exit_value", &pc->IntType, (union AnyValue *)&pc->PicocExitValue, TRUE);
+        VariableDefinePlatformVar( NULL, "__exit_value", &pc->IntType, (UnionAnyValue *)&pc->PicocExitValue, TRUE);
     
         if (FuncValue->Val->FuncDef.NumParams == 0)
             PicocParse( "startup", CALL_MAIN_NO_ARGS_RETURN_INT, strlen(CALL_MAIN_NO_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
@@ -143,7 +143,7 @@ void ProgramFail(struct ParseState *Parser, const char *Message, ...)
     PlatformVPrintf(Parser->pc->CStdOut, Message, Args);
     va_end(Args);
     PlatformPrintf(Parser->pc->CStdOut, "\n");
-	Parser->pc->PlatformExit(1);
+	Parser->pc->PlatformExit(1, Message);
 }
 
 /* exit with a message, when we're not parsing a program */
@@ -156,7 +156,7 @@ void Picoc::ProgramFailNoParser( const char *Message, ...)
     PlatformVPrintf(pc->CStdOut, Message, Args);
     va_end(Args);
     PlatformPrintf(pc->CStdOut, "\n");
-    PlatformExit( 1);
+	PlatformExit(1, Message);
 }
 
 /* like ProgramFail() but gives descriptive error messages for assignment */
@@ -177,7 +177,7 @@ void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType 
         PlatformPrintf(Stream, " in argument %d of call to %s()", ParamNo, FuncName);
     
     PlatformPrintf(Stream, "\n");
-	Parser->pc->PlatformExit(1);
+	Parser->pc->PlatformExit(1, Format);
 }
 
 /* exit lexing with a message */
@@ -191,7 +191,7 @@ void Picoc::LexFail( struct LexState *Lexer, const char *Message, ...)
     PlatformVPrintf(pc->CStdOut, Message, Args);
     va_end(Args);
     PlatformPrintf(pc->CStdOut, "\n");
-    PlatformExit( 1);
+    PlatformExit( 1, Message);
 }
 
 /* printf for compiler error reporting */
@@ -233,7 +233,7 @@ void PlatformVPrintf(IOFILE *Stream, const char *Format, va_list Args)
 
 /* make a new temporary name. takes a static buffer of char [7] as a parameter. should be initialised to "XX0000"
  * where XX can be any characters */
-char *Picoc::PlatformMakeTempName( char *TempNameBuffer)
+const char *Picoc::PlatformMakeTempName( char *TempNameBuffer)
 {
 	Picoc *pc = this;
     int CPos = 5;

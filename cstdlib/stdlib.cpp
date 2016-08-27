@@ -76,7 +76,7 @@ void StdlibAbort(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 
 void StdlibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	Parser->pc->PlatformExit(Param[0]->Val->Integer);
+	Parser->pc->PlatformExit(Param[0]->Val->Integer,"stdlib exit() is called");
 }
 
 void StdlibGetenv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -168,7 +168,7 @@ void StdlibSetupFunc(Picoc *pc)
 {
     /* define NULL, TRUE and FALSE */
     if (!pc->VariableDefined( pc->TableStrRegister( "NULL")))
-        pc->VariableDefinePlatformVar( NULL, "NULL", &pc->IntType, (union AnyValue *)&Stdlib_ZeroValue, FALSE);
+        pc->VariableDefinePlatformVar( NULL, "NULL", &pc->IntType, (UnionAnyValue *)&Stdlib_ZeroValue, FALSE);
 }
 
 #endif /* !BUILTIN_MINI_STDLIB */

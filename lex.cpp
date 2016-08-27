@@ -89,8 +89,8 @@ void Picoc::LexInit()
 	Picoc *pc = this;
     int Count;
     
-    TableInitTable(&pc->ReservedWordTable, &pc->ReservedWordHashTable[0], sizeof(ReservedWords) / sizeof(struct ReservedWord) * 2, TRUE);
-
+	pc->ReservedWordTable.TableInitTable(&pc->ReservedWordHashTable[0], sizeof(ReservedWords) / sizeof(struct ReservedWord) * 2, TRUE);
+	pc->ReservedWordTable.TableInitTable(&pc->ReservedWordMapTable);
     for (Count = 0; Count < sizeof(ReservedWords) / sizeof(struct ReservedWord); Count++)
     {
         TableSet( &pc->ReservedWordTable, TableStrRegister(ReservedWords[Count].Word), (struct Value *)&ReservedWords[Count], NULL, 0, 0);
@@ -123,7 +123,7 @@ enum LexToken Picoc::LexCheckReservedWord(const char *Word)
 	Picoc *pc = this;
     struct Value *val;
     
-    if (TableGet(&pc->ReservedWordTable, Word, &val, NULL, NULL, NULL))
+	if (pc->ReservedWordTable.TableGet(Word, &val, NULL, NULL, NULL))
         return ((struct ReservedWord *)val)->Token;
     else
         return TokenNone;
@@ -335,7 +335,7 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
     const char *EndPos;
     char *EscBuf;
     char *EscBufPos;
-    char *RegString;
+    const char *RegString;
     struct Value *ArrayValue;
     
     while (Lexer->Pos != Lexer->End && (*Lexer->Pos != EndChar || Escape))
@@ -379,13 +379,13 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
         /* create and store this string literal */
         ArrayValue = VariableAllocValueAndData( NULL, 0, FALSE, NULL, TRUE);
         ArrayValue->Typ = pc->CharArrayType;
-        ArrayValue->Val = (union AnyValue *)RegString;
+        ArrayValue->Val = (UnionAnyValue *)RegString;
         VariableStringLiteralDefine( RegString, ArrayValue);
     }
 
     /* create the the pointer for this char* */
     Value->Typ = pc->CharPtrType;
-    Value->Val->Pointer = RegString;
+    Value->Val->Pointer = const_cast<void*>(static_cast<const void*>(RegString)); // unsafe assignment and unsafe cast @todo \todo 
     if (*Lexer->Pos == EndChar)
         LEXER_INC(Lexer);
     
@@ -618,7 +618,7 @@ void *Picoc::LexAnalyse( const char *FileName, const char *Source, int SourceLen
 }
 
 /* prepare to parse a pre-tokenised buffer */
-void LexInitParser(struct ParseState *Parser, Picoc *pc, const char *SourceText, void *TokenSource, char *FileName, int RunIt, int EnableDebugger)
+void LexInitParser(struct ParseState *Parser, Picoc *pc, const char *SourceText, void *TokenSource, const char *FileName, int RunIt, int EnableDebugger)
 {
     Parser->pc = pc;
 	Parser->Pos = static_cast<unsigned char*>(TokenSource);
@@ -781,7 +781,7 @@ void LexHashIfdef(struct ParseState *Parser, int IfNot)
         ProgramFail(Parser, "identifier expected");
     
     /* is the identifier defined? */
-    IsDefined = TableGet(&Parser->pc->GlobalTable, IdentValue->Val->Identifier, &SavedValue, NULL, NULL, NULL);
+	IsDefined = Parser->pc->GlobalTable.TableGet(IdentValue->Val->Identifier, &SavedValue, NULL, NULL, NULL);
     if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && ( (IsDefined && !IfNot) || (!IsDefined && IfNot)) )
     {
         /* #if is active, evaluate to this new level */
@@ -803,7 +803,7 @@ void LexHashIf(struct ParseState *Parser)
     if (Token == TokenIdentifier)
     {
         /* look up a value from a macro definition */
-        if (!TableGet(&Parser->pc->GlobalTable, IdentValue->Val->Identifier, &SavedValue, NULL, NULL, NULL))
+		if (!Parser->pc->GlobalTable.TableGet(IdentValue->Val->Identifier, &SavedValue, NULL, NULL, NULL))
             ProgramFail(Parser, "'%s' is undefined", IdentValue->Val->Identifier);
         
         if (SavedValue->Typ->Base != TypeMacro)

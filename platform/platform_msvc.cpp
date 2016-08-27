@@ -1,5 +1,6 @@
 #include "../picoc.h"
 #include "../interpreter.h"
+#include <exception>
 
 /* mark where to end the program for platforms which require this */
 jmp_buf PicocExitBuf;
@@ -82,9 +83,10 @@ void Picoc::PicocPlatformScanFile( const char *FileName)
 }
 
 /* exit the program */
-void Picoc::PlatformExit( int RetVal)
+void Picoc::PlatformExit( int RetVal, const char *message)
 {
 	Picoc *pc = this;
     pc->PicocExitValue = RetVal;
-    longjmp(pc->PicocExitBuf, 1);
+	throw(std::exception(message));
+    //longjmp(pc->PicocExitBuf, 1);
 }

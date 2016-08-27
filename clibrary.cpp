@@ -17,14 +17,14 @@ void Picoc::LibraryInit()
 	Picoc *pc = this;
     /* define the version number macro */
     pc->VersionString = TableStrRegister( PICOC_VERSION);
-    VariableDefinePlatformVar( nullptr, "PICOC_VERSION", pc->CharPtrType, (union AnyValue *)&pc->VersionString, FALSE);
+    VariableDefinePlatformVar( nullptr, "PICOC_VERSION", pc->CharPtrType, (UnionAnyValue *)&pc->VersionString, FALSE);
 
     /* define endian-ness macros */
     BigEndian = ((*(char*)&__ENDIAN_CHECK__) == 0);
     LittleEndian = ((*(char*)&__ENDIAN_CHECK__) == 1);
 
-    VariableDefinePlatformVar( nullptr, "BIG_ENDIAN", &pc->IntType, (union AnyValue *)&BigEndian, FALSE);
-    VariableDefinePlatformVar( nullptr, "LITTLE_ENDIAN", &pc->IntType, (union AnyValue *)&LittleEndian, FALSE);
+    VariableDefinePlatformVar( nullptr, "BIG_ENDIAN", &pc->IntType, (UnionAnyValue *)&BigEndian, FALSE);
+    VariableDefinePlatformVar( nullptr, "LITTLE_ENDIAN", &pc->IntType, (UnionAnyValue *)&LittleEndian, FALSE);
 }
 
 /* add a library */
@@ -33,11 +33,11 @@ void Picoc::LibraryAdd( struct Table *GlobalTable, const char *LibraryName, stru
 	Picoc *pc = this;
     struct ParseState Parser;
     int Count;
-    char *Identifier;
+    const char *Identifier;
     struct ValueType *ReturnType;
     struct Value *NewValue;
     void *Tokens;
-    char *IntrinsicName = TableStrRegister( "c library");
+    const char *IntrinsicName = TableStrRegister( "c library");
     
     /* read all the library definitions */
     for (Count = 0; FuncList[Count].Prototype != NULL; Count++)
@@ -104,9 +104,9 @@ void CLibraryInit()
 {
 	Picoc *pc=this;
     /* define some constants */
-    VariableDefinePlatformVar( nullptr, "NULL", &IntType, (union AnyValue *)&ZeroValue, FALSE);
-    VariableDefinePlatformVar( nullptr, "TRUE", &IntType, (union AnyValue *)&TRUEValue, FALSE);
-    VariableDefinePlatformVar( nullptr, "FALSE", &IntType, (union AnyValue *)&ZeroValue, FALSE);
+    VariableDefinePlatformVar( nullptr, "NULL", &IntType, (UnionAnyValue *)&ZeroValue, FALSE);
+    VariableDefinePlatformVar( nullptr, "TRUE", &IntType, (UnionAnyValue *)&TRUEValue, FALSE);
+    VariableDefinePlatformVar( nullptr, "FALSE", &IntType, (UnionAnyValue *)&ZeroValue, FALSE);
 }
 
 /* stream for writing into strings */

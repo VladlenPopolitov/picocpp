@@ -69,7 +69,7 @@ void Picoc::PicocIncludeAllSystemHeaders()
 }
 
 /* include one of a number of predefined libraries, or perhaps an actual file */
-void Picoc::IncludeFile( char *FileName)
+void Picoc::IncludeFile( const char *FileName)
 {
 	Picoc *pc = this;
     struct IncludeLibrary *LInclude;

@@ -185,8 +185,8 @@ void TypeParseStruct(struct ParseState *Parser, struct ValueType **Typ, int IsSt
 {
     struct Value *LexValue;
     struct ValueType *MemberType;
-    char *MemberIdentifier;
-    char *StructIdentifier;
+    const char *MemberIdentifier;
+    const char *StructIdentifier;
     struct Value *MemberValue;
     enum LexToken Token;
     int AlignBoundary;
@@ -225,9 +225,10 @@ void TypeParseStruct(struct ParseState *Parser, struct ValueType **Typ, int IsSt
         
     LexGetToken(Parser, NULL, TRUE);    
 	(*Typ)->Members = static_cast<Table*>(pc->VariableAlloc(Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
-    (*Typ)->Members->HashTable = (struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table));
-    TableInitTable((*Typ)->Members, (struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
-    
+    //(*Typ)->Members->HashTable = (struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table));
+	//(*Typ)->Members->TableInitTable((struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
+	(*Typ)->Members->TableInitTable(&(*Typ)->Members->publicMap );
+
     do {
         TypeParse(Parser, &MemberType, &MemberIdentifier, NULL);
         if (MemberType == NULL || MemberIdentifier == NULL)
@@ -282,9 +283,11 @@ struct ValueType *Picoc::TypeCreateOpaqueStruct( struct ParseState *Parser, cons
     
     /* create the (empty) table */
 	Typ->Members = static_cast<Table*>(VariableAlloc( Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
-    Typ->Members->HashTable = (struct TableEntry **)((char *)Typ->Members + sizeof(struct Table));
-    TableInitTable(Typ->Members, (struct TableEntry **)((char *)Typ->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
-    Typ->Sizeof = Size;
+    //Typ->Members->HashTable = (struct TableEntry **)((char *)Typ->Members + sizeof(struct Table));
+	//Typ->Members->TableInitTable((struct TableEntry **)((char *)Typ->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
+	Typ->Members->TableInitTable(&Typ->Members->publicMap);
+
+	Typ->Sizeof = Size;
     
     return Typ;
 }
@@ -296,7 +299,7 @@ void TypeParseEnum(struct ParseState *Parser, struct ValueType **Typ)
     struct Value InitValue;
     enum LexToken Token;
     int EnumValue = 0;
-    char *EnumIdentifier;
+    const char *EnumIdentifier;
     Picoc *pc = Parser->pc;
     
     Token = LexGetToken(Parser, &LexValue, FALSE);
@@ -330,7 +333,7 @@ void TypeParseEnum(struct ParseState *Parser, struct ValueType **Typ)
     (*Typ)->Members = &pc->GlobalTable;
     memset((void *)&InitValue, '\0', sizeof(struct Value));
     InitValue.Typ = &pc->IntType;
-    InitValue.Val = (union AnyValue *)&EnumValue;
+    InitValue.Val = (UnionAnyValue *)&EnumValue;
     do {
         if (LexGetToken(Parser, &LexValue, TRUE) != TokenIdentifier)
             ProgramFail(Parser, "identifier expected");
@@ -476,7 +479,7 @@ struct ValueType *TypeParseBack(struct ParseState *Parser, struct ValueType *Fro
 }
 
 /* parse a type - the part which is repeated with each identifier in a declaration list */
-void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, char **Identifier)
+void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, const char **Identifier)
 {
     struct ParseState Before;
     enum LexToken Token;
@@ -530,7 +533,7 @@ void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, s
 }
 
 /* parse a type - a complete declaration including identifier */
-void TypeParse(struct ParseState *Parser, struct ValueType **Typ, char **Identifier, int *IsStatic)
+void TypeParse(struct ParseState *Parser, struct ValueType **Typ, const char **Identifier, int *IsStatic)
 {
     struct ValueType *BasicType;
     

@@ -57,10 +57,10 @@ int ParseCountParams(struct ParseState *Parser)
 }
 
 /* parse a function definition and store it for later */
-struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueType *ReturnType, char *Identifier)
+struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueType *ReturnType, const char *Identifier)
 {
     struct ValueType *ParamType;
-    char *ParamIdentifier;
+    const char *ParamIdentifier;
     enum LexToken Token = TokenNone;
     struct ParseState ParamParser;
     struct Value *FuncValue;
@@ -84,7 +84,7 @@ struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueTyp
     FuncValue->Val->FuncDef.NumParams = ParamCount;
     FuncValue->Val->FuncDef.VarArgs = FALSE;
     FuncValue->Val->FuncDef.ParamType = (struct ValueType **)((char *)FuncValue->Val + sizeof(struct FuncDef));
-    FuncValue->Val->FuncDef.ParamName = (char **)((char *)FuncValue->Val->FuncDef.ParamType + sizeof(struct ValueType *) * ParamCount);
+    FuncValue->Val->FuncDef.ParamName = (const char **)((char *)FuncValue->Val->FuncDef.ParamType + sizeof(struct ValueType *) * ParamCount);
    
     for (ParamCount = 0; ParamCount < FuncValue->Val->FuncDef.NumParams; ParamCount++)
     { 
@@ -151,7 +151,7 @@ struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueTyp
 		FuncValue->Val->FuncDef.Body.Pos = static_cast<unsigned char*>(LexCopyTokens(&FuncBody, Parser));
 
         /* is this function already in the global table? */
-        if (TableGet(&pc->GlobalTable, Identifier, &OldFuncValue, NULL, NULL, NULL))
+		if (pc->GlobalTable.TableGet(Identifier, &OldFuncValue, NULL, NULL, NULL))
         {
             if (OldFuncValue->Val->FuncDef.Body.Pos == NULL)
             {
@@ -211,7 +211,7 @@ int ParseArrayInitialiser(struct ParseState *Parser, struct Value *NewVariable, 
             if (Parser->Mode == RunModeRun && DoAssignment)
             {
                 SubArraySize = TypeSize(NewVariable->Typ->FromType, NewVariable->Typ->FromType->ArraySize, TRUE);
-                SubArray = VariableAllocValueFromExistingData(Parser, NewVariable->Typ->FromType, (union AnyValue *)(&NewVariable->Val->ArrayMem[0] + SubArraySize * ArrayIndex), TRUE, NewVariable);
+                SubArray = VariableAllocValueFromExistingData(Parser, NewVariable->Typ->FromType, (UnionAnyValue *)(&NewVariable->Val->ArrayMem[0] + SubArraySize * ArrayIndex), TRUE, NewVariable);
                 #ifdef DEBUG_ARRAY_INITIALIZER
                 int FullArraySize = TypeSize(NewVariable->Typ, NewVariable->Typ->ArraySize, TRUE);
                 PRINT_SOURCE_POS;
@@ -251,7 +251,7 @@ int ParseArrayInitialiser(struct ParseState *Parser, struct Value *NewVariable, 
                 #endif
                 if (ArrayIndex >= TotalSize)
                     ProgramFail(Parser, "too many array elements");
-                ArrayElement = VariableAllocValueFromExistingData(Parser, ElementType, (union AnyValue *)(&NewVariable->Val->ArrayMem[0] + ElementSize * ArrayIndex), TRUE, NewVariable);
+                ArrayElement = VariableAllocValueFromExistingData(Parser, ElementType, (UnionAnyValue *)(&NewVariable->Val->ArrayMem[0] + ElementSize * ArrayIndex), TRUE, NewVariable);
             }
 
             /* this is a normal expression initialiser */
@@ -314,7 +314,7 @@ void ParseDeclarationAssignment(struct ParseState *Parser, struct Value *NewVari
 /* declare a variable or function */
 int ParseDeclaration(struct ParseState *Parser, enum LexToken Token)
 {
-    char *Identifier;
+    const char *Identifier;
     struct ValueType *BasicType;
     struct ValueType *Typ;
     struct Value *NewVariable = NULL;
@@ -367,7 +367,7 @@ int ParseDeclaration(struct ParseState *Parser, enum LexToken Token)
 void ParseMacroDefinition(struct ParseState *Parser)
 {
     struct Value *MacroName;
-    char *MacroNameStr;
+    const char *MacroNameStr;
     struct Value *ParamName;
     struct Value *MacroValue;
 
@@ -388,7 +388,7 @@ void ParseMacroDefinition(struct ParseState *Parser)
         NumParams = ParseCountParams(&ParamParser);
 		MacroValue = Parser->pc->VariableAllocValueAndData(Parser, sizeof(struct MacroDef) + sizeof(const char *) * NumParams, FALSE, NULL, TRUE);
         MacroValue->Val->MacroDef.NumParams = NumParams;
-        MacroValue->Val->MacroDef.ParamName = (char **)((char *)MacroValue->Val + sizeof(struct MacroDef));
+        MacroValue->Val->MacroDef.ParamName = (const char **)((char *)MacroValue->Val + sizeof(struct MacroDef));
 
         Token = LexGetToken(Parser, &ParamName, TRUE);
         
@@ -551,7 +551,7 @@ void ParseTypedef(struct ParseState *Parser)
 {
     struct ValueType *Typ;
     struct ValueType **TypPtr;
-    char *TypeName;
+    const char *TypeName;
     struct Value InitValue;
     
     TypeParse(Parser, &Typ, &TypeName, NULL);
@@ -560,7 +560,7 @@ void ParseTypedef(struct ParseState *Parser)
     {
         TypPtr = &Typ;
         InitValue.Typ = &Parser->pc->TypeType;
-        InitValue.Val = (union AnyValue *)TypPtr;
+        InitValue.Val = (UnionAnyValue *)TypPtr;
 		Parser->pc->VariableDefine(Parser, TypeName, &InitValue, NULL, FALSE);
     }
 }
@@ -866,7 +866,7 @@ enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemi
                         ProgramFail(Parser, "value required in return");
                     
                     if (!Parser->pc->TopStackFrame) /* return from top-level program? */
-						Parser->pc->PlatformExit(ExpressionCoerceInteger(CValue));
+						Parser->pc->PlatformExit(ExpressionCoerceInteger(CValue), "value required in return");
                     else
                         ExpressionAssign(Parser, Parser->pc->TopStackFrame->ReturnValue, CValue, TRUE, NULL, 0, FALSE);
 
@@ -940,7 +940,7 @@ void Picoc::PicocParse( const char *FileName, const char *Source, int SourceLen,
     struct ParseState Parser;
     enum ParseResult Ok;
     struct CleanupTokenNode *NewCleanupNode;
-    char *RegFileName = TableStrRegister(FileName);
+    const char *RegFileName = TableStrRegister(FileName);
     
     void *Tokens = LexAnalyse( RegFileName, Source, SourceLen, NULL);
     
