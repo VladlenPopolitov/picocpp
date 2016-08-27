@@ -89,7 +89,7 @@ void Picoc::LexInit()
 	Picoc *pc = this;
     int Count;
     
-	pc->ReservedWordTable.TableInitTable(&pc->ReservedWordHashTable[0], sizeof(ReservedWords) / sizeof(struct ReservedWord) * 2, TRUE);
+	// obsolete pc->ReservedWordTable.TableInitTable(&pc->ReservedWordHashTable[0], sizeof(ReservedWords) / sizeof(struct ReservedWord) * 2, TRUE);
 	pc->ReservedWordTable.TableInitTable(&pc->ReservedWordMapTable);
     for (Count = 0; Count < sizeof(ReservedWords) / sizeof(struct ReservedWord); Count++)
     {

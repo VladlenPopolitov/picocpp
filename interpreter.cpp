@@ -15,8 +15,11 @@ identifier_{}{
 }
 
 
-Table::Table() : Size{ 0 }, OnHeap{ false }, HashTable{ nullptr }, hashTable_{}, publicMap{}
-{}
+Table::Table() : Size{ 0 }, OnHeap{ false }, //HashTable{ nullptr }, 
+hashTable_{}, publicMap{}
+{
+	hashTable_ = &publicMap;
+}
 
 
 void Table::TableInitTable(std::map<std::string, struct TableEntry*> *hashTable) { 
@@ -25,15 +28,18 @@ void Table::TableInitTable(std::map<std::string, struct TableEntry*> *hashTable)
 
 
 StackFrame::StackFrame() : ReturnParser{}, FuncName{}, ReturnValue{}, Parameter{}, NumParams{},
-LocalTable{}, LocalHashTable{}, LocalMapTable{}, PreviousStackFrame{}
+LocalTable{}, //obsolete LocalHashTable{},
+LocalMapTable{}, PreviousStackFrame{}
 {
 	; // LocalHashTable.resize(LOCAL_TABLE_SIZE);
 }
 
+StackFrame::~StackFrame(){};
+
 Picoc_Struct::Picoc_Struct(size_t StackSize) :
 GlobalTable{},
 CleanupTokenList{ nullptr },
-GlobalHashTable{},
+// obsolete GlobalHashTable{},
 GlobalMapTable{},
 
 /* lexer global data */
@@ -44,11 +50,11 @@ LexUseStatementPrompt{},
 LexAnyValue{},
 LexValue{},
 ReservedWordTable{},
-ReservedWordHashTable{},
+// obsolete ReservedWordHashTable{},
 ReservedWordMapTable{},
 /* the table of string literal values */
 StringLiteralTable{},
-StringLiteralHashTable{},
+// obsolete StringLiteralHashTable{},
 StringLiteralMapTable{},
 /* the stack */
 TopStackFrame{ nullptr },
@@ -107,7 +113,7 @@ VoidPtrType{},
 
 /* debugger */
 BreakpointTable{},
-BreakpointHashTable{},
+// obsolete BreakpointHashTable{},
 BreakpointMapTable{},
 BreakpointCount{},
 DebugManualBreak{},

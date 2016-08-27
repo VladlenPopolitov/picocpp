@@ -311,11 +311,11 @@ struct Table
 {
 	/* table.c */
 	Table();
-	void TableInitTable(struct TableEntry **HashTable, int Size, bool OnHeap);
+	//void TableInitTable(struct TableEntry **HashTable, int Size, bool OnHeap);
 	void TableInitTable(std::map<std::string,struct TableEntry*> *hashTable) ;
 	void Table::TableInitTable(std::vector<struct TableEntry> &HashTable, size_t Size, bool OnHeap);
 	bool TableGet(const char *Key, struct Value **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn);
-	struct TableEntry *TableSearch(const char *Key, int &AddAt);
+	struct TableEntry *TableSearch(const char *Key);
 	bool Table::TableSet(const char *Key, struct Value *Val, const char *DeclFileName, int DeclLine, int DeclColumn);
 	struct Value *Table::TableDelete(const char *Key);
 	void TableSet(const char *Key, struct TableEntry* newEntry);
@@ -323,14 +323,16 @@ struct Table
 	void Table::TableFree(Picoc *pc, void(func)(Picoc*, struct TableEntry *));
 	void Table::TableForEach(Picoc *pc, const std::function< void(Picoc*, struct TableEntry *)> &func);
 	bool Table::TableFindIf(Picoc *pc, const std::function< bool (Picoc*, struct TableEntry *)> &func);
+	struct TableEntry * Table::TableFindEntryIf(Picoc *pc, const std::function< bool(Picoc*, struct TableEntry *)> &func);
+	bool Table::TableDeleteIf(Picoc *pc, const std::function< bool(Picoc*, struct TableEntry *)> &func);
 
-	struct TableEntry *TableSearchIdentifier(const std::string &Key, int *AddAt);
+	struct TableEntry *TableSearchIdentifier(const std::string &Key);
 	const char *Table::TableSetIdentifier(const char *Ident, int IdentLen);
 	short Size;
 	bool /* short */ OnHeap;
 	std::map<std::string, struct TableEntry*> publicMap;
 private:
-	struct TableEntry **HashTable;
+	//struct TableEntry **HashTable;
 	std::map<std::string,struct TableEntry*> *hashTable_;
 };
 
@@ -339,14 +341,14 @@ struct StackFrame
 {
 public:
 	StackFrame();
+	~StackFrame();
     struct ParseState ReturnParser;         /* how we got here */
     const char *FuncName;                   /* the name of the function we're in */
     struct Value *ReturnValue;              /* copy the return value here */
     struct Value **Parameter;               /* array of parameter values */
     int NumParams;                          /* the number of parameters */
     struct Table LocalTable;                /* the local variables and parameters */
-    struct TableEntry *LocalHashTable[LOCAL_TABLE_SIZE];
-	//std::vector<struct TableEntry> LocalHashTable;
+    //struct TableEntry *LocalHashTable[LOCAL_TABLE_SIZE];
 	std::map<std::string,struct TableEntry *> LocalMapTable;
 	struct StackFrame *PreviousStackFrame;  /* the next lower stack frame */
 };
@@ -444,7 +446,7 @@ public:
     /* parser global data */
     struct Table GlobalTable;
     struct CleanupTokenNode *CleanupTokenList;
-    struct TableEntry *GlobalHashTable[GLOBAL_TABLE_SIZE];
+    // obsolete struct TableEntry *GlobalHashTable[GLOBAL_TABLE_SIZE];
 	std::map<std::string, struct TableEntry *> GlobalMapTable;
     
     /* lexer global data */
@@ -455,11 +457,11 @@ public:
     UnionAnyValue LexAnyValue;
     struct Value LexValue;
     struct Table ReservedWordTable;
-    struct TableEntry *ReservedWordHashTable[RESERVED_WORD_TABLE_SIZE];
+    // obsolete struct TableEntry *ReservedWordHashTable[RESERVED_WORD_TABLE_SIZE];
 	std::map<std::string, struct TableEntry *> ReservedWordMapTable;
     /* the table of string literal values */
     struct Table StringLiteralTable;
-    struct TableEntry *StringLiteralHashTable[STRING_LITERAL_TABLE_SIZE];
+	// obsolete struct TableEntry *StringLiteralHashTable[STRING_LITERAL_TABLE_SIZE];
 	std::map<std::string, struct TableEntry *> StringLiteralMapTable;
     
     /* the stack */
@@ -521,7 +523,7 @@ public:
 
     /* debugger */
     struct Table BreakpointTable;
-    struct TableEntry *BreakpointHashTable[BREAKPOINT_TABLE_SIZE];
+	// obsolete  struct TableEntry *BreakpointHashTable[BREAKPOINT_TABLE_SIZE];
 	std::map<std::string, struct TableEntry *> BreakpointMapTable;
     int BreakpointCount;
     int DebugManualBreak;
@@ -546,7 +548,7 @@ public:
     
     /* string table */
     struct Table StringTable;
-    struct TableEntry *StringHashTable[STRING_TABLE_SIZE];
+	// obsolete  struct TableEntry *StringHashTable[STRING_TABLE_SIZE];
 	std::map<std::string, struct TableEntry *> StringMapTable;
     const char *StrEmpty;
 	/* platform.c */

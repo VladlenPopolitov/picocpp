@@ -10,7 +10,7 @@
 void Picoc::DebugInit()
 {
 	Picoc *pc = this;
-	pc->BreakpointTable.TableInitTable(&pc->BreakpointHashTable[0], BREAKPOINT_TABLE_SIZE, TRUE);
+	// obsolete pc->BreakpointTable.TableInitTable(&pc->BreakpointHashTable[0], BREAKPOINT_TABLE_SIZE, TRUE);
 	pc->BreakpointTable.TableInitTable(&pc->BreakpointMapTable);
 	pc->BreakpointCount = 0;
 }
@@ -23,6 +23,8 @@ void Picoc::DebugCleanup()
     struct TableEntry *NextEntry;
     int Count;
     
+	BreakpointTable.TableFree();
+	/* obsolete
     for (Count = 0; Count < pc->BreakpointTable.Size; Count++)
     {
         for (Entry = pc->BreakpointHashTable[Count]; Entry != NULL; Entry = NextEntry)
@@ -31,6 +33,7 @@ void Picoc::DebugCleanup()
             HeapFreeMem( Entry);
         }
     }
+	*/
 }
 
 /* search the table for a breakpoint */
@@ -39,15 +42,20 @@ static struct TableEntry *DebugTableSearchBreakpoint(struct ParseState *Parser, 
     struct TableEntry *Entry;
     Picoc *pc = Parser->pc;
     int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
-    
-    for (Entry = pc->BreakpointHashTable[HashValue]; Entry != NULL; Entry = Entry->Next)
-    {
-        if (Entry->p.b.FileName == Parser->FileName && Entry->p.b.Line == Parser->Line && Entry->p.b.CharacterPos == Parser->CharacterPos)
-            return Entry;   /* found */
-    }
-    
-    *AddAt = HashValue;    /* didn't find it in the chain */
-    return NULL;
+	Entry = pc->BreakpointTable.TableFindEntryIf(pc, [Parser](Picoc *pc, struct TableEntry *Entry)-> bool {
+		//for (Entry = pc->BreakpointHashTable[HashValue]; Entry != NULL; Entry = Entry->Next)
+		//{
+			if (Entry->p.b.FileName == Parser->FileName && Entry->p.b.Line == Parser->Line && Entry->p.b.CharacterPos == Parser->CharacterPos)
+				return true;   /* found */
+		//}
+	});
+	if (Entry) {
+		return Entry;
+	}
+	else {
+		*AddAt = HashValue;    /* didn't find it in the chain */
+		return nullptr;
+	}
 }
 
 /* set a breakpoint in the table */
@@ -60,16 +68,20 @@ void DebugSetBreakpoint(struct ParseState *Parser)
     if (FoundEntry == NULL)
     {   
         /* add it to the table */
-		struct TableEntry *NewEntry = static_cast<TableEntry*>(pc->HeapAllocMem( sizeof(struct TableEntry)));
+		std::string Key = Parser->FileName;
+		Key.append("_").append(std::to_string(Parser->Line)).append("_").append(std::to_string(Parser->CharacterPos));
+		struct TableEntry *NewEntry = new struct TableEntry; // static_cast<TableEntry*>(pc->HeapAllocMem(sizeof(struct TableEntry)));
         if (NewEntry == NULL)
             pc->ProgramFailNoParser( "out of memory");
             
         NewEntry->p.b.FileName = Parser->FileName;
         NewEntry->p.b.Line = Parser->Line;
         NewEntry->p.b.CharacterPos = Parser->CharacterPos;
-        NewEntry->Next = pc->BreakpointHashTable[AddAt];
-        pc->BreakpointHashTable[AddAt] = NewEntry;
-        pc->BreakpointCount++;
+        //NewEntry->Next = pc->BreakpointHashTable[AddAt];
+        //pc->BreakpointHashTable[AddAt] = NewEntry;
+		pc->BreakpointTable.TableSet(Key.c_str(),NewEntry);
+
+		pc->BreakpointCount++;
     }
 }
 
@@ -79,21 +91,23 @@ int DebugClearBreakpoint(struct ParseState *Parser)
     struct TableEntry **EntryPtr;
     Picoc *pc = Parser->pc;
     int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
-    
-    for (EntryPtr = &pc->BreakpointHashTable[HashValue]; *EntryPtr != NULL; EntryPtr = &(*EntryPtr)->Next)
-    {
-        struct TableEntry *DeleteEntry = *EntryPtr;
-        if (DeleteEntry->p.b.FileName == Parser->FileName && DeleteEntry->p.b.Line == Parser->Line && DeleteEntry->p.b.CharacterPos == Parser->CharacterPos)
-        {
-            *EntryPtr = DeleteEntry->Next;
-            pc->HeapFreeMem( DeleteEntry);
-            pc->BreakpointCount--;
+	return pc->BreakpointTable.TableDeleteIf(pc, [&Parser](Picoc *pc, struct TableEntry *DeleteEntry)->bool {
+		//for (EntryPtr = &pc->BreakpointHashTable[HashValue]; *EntryPtr != NULL; EntryPtr = &(*EntryPtr)->Next)
+		//{
+		//	struct TableEntry *DeleteEntry = *EntryPtr;
+			if (DeleteEntry->p.b.FileName == Parser->FileName && DeleteEntry->p.b.Line == Parser->Line && DeleteEntry->p.b.CharacterPos == Parser->CharacterPos)
+			{
+				//*EntryPtr = DeleteEntry->Next;
+				delete DeleteEntry;//pc->HeapFreeMem( DeleteEntry);
+				pc->BreakpointCount--;
 
-            return TRUE;
-        }
-    }
-
-    return FALSE;
+				return true;
+			}
+			else {
+				return false;
+			}
+		//}
+	});
 }
 
 /* before we run a statement, check if there's anything we have to do with the debugger here */

@@ -11,10 +11,10 @@
 void Picoc::VariableInit()
 {
 	Picoc *pc = this;
-	(pc->GlobalTable).TableInitTable( &(pc->GlobalHashTable)[0], GLOBAL_TABLE_SIZE, true);
+	// obsolete (pc->GlobalTable).TableInitTable( &(pc->GlobalHashTable)[0], GLOBAL_TABLE_SIZE, true);
 	(pc->GlobalTable).TableInitTable(&(pc->GlobalMapTable));
 
-	(pc->StringLiteralTable).TableInitTable(&pc->StringLiteralHashTable[0], STRING_LITERAL_TABLE_SIZE, true);
+	// obsolete (pc->StringLiteralTable).TableInitTable(&pc->StringLiteralHashTable[0], STRING_LITERAL_TABLE_SIZE, true);
 	(pc->StringLiteralTable).TableInitTable(&pc->StringLiteralMapTable);
 
 	pc->TopStackFrame = nullptr;
@@ -451,14 +451,15 @@ void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int 
     struct StackFrame *NewFrame;
     
 	Parser->pc->HeapPushStackFrame();
+	// bug is here. StackFrame is allocated, but the constructor is not called
 	NewFrame = static_cast<StackFrame*>(Parser->pc->HeapAllocStack( sizeof(struct StackFrame) + sizeof(struct Value *) * NumParams));
-    if (NewFrame == NULL)
+    if (NewFrame == nullptr)
         ProgramFail(Parser, "out of memory");
-        
+	NewFrame = new(NewFrame) struct StackFrame; // C++ in-place constructor
     ParserCopy(&NewFrame->ReturnParser, Parser);
     NewFrame->FuncName = FuncName;
 	NewFrame->Parameter = static_cast<struct Value**>((NumParams > 0) ? ((void *)((char *)NewFrame + sizeof(struct StackFrame))) : nullptr);
-	NewFrame->LocalTable.TableInitTable(&NewFrame->LocalHashTable[0], LOCAL_TABLE_SIZE, FALSE);
+//obsolete	NewFrame->LocalTable.TableInitTable(&NewFrame->LocalHashTable[0], LOCAL_TABLE_SIZE, FALSE);
 	NewFrame->LocalTable.TableInitTable(&NewFrame->LocalMapTable);
 
     NewFrame->PreviousStackFrame = Parser->pc->TopStackFrame;
@@ -472,7 +473,9 @@ void VariableStackFramePop(struct ParseState *Parser)
         ProgramFail(Parser, "stack is empty - can't go back");
         
     ParserCopy(Parser, &Parser->pc->TopStackFrame->ReturnParser);
-    Parser->pc->TopStackFrame = Parser->pc->TopStackFrame->PreviousStackFrame;
+	struct StackFrame *previousStack = Parser->pc->TopStackFrame->PreviousStackFrame;
+	Parser->pc->TopStackFrame->~StackFrame();
+	Parser->pc->TopStackFrame = previousStack; // obsolete  Parser->pc->TopStackFrame->PreviousStackFrame;
 	Parser->pc->HeapPopStackFrame();
 }
 

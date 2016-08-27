@@ -165,7 +165,7 @@ void Picoc::TypeCleanupNode( struct ValueType *Typ)
             if (SubType->Members != NULL)
             {
                 VariableTableCleanup( SubType->Members);
-                HeapFreeMem( SubType->Members);
+				delete SubType->Members; // obsolete HeapFreeMem( SubType->Members);
             }
 
             /* free this node */
@@ -224,9 +224,9 @@ void TypeParseStruct(struct ParseState *Parser, struct ValueType **Typ, int IsSt
         ProgramFail(Parser, "struct/union definitions can only be globals");
         
     LexGetToken(Parser, NULL, TRUE);    
-	(*Typ)->Members = static_cast<Table*>(pc->VariableAlloc(Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
-    //(*Typ)->Members->HashTable = (struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table));
-	//(*Typ)->Members->TableInitTable((struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
+	(*Typ)->Members = new struct Table;// obsolete static_cast<Table*>(pc->VariableAlloc(Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
+    // obsolete (*Typ)->Members->HashTable = (struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table));
+	// obsolete (*Typ)->Members->TableInitTable((struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
 	(*Typ)->Members->TableInitTable(&(*Typ)->Members->publicMap );
 
     do {
@@ -282,7 +282,7 @@ struct ValueType *Picoc::TypeCreateOpaqueStruct( struct ParseState *Parser, cons
     struct ValueType *Typ = TypeGetMatching( Parser, &pc->UberType, TypeStruct, 0, StructName, FALSE);
     
     /* create the (empty) table */
-	Typ->Members = static_cast<Table*>(VariableAlloc( Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
+	Typ->Members = new struct Table; //    static_cast<Table*>(VariableAlloc(Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
     //Typ->Members->HashTable = (struct TableEntry **)((char *)Typ->Members + sizeof(struct Table));
 	//Typ->Members->TableInitTable((struct TableEntry **)((char *)Typ->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
 	Typ->Members->TableInitTable(&Typ->Members->publicMap);
@@ -320,7 +320,7 @@ void TypeParseEnum(struct ParseState *Parser, struct ValueType **Typ)
     if (Token != TokenLeftBrace)
     { 
         /* use the already defined enum */
-        if ((*Typ)->Members == NULL)
+        if ((*Typ)->Members == nullptr)
             ProgramFail(Parser, "enum '%s' isn't defined", EnumIdentifier);
             
         return;

@@ -26,7 +26,7 @@ int main(int argcc, char **argvc)
 				"        picoc -i                               : interactive mode\n");
 			exit(1);
 		}
-		for (int i = 0; i < 10000; ++i){
+		for (int i = 0; i < 1; ++i){ // for test
 			int ParamCount = 1;
 			int argc = argcc;
 			char **argv = argvc;
@@ -59,6 +59,10 @@ int main(int argcc, char **argvc)
 			}
 		}
 		return 0; // pc.PicocExitValue;
+	}
+	catch (std::exception &ex){
+		const char *msg=ex.what();
+		return 0;
 	}
 	catch (...){
 		return 0;
