@@ -103,6 +103,8 @@
     <ClInclude Include="..\..\interpreter.h" />
     <ClInclude Include="..\..\picoc.h" />
     <ClInclude Include="..\..\platform.h" />
+    <ClInclude Include="..\..\vld.h" />
+    <ClInclude Include="..\..\vld_def.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

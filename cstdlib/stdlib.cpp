@@ -168,7 +168,7 @@ void StdlibSetupFunc(Picoc *pc)
 {
     /* define NULL, TRUE and FALSE */
     if (!pc->VariableDefined( pc->TableStrRegister( "NULL")))
-        pc->VariableDefinePlatformVar( NULL, "NULL", &pc->IntType, (UnionAnyValue *)&Stdlib_ZeroValue, FALSE);
+        pc->VariableDefinePlatformVar( NULL, "NULL", &pc->IntType, (UnionAnyValuePointer )&Stdlib_ZeroValue, FALSE);
 }
 
 #endif /* !BUILTIN_MINI_STDLIB */

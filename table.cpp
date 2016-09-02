@@ -8,7 +8,7 @@ void Picoc::TableInit()
 {
 	Picoc *pc = this;
 	//pc->StringTable.TableInitTable(&pc->StringHashTable[0], STRING_TABLE_SIZE, true);
-	pc->StringTable.TableInitTable(&StringMapTable);
+	//obsolete pc->StringTable.TableInitTable(&StringMapTable);
     pc->StrEmpty = TableStrRegister( "");
 }
 

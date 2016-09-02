@@ -9,10 +9,11 @@ static int IntAlignBytes;
 
 
 /* add a new type to the set of types we know about */
-struct ValueType *Picoc::TypeAdd( struct ParseState *Parser, struct ValueType *ParentType, enum BaseType Base, int ArraySize, const char *Identifier, int Sizeof, int AlignBytes)
+struct ValueType *Picoc::TypeAdd( struct ParseState *Parser, struct ValueType *ParentType, enum BaseType Base, int ArraySize, 
+	const char *Identifier, int Sizeof, int AlignBytes)
 {
 	Picoc *pc = this;
-	struct ValueType *NewType = static_cast<ValueType*>(VariableAlloc( Parser, sizeof(struct ValueType), TRUE));
+	struct ValueType *NewType = static_cast<ValueType*>(VariableAlloc( Parser, sizeof(struct ValueType), LocationOnHeap));
     NewType->Base = Base;
     NewType->ArraySize = ArraySize;
     NewType->Sizeof = Sizeof;
@@ -21,7 +22,7 @@ struct ValueType *Picoc::TypeAdd( struct ParseState *Parser, struct ValueType *P
     NewType->Members = NULL;
     NewType->FromType = ParentType;
     NewType->DerivedTypeList = NULL;
-    NewType->OnHeap = TRUE;
+    NewType->OnHeap = LocationOnHeap;
     NewType->Next = ParentType->DerivedTypeList;
     ParentType->DerivedTypeList = NewType;
     
@@ -101,7 +102,7 @@ void Picoc::TypeAddBaseType( struct ValueType *TypeNode, enum BaseType Base, int
     TypeNode->Members = NULL;
     TypeNode->FromType = NULL;
     TypeNode->DerivedTypeList = NULL;
-    TypeNode->OnHeap = FALSE;
+    TypeNode->OnHeap = LocationOnStack;
     TypeNode->Next = pc->UberType.DerivedTypeList;
     pc->UberType.DerivedTypeList = TypeNode;
 }
@@ -220,21 +221,21 @@ void TypeParseStruct(struct ParseState *Parser, struct ValueType **Typ, int IsSt
         return;
     }
     
-    if (pc->TopStackFrame != NULL)
+    if (pc->TopStackFrame() != NULL)
         ProgramFail(Parser, "struct/union definitions can only be globals");
         
     LexGetToken(Parser, NULL, TRUE);    
 	(*Typ)->Members = new struct Table;// obsolete static_cast<Table*>(pc->VariableAlloc(Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
     // obsolete (*Typ)->Members->HashTable = (struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table));
 	// obsolete (*Typ)->Members->TableInitTable((struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
-	(*Typ)->Members->TableInitTable(&(*Typ)->Members->publicMap );
+	// obsolete init in the constructor (*Typ)->Members->TableInitTable(&(*Typ)->Members->publicMap );
 
     do {
         TypeParse(Parser, &MemberType, &MemberIdentifier, NULL);
         if (MemberType == NULL || MemberIdentifier == NULL)
             ProgramFail(Parser, "invalid type in struct");
         
-		MemberValue = pc->VariableAllocValueAndData(Parser, sizeof(int), FALSE, NULL, TRUE);
+		MemberValue = pc->VariableAllocValueAndData(Parser, sizeof(int), FALSE, NULL, LocationOnHeap);
         MemberValue->Typ = MemberType;
         if (IsStruct)
         { 
@@ -283,9 +284,9 @@ struct ValueType *Picoc::TypeCreateOpaqueStruct( struct ParseState *Parser, cons
     
     /* create the (empty) table */
 	Typ->Members = new struct Table; //    static_cast<Table*>(VariableAlloc(Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
-    //Typ->Members->HashTable = (struct TableEntry **)((char *)Typ->Members + sizeof(struct Table));
-	//Typ->Members->TableInitTable((struct TableEntry **)((char *)Typ->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
-	Typ->Members->TableInitTable(&Typ->Members->publicMap);
+    // obsoleteTyp->Members->HashTable = (struct TableEntry **)((char *)Typ->Members + sizeof(struct Table));
+	// obsoleteTyp->Members->TableInitTable((struct TableEntry **)((char *)Typ->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
+	// obsolete Typ->Members->TableInitTable(&Typ->Members->publicMap);
 
 	Typ->Sizeof = Size;
     
@@ -326,14 +327,14 @@ void TypeParseEnum(struct ParseState *Parser, struct ValueType **Typ)
         return;
     }
     
-    if (pc->TopStackFrame != NULL)
+    if (pc->TopStackFrame() != NULL)
         ProgramFail(Parser, "enum definitions can only be globals");
         
     LexGetToken(Parser, NULL, TRUE);    
     (*Typ)->Members = &pc->GlobalTable;
     memset((void *)&InitValue, '\0', sizeof(struct Value));
     InitValue.Typ = &pc->IntType;
-    InitValue.Val = (UnionAnyValue *)&EnumValue;
+    InitValue.Val = (UnionAnyValuePointer )&EnumValue;
     do {
         if (LexGetToken(Parser, &LexValue, TRUE) != TokenIdentifier)
             ProgramFail(Parser, "identifier expected");

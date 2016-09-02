@@ -98,5 +98,11 @@
     <ClInclude Include="..\..\platform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\vld.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\vld_def.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

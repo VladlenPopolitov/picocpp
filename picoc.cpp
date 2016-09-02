@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+//#include <vld.h>
 
               /* space for the the stack */
 
@@ -61,8 +62,13 @@ int main(int argcc, char **argvc)
 		return 0; // pc.PicocExitValue;
 	}
 	catch (std::exception &ex){
-		const char *msg=ex.what();
-		return 0;
+		try{
+			const char *msg = ex.what();
+			return 0;
+		}
+		catch (...){
+			return 1;
+		}
 	}
 	catch (...){
 		return 0;

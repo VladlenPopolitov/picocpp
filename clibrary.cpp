@@ -17,14 +17,14 @@ void Picoc::LibraryInit()
 	Picoc *pc = this;
     /* define the version number macro */
     pc->VersionString = TableStrRegister( PICOC_VERSION);
-    VariableDefinePlatformVar( nullptr, "PICOC_VERSION", pc->CharPtrType, (UnionAnyValue *)&pc->VersionString, FALSE);
+    VariableDefinePlatformVar( nullptr, "PICOC_VERSION", pc->CharPtrType, (UnionAnyValuePointer )&pc->VersionString, FALSE);
 
     /* define endian-ness macros */
     BigEndian = ((*(char*)&__ENDIAN_CHECK__) == 0);
     LittleEndian = ((*(char*)&__ENDIAN_CHECK__) == 1);
 
-    VariableDefinePlatformVar( nullptr, "BIG_ENDIAN", &pc->IntType, (UnionAnyValue *)&BigEndian, FALSE);
-    VariableDefinePlatformVar( nullptr, "LITTLE_ENDIAN", &pc->IntType, (UnionAnyValue *)&LittleEndian, FALSE);
+    VariableDefinePlatformVar( nullptr, "BIG_ENDIAN", &pc->IntType, (UnionAnyValuePointer )&BigEndian, FALSE);
+    VariableDefinePlatformVar( nullptr, "LITTLE_ENDIAN", &pc->IntType, (UnionAnyValuePointer )&LittleEndian, FALSE);
 }
 
 /* add a library */
@@ -104,9 +104,9 @@ void CLibraryInit()
 {
 	Picoc *pc=this;
     /* define some constants */
-    VariableDefinePlatformVar( nullptr, "NULL", &IntType, (UnionAnyValue *)&ZeroValue, FALSE);
-    VariableDefinePlatformVar( nullptr, "TRUE", &IntType, (UnionAnyValue *)&TRUEValue, FALSE);
-    VariableDefinePlatformVar( nullptr, "FALSE", &IntType, (UnionAnyValue *)&ZeroValue, FALSE);
+    VariableDefinePlatformVar( nullptr, "NULL", &IntType, (UnionAnyValuePointer )&ZeroValue, FALSE);
+    VariableDefinePlatformVar( nullptr, "TRUE", &IntType, (UnionAnyValuePointer )&TRUEValue, FALSE);
+    VariableDefinePlatformVar( nullptr, "FALSE", &IntType, (UnionAnyValuePointer )&ZeroValue, FALSE);
 }
 
 /* stream for writing into strings */

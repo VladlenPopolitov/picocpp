@@ -11,7 +11,9 @@
 #include <map>
 #include <vector>
 // for std::function
-#include <thread> 
+#include <thread>
+//for std::shared_ptr
+#include <memory>
 
 const size_t  picocStackSize = (128 * 1024);
 
@@ -164,6 +166,10 @@ enum BaseType
 };
 
 /* data type */
+enum MemoryLocation {
+	LocationOnStack, LocationOnHeap, LocationVirtual
+};
+
 struct ValueType
 {
     enum BaseType Base;             /* what kind of type this is */
@@ -175,8 +181,8 @@ struct ValueType
     struct ValueType *DerivedTypeList;  /* first in a list of types derived from this one */
     struct ValueType *Next;         /* next item in the derived type list */
     struct Table *Members;          /* members of a struct or union */
-    int OnHeap;                     /* true if allocated on the heap */
-    int StaticQualifier;            /* true if it's a static */
+    MemoryLocation OnHeap;                     /* true if allocated on the heap */
+    bool StaticQualifier;            /* true if it's a static */
 };
 
 /* function definition */
@@ -228,7 +234,16 @@ union AnyValueOld
 	int *PointerInt;
 };
 
+class VirtualPointer {
+public:
+	//VirtualPointer() :ref_{} {};
+	void *Ref(){ return ref_; };
+public:
+	void *ref_;
+};
+
 using PointerType = void*;
+//using PointerType = VirtualPointer;
 
 union UnionAnyValue
 {
@@ -260,14 +275,13 @@ private:
 };
 
 using AnyValue = class AnyValueClass;
-
+using UnionAnyValuePointer = UnionAnyValue *;
 
 struct Value 
 {
 public:
 	Value();
     struct ValueType *Typ;          /* the type of this value */
-    UnionAnyValue *Val;            /* pointer to the AnyValue which holds the actual content */
     struct Value *LValueFrom;       /* if an LValue, this is a Value our LValue is contained within (or NULL) */
     char ValOnHeap;                 /* this Value is on the heap */
     char ValOnStack;                /* the AnyValue is on the stack along with this Value */
@@ -275,6 +289,11 @@ public:
     char IsLValue;                  /* is modifiable and is allocated somewhere we can usefully modify it */
     int ScopeID;                    /* to know when it goes out of scope */
     char OutOfScope;
+	UnionAnyValuePointer getVal();
+	void setVal(UnionAnyValuePointer newVal);
+//private:
+	UnionAnyValuePointer Val;            /* pointer to the AnyValue which holds the actual content */
+
 };
 
 /* hash table data structure */
@@ -312,7 +331,7 @@ struct Table
 	/* table.c */
 	Table();
 	//void TableInitTable(struct TableEntry **HashTable, int Size, bool OnHeap);
-	void TableInitTable(std::map<std::string,struct TableEntry*> *hashTable) ;
+	//void TableInitTable(std::map<std::string,struct TableEntry*> *hashTable) ;
 	void Table::TableInitTable(std::vector<struct TableEntry> &HashTable, size_t Size, bool OnHeap);
 	bool TableGet(const char *Key, struct Value **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn);
 	struct TableEntry *TableSearch(const char *Key);
@@ -328,29 +347,35 @@ struct Table
 
 	struct TableEntry *TableSearchIdentifier(const std::string &Key);
 	const char *Table::TableSetIdentifier(const char *Ident, int IdentLen);
+private:
+	std::map<std::string, struct TableEntry*> publicMap;
 	short Size;
 	bool /* short */ OnHeap;
-	std::map<std::string, struct TableEntry*> publicMap;
-private:
 	//struct TableEntry **HashTable;
 	std::map<std::string,struct TableEntry*> *hashTable_;
 };
 
 /* stack frame for function calls */
+struct StackFrame;
+using StructStackFrame = struct StackFrame;
+
 struct StackFrame
 {
 public:
+	StackFrame(const StackFrame &in);
 	StackFrame();
 	~StackFrame();
-    struct ParseState ReturnParser;         /* how we got here */
+	StackFrame &operator=(StackFrame &in);
+
+	struct ParseState ReturnParser;         /* how we got here */
     const char *FuncName;                   /* the name of the function we're in */
     struct Value *ReturnValue;              /* copy the return value here */
     struct Value **Parameter;               /* array of parameter values */
     int NumParams;                          /* the number of parameters */
-    struct Table LocalTable;                /* the local variables and parameters */
-    //struct TableEntry *LocalHashTable[LOCAL_TABLE_SIZE];
-	std::map<std::string,struct TableEntry *> LocalMapTable;
-	struct StackFrame *PreviousStackFrame;  /* the next lower stack frame */
+    std::shared_ptr<struct Table> LocalTable;                /* the local variables and parameters */
+    //obsolete struct TableEntry *LocalHashTable[LOCAL_TABLE_SIZE];
+	//obsolete std::map<std::string,struct TableEntry *> LocalMapTable;
+	StructStackFrame *PreviousStackFrame;  /* the next lower stack frame */
 };
 
 /* lexer state */
@@ -447,7 +472,7 @@ public:
     struct Table GlobalTable;
     struct CleanupTokenNode *CleanupTokenList;
     // obsolete struct TableEntry *GlobalHashTable[GLOBAL_TABLE_SIZE];
-	std::map<std::string, struct TableEntry *> GlobalMapTable;
+	// obsolete std::map<std::string, struct TableEntry *> GlobalMapTable;
     
     /* lexer global data */
     struct TokenLine *InteractiveHead;
@@ -458,15 +483,20 @@ public:
     struct Value LexValue;
     struct Table ReservedWordTable;
     // obsolete struct TableEntry *ReservedWordHashTable[RESERVED_WORD_TABLE_SIZE];
-	std::map<std::string, struct TableEntry *> ReservedWordMapTable;
+	// obsolete std::map<std::string, struct TableEntry *> ReservedWordMapTable;
     /* the table of string literal values */
     struct Table StringLiteralTable;
 	// obsolete struct TableEntry *StringLiteralHashTable[STRING_LITERAL_TABLE_SIZE];
-	std::map<std::string, struct TableEntry *> StringLiteralMapTable;
+	// obsolete std::map<std::string, struct TableEntry *> StringLiteralMapTable;
     
     /* the stack */
-    struct StackFrame *TopStackFrame;
+    StructStackFrame *TopStackFrame();
+	void pushStackFrame(StructStackFrame &newFrame);
+	void popStackFrame();
 
+private:
+	std::vector<StructStackFrame> topStackFrame_;
+public:
     /* the value passed to exit() */
     int PicocExitValue;
 
@@ -477,26 +507,26 @@ public:
 #ifdef USE_MALLOC_STACK
     unsigned char *HeapMemory;          /* stack memory since our heap is malloc()ed */
     void *HeapBottom;                   /* the bottom of the (downward-growing) heap */
-    void *StackFrame;                   /* the current stack frame */
+    std::vector<void *> CurrentStackFrame;                   /* the current stack frame */
     void *HeapStackTop;                 /* the top of the stack */
 #else
 # ifdef SURVEYOR_HOST
     unsigned char *HeapMemory;          /* all memory - stack and heap */
     void *HeapBottom;                   /* the bottom of the (downward-growing) heap */
-    void *StackFrame;                   /* the current stack frame */
+    void *CurrentStackFrame;                   /* the current stack frame */
     void *HeapStackTop;                 /* the top of the stack */
     void *HeapMemStart;
 # else
     unsigned char HeapMemory[HEAP_SIZE];  /* all memory - stack and heap */
     void *HeapBottom;                   /* the bottom of the (downward-growing) heap */
-    void *StackFrame;                   /* the current stack frame */
+    void *CurrentStackFrame;                   /* the current stack frame */
     void *HeapStackTop;                 /* the top of the stack */
 # endif
 #endif
-
-    struct AllocNode *FreeListBucket[FREELIST_BUCKETS];      /* we keep a pool of freelist buckets to reduce fragmentation */
+#ifndef USE_MALLOC_HEAP
+    std::vector<struct AllocNode *>FreeListBucket;      /* we keep a pool of freelist buckets to reduce fragmentation */
     struct AllocNode *FreeListBig;                           /* free memory which doesn't fit in a bucket */
-
+#endif
     /* types */    
     struct ValueType UberType;
     struct ValueType IntType;
@@ -524,7 +554,7 @@ public:
     /* debugger */
     struct Table BreakpointTable;
 	// obsolete  struct TableEntry *BreakpointHashTable[BREAKPOINT_TABLE_SIZE];
-	std::map<std::string, struct TableEntry *> BreakpointMapTable;
+	// obsolete std::map<std::string, struct TableEntry *> BreakpointMapTable;
     int BreakpointCount;
     int DebugManualBreak;
     
@@ -549,7 +579,7 @@ public:
     /* string table */
     struct Table StringTable;
 	// obsolete  struct TableEntry *StringHashTable[STRING_TABLE_SIZE];
-	std::map<std::string, struct TableEntry *> StringMapTable;
+	// obsolete std::map<std::string, struct TableEntry *> StringMapTable;
     const char *StrEmpty;
 	/* platform.c */
 	void PicocCallMain(int argc, char **argv);
@@ -620,12 +650,15 @@ public:
 	void HeapInit( int StackSize);
 	void HeapCleanup();
 	void *HeapAllocStack( int Size);
-	int HeapPopStack( void *Addr, int Size);
+	bool HeapPopStack( void *Addr, int Size);
 	void HeapUnpopStack( int Size);
 	void HeapPushStackFrame();
-	int HeapPopStackFrame();
+	bool HeapPopStackFrame();
 	void *HeapAllocMem( int Size);
+	void *HeapAllocVirtualMem(int Size);
+	void HeapFreeMem(UnionAnyValuePointer  Mem);
 	void HeapFreeMem( void *Mem);
+
 #ifdef DEBUG_HEAP
 	void ShowBigList()
 #endif
@@ -634,12 +667,13 @@ public:
 	void VariableCleanup();
 	void VariableFree(struct Value *Val);
 	void VariableTableCleanup( struct Table *HashTable);
-	void *VariableAlloc( struct ParseState *Parser, int Size, int OnHeap);
+	void *VariableAlloc( struct ParseState *Parser, int Size, MemoryLocation OnHeap);
 	//void VariableStackPop(struct ParseState *Parser, struct Value *Var);
-	struct Value *VariableAllocValueAndData( struct ParseState *Parser, int DataSize, int IsLValue, struct Value *LValueFrom, int OnHeap);
-	struct Value *VariableAllocValueAndCopy( struct ParseState *Parser, struct Value *FromValue, int OnHeap);
-	struct Value *VariableAllocValueFromType( struct ParseState *Parser, struct ValueType *Typ, int IsLValue, struct Value *LValueFrom, int OnHeap);
-	//struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValue *FromValue, int IsLValue, struct Value *LValueFrom);
+	struct Value *VariableAllocValueAndData(struct ParseState *Parser, int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap);
+	struct Value *VariableAllocValueAndCopy(struct ParseState *Parser, struct Value *FromValue, MemoryLocation OnHeap);
+	struct Value *VariableAllocValueFromType(struct ParseState *Parser, struct ValueType *Typ, int IsLValue, 
+		struct Value *LValueFrom, MemoryLocation OnHeap);
+	//struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
 	//struct Value *VariableAllocValueShared(struct ParseState *Parser, struct Value *FromValue);
 	struct Value *VariableDefine( struct ParseState *Parser, const char *Ident, struct Value *InitValue, struct ValueType *Typ, int MakeWritable);
 	//struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
@@ -647,7 +681,8 @@ public:
 	bool VariableDefinedAndOutOfScope( const char *Ident);
 	//void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);
 	void VariableGet( struct ParseState *Parser, const char *Ident, struct Value **LVal);
-	void VariableDefinePlatformVar( struct ParseState *Parser, const char *Ident, struct ValueType *Typ, UnionAnyValue *FromValue, int IsWritable);
+	void VariableDefinePlatformVar( struct ParseState *Parser, const char *Ident, struct ValueType *Typ, 
+		UnionAnyValuePointer FromValue, int IsWritable);
 	//void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
 	//void VariableStackFramePop(struct ParseState *Parser);
 	struct Value *VariableStringLiteralGet( const char *Ident);
@@ -744,7 +779,7 @@ int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
 
 /* variable.c */
 void VariableStackPop(struct ParseState *Parser, struct Value *Var);
-struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValue *FromValue, int IsLValue, struct Value *LValueFrom);
+struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
 struct Value *VariableAllocValueShared(struct ParseState *Parser, struct Value *FromValue);
 struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
 void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);

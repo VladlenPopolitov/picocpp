@@ -11,49 +11,35 @@ void Picoc::DebugInit()
 {
 	Picoc *pc = this;
 	// obsolete pc->BreakpointTable.TableInitTable(&pc->BreakpointHashTable[0], BREAKPOINT_TABLE_SIZE, TRUE);
-	pc->BreakpointTable.TableInitTable(&pc->BreakpointMapTable);
+	// obsolete pc->BreakpointTable.TableInitTable(&pc->BreakpointMapTable);
 	pc->BreakpointCount = 0;
 }
 
 /* free the contents of the breakpoint table */
 void Picoc::DebugCleanup()
 {
-	Picoc *pc = this;
-    struct TableEntry *Entry;
-    struct TableEntry *NextEntry;
-    int Count;
-    
 	BreakpointTable.TableFree();
-	/* obsolete
-    for (Count = 0; Count < pc->BreakpointTable.Size; Count++)
-    {
-        for (Entry = pc->BreakpointHashTable[Count]; Entry != NULL; Entry = NextEntry)
-        {
-            NextEntry = Entry->Next;
-            HeapFreeMem( Entry);
-        }
-    }
-	*/
 }
 
 /* search the table for a breakpoint */
-static struct TableEntry *DebugTableSearchBreakpoint(struct ParseState *Parser, int *AddAt)
+static struct TableEntry *DebugTableSearchBreakpoint(struct ParseState *Parser)
 {
     struct TableEntry *Entry;
     Picoc *pc = Parser->pc;
-    int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
+    // obsolete int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
 	Entry = pc->BreakpointTable.TableFindEntryIf(pc, [Parser](Picoc *pc, struct TableEntry *Entry)-> bool {
-		//for (Entry = pc->BreakpointHashTable[HashValue]; Entry != NULL; Entry = Entry->Next)
-		//{
+		//obsolete for (Entry = pc->BreakpointHashTable[HashValue]; Entry != NULL; Entry = Entry->Next)
+		//obsolete {
 			if (Entry->p.b.FileName == Parser->FileName && Entry->p.b.Line == Parser->Line && Entry->p.b.CharacterPos == Parser->CharacterPos)
 				return true;   /* found */
-		//}
+			return false;
+		//obsolete }
 	});
 	if (Entry) {
 		return Entry;
 	}
 	else {
-		*AddAt = HashValue;    /* didn't find it in the chain */
+	//obsolete	*AddAt = HashValue;    /* didn't find it in the chain */
 		return nullptr;
 	}
 }
@@ -61,8 +47,8 @@ static struct TableEntry *DebugTableSearchBreakpoint(struct ParseState *Parser, 
 /* set a breakpoint in the table */
 void DebugSetBreakpoint(struct ParseState *Parser)
 {
-    int AddAt;
-    struct TableEntry *FoundEntry = DebugTableSearchBreakpoint(Parser, &AddAt);
+    //int AddAt;
+    struct TableEntry *FoundEntry = DebugTableSearchBreakpoint(Parser);
     Picoc *pc = Parser->pc;
     
     if (FoundEntry == NULL)
@@ -88,13 +74,12 @@ void DebugSetBreakpoint(struct ParseState *Parser)
 /* delete a breakpoint from the hash table */
 int DebugClearBreakpoint(struct ParseState *Parser)
 {
-    struct TableEntry **EntryPtr;
     Picoc *pc = Parser->pc;
-    int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
+    //obsolete int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
 	return pc->BreakpointTable.TableDeleteIf(pc, [&Parser](Picoc *pc, struct TableEntry *DeleteEntry)->bool {
-		//for (EntryPtr = &pc->BreakpointHashTable[HashValue]; *EntryPtr != NULL; EntryPtr = &(*EntryPtr)->Next)
-		//{
-		//	struct TableEntry *DeleteEntry = *EntryPtr;
+		//obsolete for (EntryPtr = &pc->BreakpointHashTable[HashValue]; *EntryPtr != NULL; EntryPtr = &(*EntryPtr)->Next)
+		//obsolete{
+		//obsolete	struct TableEntry *DeleteEntry = *EntryPtr;
 			if (DeleteEntry->p.b.FileName == Parser->FileName && DeleteEntry->p.b.Line == Parser->Line && DeleteEntry->p.b.CharacterPos == Parser->CharacterPos)
 			{
 				//*EntryPtr = DeleteEntry->Next;
@@ -114,7 +99,6 @@ int DebugClearBreakpoint(struct ParseState *Parser)
 void DebugCheckStatement(struct ParseState *Parser)
 {
     int DoBreak = FALSE;
-    int AddAt;
     Picoc *pc = Parser->pc;
     
     /* has the user manually pressed break? */
@@ -126,7 +110,7 @@ void DebugCheckStatement(struct ParseState *Parser)
     }
     
     /* is this a breakpoint location? */
-    if (Parser->pc->BreakpointCount != 0 && DebugTableSearchBreakpoint(Parser, &AddAt) != NULL)
+    if (Parser->pc->BreakpointCount != 0 && DebugTableSearchBreakpoint(Parser) != NULL)
         DoBreak = TRUE;
     
     /* handle a break */
