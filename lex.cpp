@@ -376,8 +376,12 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
     ArrayValue = VariableStringLiteralGet( RegString);
     if (ArrayValue == nullptr)
     {
-        /* create and store this string literal */
-        ArrayValue = VariableAllocValueAndData( NULL, 0, FALSE, NULL, LocationOnHeap);
+		struct ParseState temp;
+		temp.setScopeID(-1);
+		temp.pc = pc;
+
+		/* create and store this string literal */
+       ArrayValue = temp.VariableAllocValueAndData( 0, FALSE, NULL, LocationOnHeap);
         ArrayValue->Typ = pc->CharArrayType;
         ArrayValue->Val = (UnionAnyValuePointer )RegString;
         VariableStringLiteralDefine( RegString, ArrayValue);
@@ -618,8 +622,9 @@ void *Picoc::LexAnalyse( const char *FileName, const char *Source, int SourceLen
 }
 
 /* prepare to parse a pre-tokenised buffer */
-void LexInitParser(struct ParseState *Parser, Picoc *pc, const char *SourceText, void *TokenSource, const char *FileName, int RunIt, int EnableDebugger)
+void  ParseState::LexInitParser(Picoc *pc, const char *SourceText, void *TokenSource, const char *FileName, int RunIt, int EnableDebugger)
 {
+	struct ParseState *Parser = this;
     Parser->pc = pc;
 	Parser->Pos = static_cast<unsigned char*>(TokenSource);
     Parser->Line = 1;
@@ -634,8 +639,9 @@ void LexInitParser(struct ParseState *Parser, Picoc *pc, const char *SourceText,
 }
 
 /* get the next token, without pre-processing */
-enum LexToken LexGetRawToken(struct ParseState *Parser, struct Value **Value, int IncPos)
+enum LexToken ParseState::LexGetRawToken(struct Value **Value, int IncPos)
 {
+	struct ParseState *Parser = this;
     enum LexToken Token = TokenNone;
     int ValueSize;
     char *Prompt = NULL;
@@ -681,7 +687,7 @@ enum LexToken LexGetRawToken(struct ParseState *Parser, struct Value **Value, in
 
                 /* put the new line at the end of the linked list of interactive lines */        
                 LineTokens = pc->LexAnalyse( pc->StrEmpty, &LineBuffer[0], strlen(LineBuffer), &LineBytes);
-				LineNode = static_cast<TokenLine*>(pc->VariableAlloc(Parser, sizeof(struct TokenLine), LocationOnHeap));
+				LineNode = static_cast<TokenLine*>(VariableAlloc( sizeof(struct TokenLine), LocationOnHeap));
 				LineNode->Tokens = static_cast<unsigned char*>(LineTokens);
                 LineNode->NumBytes = LineBytes;
                 if (pc->InteractiveHead == NULL)
@@ -762,23 +768,25 @@ enum LexToken LexGetRawToken(struct ParseState *Parser, struct Value **Value, in
 }
 
 /* correct the token position depending if we already incremented the position */
-void LexHashIncPos(struct ParseState *Parser, int IncPos)
+void ParseState::LexHashIncPos(int IncPos)
 {
+	struct ParseState *Parser = this;
     if (!IncPos)
-        LexGetRawToken(Parser, NULL, TRUE);
+        LexGetRawToken(/*Parser,*/ NULL, TRUE);
 }
 
 /* handle a #ifdef directive */
-void LexHashIfdef(struct ParseState *Parser, int IfNot)
+void ParseState::LexHashIfdef(int IfNot)
 {
+	struct ParseState *Parser = this;
     /* get symbol to check */
     struct Value *IdentValue;
     struct Value *SavedValue;
     int IsDefined;
-    enum LexToken Token = LexGetRawToken(Parser, &IdentValue, TRUE);
+    enum LexToken Token = LexGetRawToken(/*Parser,*/ &IdentValue, TRUE);
     
     if (Token != TokenIdentifier)
-        ProgramFail(Parser, "identifier expected");
+        Parser->ProgramFail( "identifier expected");
     
     /* is the identifier defined? */
 	IsDefined = Parser->pc->GlobalTable.TableGet(IdentValue->Val->Identifier, &SavedValue, NULL, NULL, NULL);
@@ -792,29 +800,30 @@ void LexHashIfdef(struct ParseState *Parser, int IfNot)
 }
 
 /* handle a #if directive */
-void LexHashIf(struct ParseState *Parser)
+void ParseState::LexHashIf()
 {
+	struct ParseState *Parser = this;
     /* get symbol to check */
     struct Value *IdentValue;
     struct Value *SavedValue = NULL;
     struct ParseState MacroParser;
-    enum LexToken Token = LexGetRawToken(Parser, &IdentValue, TRUE);
+    enum LexToken Token = LexGetRawToken(/*Parser,*/ &IdentValue, TRUE);
 
     if (Token == TokenIdentifier)
     {
         /* look up a value from a macro definition */
 		if (!Parser->pc->GlobalTable.TableGet(IdentValue->Val->Identifier, &SavedValue, NULL, NULL, NULL))
-            ProgramFail(Parser, "'%s' is undefined", IdentValue->Val->Identifier);
+            Parser->ProgramFail( "'%s' is undefined", IdentValue->Val->Identifier);
         
         if (SavedValue->Typ->Base != TypeMacro)
-            ProgramFail(Parser, "value expected");
+            Parser->ProgramFail( "value expected");
         
         ParserCopy(&MacroParser, &SavedValue->Val->MacroDef.Body);
-        Token = LexGetRawToken(&MacroParser, &IdentValue, TRUE);
+		Token = MacroParser.LexGetRawToken(&IdentValue, TRUE);
     }
     
     if (Token != TokenCharacterConstant && Token != TokenIntegerConstant)
-        ProgramFail(Parser, "value expected");
+        Parser->ProgramFail( "value expected");
     
     /* is the identifier defined? */
     if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && IdentValue->Val->Character)
@@ -827,8 +836,9 @@ void LexHashIf(struct ParseState *Parser)
 }
 
 /* handle a #else directive */
-void LexHashElse(struct ParseState *Parser)
+void ParseState::LexHashElse()
 {
+	struct ParseState *Parser = this;
     if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel - 1)
         Parser->HashIfEvaluateToLevel++;     /* #if was not active, make this next section active */
         
@@ -836,17 +846,18 @@ void LexHashElse(struct ParseState *Parser)
     {
         /* #if was active, now go inactive */
         if (Parser->HashIfLevel == 0)
-            ProgramFail(Parser, "#else without #if");
+            Parser->ProgramFail( "#else without #if");
             
         Parser->HashIfEvaluateToLevel--;
     }
 }
 
 /* handle a #endif directive */
-void LexHashEndif(struct ParseState *Parser)
+void ParseState::LexHashEndif()
 {
+	struct ParseState *Parser = this;
     if (Parser->HashIfLevel == 0)
-        ProgramFail(Parser, "#endif without #if");
+        Parser->ProgramFail( "#endif without #if");
 
     Parser->HashIfLevel--;
     if (Parser->HashIfEvaluateToLevel > Parser->HashIfLevel)
@@ -891,31 +902,31 @@ void LexPrintToken(enum LexToken Token)
 #endif
 
 /* get the next token given a parser state, pre-processing as we go */
-enum LexToken LexGetToken(struct ParseState *Parser, struct Value **Value, int IncPos)
+enum LexToken ParseState::LexGetToken(struct Value **Value, int IncPos)
 {
     enum LexToken Token;
     int TryNextToken;
-    
+	struct ParseState *Parser = this;
     /* implements the pre-processor #if commands */
     do
     {
         int WasPreProcToken = TRUE;
 
-        Token = LexGetRawToken(Parser, Value, IncPos);
+        Token = LexGetRawToken(/*Parser,*/ Value, IncPos);
         switch (Token)
         {
-            case TokenHashIfdef:    LexHashIncPos(Parser, IncPos); LexHashIfdef(Parser, FALSE); break;
-            case TokenHashIfndef:   LexHashIncPos(Parser, IncPos); LexHashIfdef(Parser, TRUE); break;
-            case TokenHashIf:       LexHashIncPos(Parser, IncPos); LexHashIf(Parser); break;
-            case TokenHashElse:     LexHashIncPos(Parser, IncPos); LexHashElse(Parser); break;
-            case TokenHashEndif:    LexHashIncPos(Parser, IncPos); LexHashEndif(Parser); break;
+            case TokenHashIfdef:    LexHashIncPos(/*Parser,*/ IncPos); LexHashIfdef(/*Parser,*/ FALSE); break;
+            case TokenHashIfndef:   LexHashIncPos(/*Parser,*/ IncPos); LexHashIfdef(/*Parser,*/ TRUE); break;
+            case TokenHashIf:       LexHashIncPos(/*Parser,*/ IncPos); LexHashIf(/*Parser*/); break;
+            case TokenHashElse:     LexHashIncPos(/*Parser,*/ IncPos); LexHashElse(/*Parser*/); break;
+            case TokenHashEndif:    LexHashIncPos(/*Parser,*/ IncPos); LexHashEndif(/*Parser*/); break;
             default:                WasPreProcToken = FALSE; break;
         }
 
         /* if we're going to reject this token, increment the token pointer to the next one */
         TryNextToken = (Parser->HashIfEvaluateToLevel < Parser->HashIfLevel && Token != TokenEOF) || WasPreProcToken;
         if (!IncPos && TryNextToken)
-            LexGetRawToken(Parser, NULL, TRUE);
+            LexGetRawToken(/*Parser,*/ NULL, TRUE);
             
     } while (TryNextToken);
     
@@ -923,27 +934,30 @@ enum LexToken LexGetToken(struct ParseState *Parser, struct Value **Value, int I
 }
 
 /* take a quick peek at the next token, skipping any pre-processing */
-enum LexToken LexRawPeekToken(struct ParseState *Parser)
+enum LexToken ParseState::LexRawPeekToken()
 {
+	struct ParseState *Parser = this;
     return (enum LexToken)*(unsigned char *)Parser->Pos;
 }
 
 /* find the end of the line */
-void LexToEndOfLine(struct ParseState *Parser)
+void ParseState::LexToEndOfLine()
 {
-    while (TRUE)
+	struct ParseState *Parser = this;
+    while (true)
     {
         enum LexToken Token = (enum LexToken)*(unsigned char *)Parser->Pos;
         if (Token == TokenEndOfLine || Token == TokenEOF)
             return;
         else
-            LexGetRawToken(Parser, NULL, TRUE);
+            LexGetRawToken(/*Parser,*/ NULL, TRUE);
     }
 }
 
 /* copy the tokens from StartParser to EndParser into new memory, removing TokenEOFs and terminate with a TokenEndOfFunction */
 void *LexCopyTokens(struct ParseState *StartParser, struct ParseState *EndParser)
 {
+	//struct ParseState *StartParser = this;
     int MemSize = 0;
     int CopySize;
     unsigned char *Pos = (unsigned char *)StartParser->Pos;
@@ -956,7 +970,7 @@ void *LexCopyTokens(struct ParseState *StartParser, struct ParseState *EndParser
     { 
         /* non-interactive mode - copy the tokens */
         MemSize = EndParser->Pos - StartParser->Pos;
-		NewTokens = static_cast<unsigned char*>(pc->VariableAlloc(StartParser, MemSize + TOKEN_DATA_OFFSET, LocationOnHeap));
+		NewTokens = static_cast<unsigned char*>(StartParser->VariableAlloc(MemSize + TOKEN_DATA_OFFSET, LocationOnHeap));
         memcpy(NewTokens, (void *)StartParser->Pos, MemSize);
     }
     else
@@ -969,7 +983,7 @@ void *LexCopyTokens(struct ParseState *StartParser, struct ParseState *EndParser
         { 
             /* all on a single line */
             MemSize = EndParser->Pos - StartParser->Pos;
-			NewTokens = static_cast<unsigned char*>(pc->VariableAlloc(StartParser, MemSize + TOKEN_DATA_OFFSET, LocationOnHeap));
+			NewTokens = static_cast<unsigned char*>(StartParser->VariableAlloc(MemSize + TOKEN_DATA_OFFSET, LocationOnHeap));
             memcpy(NewTokens, (void *)StartParser->Pos, MemSize);
         }
         else
@@ -982,7 +996,7 @@ void *LexCopyTokens(struct ParseState *StartParser, struct ParseState *EndParser
             
             assert(ILine != NULL);
             MemSize += EndParser->Pos - &ILine->Tokens[0];
-			NewTokens = static_cast<unsigned char*>(pc->VariableAlloc(StartParser, MemSize + TOKEN_DATA_OFFSET, LocationOnHeap));
+			NewTokens = static_cast<unsigned char*>(StartParser->VariableAlloc(MemSize + TOKEN_DATA_OFFSET, LocationOnHeap));
             
             CopySize = &pc->InteractiveCurrentLine->Tokens[pc->InteractiveCurrentLine->NumBytes-TOKEN_DATA_OFFSET] - Pos;
             memcpy(NewTokens, Pos, CopySize);
@@ -1015,18 +1029,18 @@ void Picoc::LexInteractiveClear( struct ParseState *Parser)
         pc->InteractiveHead = NextLine;
     }
 
-    if (Parser != NULL)
-        Parser->Pos = NULL;
+    if (Parser != nullptr)
+        Parser->setPos( nullptr );
         
-    pc->InteractiveTail = NULL;
+    pc->InteractiveTail = nullptr;
 }
 
 /* indicate that we've completed up to this point in the interactive input and free expired tokens */
 void Picoc::LexInteractiveCompleted( struct ParseState *Parser)
 {
 	Picoc *pc = this;
-    while (pc->InteractiveHead != nullptr && !(Parser->Pos >= &pc->InteractiveHead->Tokens[0] && 
-		Parser->Pos < &pc->InteractiveHead->Tokens[pc->InteractiveHead->NumBytes]))
+    while (pc->InteractiveHead != nullptr && !(Parser->getPos() >= &pc->InteractiveHead->Tokens[0] && 
+		Parser->getPos() < &pc->InteractiveHead->Tokens[pc->InteractiveHead->NumBytes]))
     { 
         /* this token line is no longer needed - free it */
         struct TokenLine *NextLine = pc->InteractiveHead->Next;
@@ -1035,11 +1049,11 @@ void Picoc::LexInteractiveCompleted( struct ParseState *Parser)
         HeapFreeMem( pc->InteractiveHead);
         pc->InteractiveHead = NextLine;
         
-        if (pc->InteractiveHead == NULL)
+        if (pc->InteractiveHead == nullptr)
         { 
             /* we've emptied the list */
-            Parser->Pos = NULL;
-            pc->InteractiveTail = NULL;
+            Parser->setPos(  nullptr );
+            pc->InteractiveTail = nullptr;
         }
     }
 }

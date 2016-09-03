@@ -328,3 +328,7 @@ void Picoc::TableStrFree()
     }
 	*/
 }
+
+struct Table * Picoc::GetCurrentTable(){
+	return (TopStackFrame() == nullptr) ? &(GlobalTable) : (TopStackFrame())->LocalTable.get();
+}

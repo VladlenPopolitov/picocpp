@@ -181,7 +181,7 @@ void StringSetupFunc(Picoc *pc)
 {
     /* define NULL */
     if (!pc->VariableDefined( pc->TableStrRegister( "NULL")))
-        pc->VariableDefinePlatformVar( NULL, "NULL", &pc->IntType, (UnionAnyValuePointer )&String_ZeroValue, FALSE);
+        pc->VariableDefinePlatformVar( "NULL", &pc->IntType, (UnionAnyValuePointer )&String_ZeroValue, FALSE);
 }
 
 #endif /* !BUILTIN_MINI_STDLIB */

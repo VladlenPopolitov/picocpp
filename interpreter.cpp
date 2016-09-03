@@ -11,6 +11,45 @@ void Value::setVal(UnionAnyValuePointer newVal){
 	Val = newVal;
 }
 
+#ifdef PARSESTATE_CONSTR
+ParseState::ParseState() :
+pc{},                  /* the picoc instance this parser is a part of */
+Pos{},   /* the character position in the source text */
+FileName{},             /* what file we're executing (registered string) */
+Line{},             /* line number we're executing */
+CharacterPos{},     /* character/column in the line we're executing */
+Mode{},          /* whether to skip or run code */
+SearchLabel{},            /* what case label we're searching for */
+SearchGotoLabel{},/* what goto label we're searching for */
+SourceText{},     /* the entire source text */
+HashIfLevel{},      /* how many "if"s we're nested down */
+HashIfEvaluateToLevel{},    /* if we're not evaluating an if branch, what the last evaluated level was */
+DebugMode{},             /* debugging mode */
+ScopeID{}{}
+#endif
+
+short ParseState::getLine() { 
+	return Line; 
+}
+
+const unsigned char *ParseState::getPos(){
+	return Pos;
+}
+void ParseState::setPos(const unsigned char* newPos){
+	Pos = newPos;
+}
+int ParseState::getScopeID(){
+	return ScopeID;
+}
+
+void ParseState::setScopeID(int newID){
+	ScopeID = newID;
+}
+
+void ParseState::setTemp(Picoc *newPc){
+	pc = newPc;
+	setScopeID(-1);
+}
 
 TableEntry::TableEntry() : Next{},        /* next item in this hash chain */
 DeclFileName{},       /* where the variable was declared */

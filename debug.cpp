@@ -22,8 +22,9 @@ void Picoc::DebugCleanup()
 }
 
 /* search the table for a breakpoint */
-static struct TableEntry *DebugTableSearchBreakpoint(struct ParseState *Parser)
+struct TableEntry *ParseState::DebugTableSearchBreakpoint()
 {
+	struct ParseState *Parser = this;
     struct TableEntry *Entry;
     Picoc *pc = Parser->pc;
     // obsolete int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
@@ -45,10 +46,11 @@ static struct TableEntry *DebugTableSearchBreakpoint(struct ParseState *Parser)
 }
 
 /* set a breakpoint in the table */
-void DebugSetBreakpoint(struct ParseState *Parser)
+void ParseState::DebugSetBreakpoint()
 {
+	struct ParseState *Parser = this;
     //int AddAt;
-    struct TableEntry *FoundEntry = DebugTableSearchBreakpoint(Parser);
+    struct TableEntry *FoundEntry = DebugTableSearchBreakpoint();
     Picoc *pc = Parser->pc;
     
     if (FoundEntry == NULL)
@@ -72,8 +74,9 @@ void DebugSetBreakpoint(struct ParseState *Parser)
 }
 
 /* delete a breakpoint from the hash table */
-int DebugClearBreakpoint(struct ParseState *Parser)
+int ParseState::DebugClearBreakpoint()
 {
+	struct ParseState *Parser = this;
     Picoc *pc = Parser->pc;
     //obsolete int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
 	return pc->BreakpointTable.TableDeleteIf(pc, [&Parser](Picoc *pc, struct TableEntry *DeleteEntry)->bool {
@@ -96,8 +99,9 @@ int DebugClearBreakpoint(struct ParseState *Parser)
 }
 
 /* before we run a statement, check if there's anything we have to do with the debugger here */
-void DebugCheckStatement(struct ParseState *Parser)
+void ParseState::DebugCheckStatement()
 {
+	struct ParseState *Parser = this;
     int DoBreak = FALSE;
     Picoc *pc = Parser->pc;
     
@@ -110,7 +114,7 @@ void DebugCheckStatement(struct ParseState *Parser)
     }
     
     /* is this a breakpoint location? */
-    if (Parser->pc->BreakpointCount != 0 && DebugTableSearchBreakpoint(Parser) != NULL)
+    if (Parser->pc->BreakpointCount != 0 && DebugTableSearchBreakpoint() != NULL)
         DoBreak = TRUE;
     
     /* handle a break */

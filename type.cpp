@@ -9,11 +9,10 @@ static int IntAlignBytes;
 
 
 /* add a new type to the set of types we know about */
-struct ValueType *Picoc::TypeAdd( struct ParseState *Parser, struct ValueType *ParentType, enum BaseType Base, int ArraySize, 
+struct ValueType *ParseState::TypeAdd(  struct ValueType *ParentType, enum BaseType Base, int ArraySize, 
 	const char *Identifier, int Sizeof, int AlignBytes)
 {
-	Picoc *pc = this;
-	struct ValueType *NewType = static_cast<ValueType*>(VariableAlloc( Parser, sizeof(struct ValueType), LocationOnHeap));
+	struct ValueType *NewType = static_cast<ValueType*>(VariableAlloc(sizeof(struct ValueType), LocationOnHeap));
     NewType->Base = Base;
     NewType->ArraySize = ArraySize;
     NewType->Sizeof = Sizeof;
@@ -31,9 +30,9 @@ struct ValueType *Picoc::TypeAdd( struct ParseState *Parser, struct ValueType *P
 
 /* given a parent type, get a matching derived type and make one if necessary.
  * Identifier should be registered with the shared string table. */
-struct ValueType *Picoc::TypeGetMatching( struct ParseState *Parser, struct ValueType *ParentType, enum BaseType Base, int ArraySize, const char *Identifier, int AllowDuplicates)
+struct ValueType *ParseState::TypeGetMatching(struct ValueType *ParentType, enum BaseType Base, int ArraySize, const char *Identifier, int AllowDuplicates)
 {
-	Picoc *pc = this;
+	struct ParseState *Parser = this;
     int Sizeof;
     int AlignBytes;
     struct ValueType *ThisType = ParentType->DerivedTypeList;
@@ -45,7 +44,7 @@ struct ValueType *Picoc::TypeGetMatching( struct ParseState *Parser, struct Valu
         if (AllowDuplicates)
             return ThisType;
         else
-            ProgramFail(Parser, "data type '%s' is already defined", Identifier);
+            Parser->ProgramFail( "data type '%s' is already defined", Identifier);
     }
         
     switch (Base)
@@ -56,7 +55,7 @@ struct ValueType *Picoc::TypeGetMatching( struct ParseState *Parser, struct Valu
         default:            Sizeof = 0; AlignBytes = 0; break;      /* structs and unions will get bigger when we add members to them */
     }
 
-    return TypeAdd( Parser, ParentType, Base, ArraySize, Identifier, Sizeof, AlignBytes);
+    return TypeAdd( ParentType, Base, ArraySize, Identifier, Sizeof, AlignBytes);
 }
 
 /* stack space used by a value */
@@ -119,6 +118,9 @@ void Picoc::TypeInit()
     struct DoubleAlign { char x; double y; } da;
 #endif
     struct PointerAlign { char x; void *y; } pa;
+	struct ParseState temp;
+	temp.setScopeID(-1);
+	temp.pc = pc;
     
     IntAlignBytes = (char *)&ia.y - &ia.x;
     PointerAlignBytes = (char *)&pa.y - &pa.x;
@@ -142,10 +144,10 @@ void Picoc::TypeInit()
 #else
     TypeAddBaseType( &pc->TypeType, Type_Type, sizeof(struct ValueType *), PointerAlignBytes);
 #endif
-    pc->CharArrayType = TypeAdd( NULL, &pc->CharType, TypeArray, 0, pc->StrEmpty, sizeof(char), (char *)&ca.y - &ca.x);
-    pc->CharPtrType = TypeAdd( NULL, &pc->CharType, TypePointer, 0, pc->StrEmpty, sizeof(void *), PointerAlignBytes);
-    pc->CharPtrPtrType = TypeAdd( NULL, pc->CharPtrType, TypePointer, 0, pc->StrEmpty, sizeof(void *), PointerAlignBytes);
-    pc->VoidPtrType = TypeAdd( NULL, &pc->VoidType, TypePointer, 0, pc->StrEmpty, sizeof(void *), PointerAlignBytes);
+    pc->CharArrayType = temp.TypeAdd( &pc->CharType, TypeArray, 0, pc->StrEmpty, sizeof(char), (char *)&ca.y - &ca.x);
+    pc->CharPtrType = temp.TypeAdd(  &pc->CharType, TypePointer, 0, pc->StrEmpty, sizeof(void *), PointerAlignBytes);
+    pc->CharPtrPtrType = temp.TypeAdd( pc->CharPtrType, TypePointer, 0, pc->StrEmpty, sizeof(void *), PointerAlignBytes);
+    pc->VoidPtrType = temp.TypeAdd( &pc->VoidType, TypePointer, 0, pc->StrEmpty, sizeof(void *), PointerAlignBytes);
 }
 
 /* deallocate heap-allocated types */
@@ -182,8 +184,9 @@ void Picoc::TypeCleanup()
 }
 
 /* parse a struct or union declaration */
-void TypeParseStruct(struct ParseState *Parser, struct ValueType **Typ, int IsStruct)
+void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
 {
+	struct ParseState *Parser = this;
     struct Value *LexValue;
     struct ValueType *MemberType;
     const char *MemberIdentifier;
@@ -193,12 +196,12 @@ void TypeParseStruct(struct ParseState *Parser, struct ValueType **Typ, int IsSt
     int AlignBoundary;
     Picoc *pc = Parser->pc;
     
-    Token = LexGetToken(Parser, &LexValue, FALSE);
+	Token = Parser->LexGetToken(&LexValue, FALSE);
     if (Token == TokenIdentifier)
     {
-        LexGetToken(Parser, &LexValue, TRUE);
+		Parser->LexGetToken( &LexValue, TRUE);
         StructIdentifier = LexValue->Val->Identifier;
-        Token = LexGetToken(Parser, NULL, FALSE);
+		Token = Parser->LexGetToken( NULL, FALSE);
     }
     else
     {
@@ -206,36 +209,36 @@ void TypeParseStruct(struct ParseState *Parser, struct ValueType **Typ, int IsSt
 		StructIdentifier = pc->PlatformMakeTempName(TempNameBuf);
     }
 
-    *Typ = pc->TypeGetMatching( Parser, &Parser->pc->UberType, IsStruct ? TypeStruct : TypeUnion, 0, StructIdentifier, TRUE);
+    *Typ = TypeGetMatching( &Parser->pc->UberType, IsStruct ? TypeStruct : TypeUnion, 0, StructIdentifier, TRUE);
     if (Token == TokenLeftBrace && (*Typ)->Members != NULL)
-        ProgramFail(Parser, "data type '%t' is already defined", *Typ);
+        Parser->ProgramFail( "data type '%t' is already defined", *Typ);
 
-    Token = LexGetToken(Parser, NULL, FALSE);
+    Token = Parser->LexGetToken( NULL, FALSE);
     if (Token != TokenLeftBrace)
     { 
         /* use the already defined structure */
 #if 0
         if ((*Typ)->Members == NULL)
-            ProgramFail(Parser, "structure '%s' isn't defined", LexValue->Val->Identifier);
+            Parser->ProgramFail( "structure '%s' isn't defined", LexValue->Val->Identifier);
 #endif            
         return;
     }
     
     if (pc->TopStackFrame() != NULL)
-        ProgramFail(Parser, "struct/union definitions can only be globals");
+        Parser->ProgramFail( "struct/union definitions can only be globals");
         
-    LexGetToken(Parser, NULL, TRUE);    
+    Parser->LexGetToken( NULL, TRUE);    
 	(*Typ)->Members = new struct Table;// obsolete static_cast<Table*>(pc->VariableAlloc(Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
     // obsolete (*Typ)->Members->HashTable = (struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table));
 	// obsolete (*Typ)->Members->TableInitTable((struct TableEntry **)((char *)(*Typ)->Members + sizeof(struct Table)), STRUCT_TABLE_SIZE, TRUE);
 	// obsolete init in the constructor (*Typ)->Members->TableInitTable(&(*Typ)->Members->publicMap );
 
     do {
-        TypeParse(Parser, &MemberType, &MemberIdentifier, NULL);
+        Parser->TypeParse( &MemberType, &MemberIdentifier, NULL);
         if (MemberType == NULL || MemberIdentifier == NULL)
-            ProgramFail(Parser, "invalid type in struct");
+            Parser->ProgramFail( "invalid type in struct");
         
-		MemberValue = pc->VariableAllocValueAndData(Parser, sizeof(int), FALSE, NULL, LocationOnHeap);
+		MemberValue = VariableAllocValueAndData( sizeof(int), FALSE, NULL, LocationOnHeap);
         MemberValue->Typ = MemberType;
         if (IsStruct)
         { 
@@ -261,26 +264,26 @@ void TypeParseStruct(struct ParseState *Parser, struct ValueType **Typ, int IsSt
         
         /* define it */
         if (!pc->TableSet( (*Typ)->Members, MemberIdentifier, MemberValue, Parser->FileName, Parser->Line, Parser->CharacterPos))
-            ProgramFail(Parser, "member '%s' already defined", &MemberIdentifier);
+            Parser->ProgramFail( "member '%s' already defined", &MemberIdentifier);
             
-        if (LexGetToken(Parser, NULL, TRUE) != TokenSemicolon)
-            ProgramFail(Parser, "semicolon expected");
+        if (Parser->LexGetToken( NULL, TRUE) != TokenSemicolon)
+            Parser->ProgramFail( "semicolon expected");
                     
-    } while (LexGetToken(Parser, NULL, FALSE) != TokenRightBrace);
+    } while (Parser->LexGetToken( NULL, FALSE) != TokenRightBrace);
     
     /* now align the structure to the size of its largest member's alignment */
     AlignBoundary = (*Typ)->AlignBytes;
     if (((*Typ)->Sizeof & (AlignBoundary-1)) != 0)
         (*Typ)->Sizeof += AlignBoundary - ((*Typ)->Sizeof & (AlignBoundary-1));
     
-    LexGetToken(Parser, NULL, TRUE);
+    Parser->LexGetToken( NULL, TRUE);
 }
 
 /* create a system struct which has no user-visible members */
-struct ValueType *Picoc::TypeCreateOpaqueStruct( struct ParseState *Parser, const char *StructName, int Size)
+struct ValueType *ParseState::TypeCreateOpaqueStruct(const char *StructName, int Size)
 {
-	Picoc *pc = this;
-    struct ValueType *Typ = TypeGetMatching( Parser, &pc->UberType, TypeStruct, 0, StructName, FALSE);
+	struct ParseState *Parser = this;
+    struct ValueType *Typ = TypeGetMatching( &pc->UberType, TypeStruct, 0, StructName, FALSE);
     
     /* create the (empty) table */
 	Typ->Members = new struct Table; //    static_cast<Table*>(VariableAlloc(Parser, sizeof(struct Table) + STRUCT_TABLE_SIZE * sizeof(struct TableEntry), TRUE));
@@ -294,8 +297,9 @@ struct ValueType *Picoc::TypeCreateOpaqueStruct( struct ParseState *Parser, cons
 }
 
 /* parse an enum declaration */
-void TypeParseEnum(struct ParseState *Parser, struct ValueType **Typ)
+void ParseState::TypeParseEnum(struct ValueType **Typ)
 {
+	struct ParseState *Parser = this;
     struct Value *LexValue;
     struct Value InitValue;
     enum LexToken Token;
@@ -303,12 +307,12 @@ void TypeParseEnum(struct ParseState *Parser, struct ValueType **Typ)
     const char *EnumIdentifier;
     Picoc *pc = Parser->pc;
     
-    Token = LexGetToken(Parser, &LexValue, FALSE);
+    Token = Parser->LexGetToken( &LexValue, FALSE);
     if (Token == TokenIdentifier)
     {
-        LexGetToken(Parser, &LexValue, TRUE);
+        Parser->LexGetToken( &LexValue, TRUE);
         EnumIdentifier = LexValue->Val->Identifier;
-        Token = LexGetToken(Parser, NULL, FALSE);
+        Token = Parser->LexGetToken( NULL, FALSE);
     }
     else
     {
@@ -316,41 +320,41 @@ void TypeParseEnum(struct ParseState *Parser, struct ValueType **Typ)
 		EnumIdentifier = pc->PlatformMakeTempName(TempNameBuf);
     }
 
-    pc->TypeGetMatching( Parser, &pc->UberType, TypeEnum, 0, EnumIdentifier, Token != TokenLeftBrace);
+    TypeGetMatching( &pc->UberType, TypeEnum, 0, EnumIdentifier, Token != TokenLeftBrace);
     *Typ = &pc->IntType;
     if (Token != TokenLeftBrace)
     { 
         /* use the already defined enum */
         if ((*Typ)->Members == nullptr)
-            ProgramFail(Parser, "enum '%s' isn't defined", EnumIdentifier);
+            Parser->ProgramFail( "enum '%s' isn't defined", EnumIdentifier);
             
         return;
     }
     
     if (pc->TopStackFrame() != NULL)
-        ProgramFail(Parser, "enum definitions can only be globals");
+        Parser->ProgramFail( "enum definitions can only be globals");
         
-    LexGetToken(Parser, NULL, TRUE);    
+    Parser->LexGetToken( NULL, TRUE);    
     (*Typ)->Members = &pc->GlobalTable;
     memset((void *)&InitValue, '\0', sizeof(struct Value));
     InitValue.Typ = &pc->IntType;
     InitValue.Val = (UnionAnyValuePointer )&EnumValue;
     do {
-        if (LexGetToken(Parser, &LexValue, TRUE) != TokenIdentifier)
-            ProgramFail(Parser, "identifier expected");
+        if (Parser->LexGetToken( &LexValue, TRUE) != TokenIdentifier)
+            Parser->ProgramFail( "identifier expected");
         
         EnumIdentifier = LexValue->Val->Identifier;
-        if (LexGetToken(Parser, NULL, FALSE) == TokenAssign)
+        if (Parser->LexGetToken( NULL, FALSE) == TokenAssign)
         {
-            LexGetToken(Parser, NULL, TRUE);
-            EnumValue = ExpressionParseInt(Parser);
+            Parser->LexGetToken( NULL, TRUE);
+			EnumValue = Parser->ExpressionParseInt();
         }
         
-        pc->VariableDefine( Parser, EnumIdentifier, &InitValue, NULL, FALSE);
+        VariableDefine( EnumIdentifier, &InitValue, NULL, FALSE);
             
-        Token = LexGetToken(Parser, NULL, TRUE);
+        Token = Parser->LexGetToken( NULL, TRUE);
         if (Token != TokenComma && Token != TokenRightBrace)
-            ProgramFail(Parser, "comma expected");
+            Parser->ProgramFail( "comma expected");
         
         EnumValue++;
                     
@@ -358,8 +362,9 @@ void TypeParseEnum(struct ParseState *Parser, struct ValueType **Typ)
 }
 
 /* parse a type - just the basic type */
-int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsStatic)
+int ParseState::TypeParseFront(struct ValueType **Typ, int *IsStatic)
 {
+	struct ParseState *Parser = this;
     struct ParseState Before;
     struct Value *LexerValue;
     enum LexToken Token;
@@ -371,13 +376,13 @@ int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsSta
 
     /* ignore leading type qualifiers */
     ParserCopy(&Before, Parser);
-    Token = LexGetToken(Parser, &LexerValue, TRUE);
+    Token = Parser->LexGetToken( &LexerValue, TRUE);
     while (Token == TokenStaticType || Token == TokenAutoType || Token == TokenRegisterType || Token == TokenExternType)
     {
         if (Token == TokenStaticType)
             StaticQualifier = TRUE;
             
-        Token = LexGetToken(Parser, &LexerValue, TRUE);
+        Token = Parser->LexGetToken( &LexerValue, TRUE);
     }
     
     if (IsStatic != NULL)
@@ -386,7 +391,7 @@ int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsSta
     /* handle signed/unsigned with no trailing type */
     if (Token == TokenSignedType || Token == TokenUnsignedType)
     {
-        enum LexToken FollowToken = LexGetToken(Parser, &LexerValue, FALSE);
+        enum LexToken FollowToken = Parser->LexGetToken( &LexerValue, FALSE);
         Unsigned = (Token == TokenUnsignedType);
         
         if (FollowToken != TokenIntType && FollowToken != TokenLongType && FollowToken != TokenShortType && FollowToken != TokenCharType)
@@ -399,7 +404,7 @@ int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsSta
             return TRUE;
         }
         
-        Token = LexGetToken(Parser, &LexerValue, TRUE);
+        Token = Parser->LexGetToken( &LexerValue, TRUE);
     }
     
     switch (Token)
@@ -415,21 +420,21 @@ int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsSta
         
         case TokenStructType: case TokenUnionType: 
             if (*Typ != NULL)
-                ProgramFail(Parser, "bad type declaration");
+                Parser->ProgramFail( "bad type declaration");
                 
-            TypeParseStruct(Parser, Typ, Token == TokenStructType);
+            Parser->TypeParseStruct( Typ, Token == TokenStructType);
             break;
 
         case TokenEnumType:
             if (*Typ != NULL)
-                ProgramFail(Parser, "bad type declaration");
+                Parser->ProgramFail( "bad type declaration");
                 
-            TypeParseEnum(Parser, Typ);
+            TypeParseEnum( Typ);
             break;
         
         case TokenIdentifier:
             /* we already know it's a typedef-defined type because we got here */
-            pc->VariableGet( Parser, LexerValue->Val->Identifier, &VarValue);
+            VariableGet( LexerValue->Val->Identifier, &VarValue);
             *Typ = VarValue->Val->Typ;
             break;
 
@@ -440,21 +445,22 @@ int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsSta
 }
 
 /* parse a type - the part at the end after the identifier. eg. array specifications etc. */
-struct ValueType *TypeParseBack(struct ParseState *Parser, struct ValueType *FromType)
+struct ValueType *ParseState::TypeParseBack(struct ValueType *FromType)
 {
+	struct ParseState *Parser = this;
     enum LexToken Token;
     struct ParseState Before;
 
     ParserCopy(&Before, Parser);
-    Token = LexGetToken(Parser, NULL, TRUE);
+    Token = Parser->LexGetToken( NULL, TRUE);
     if (Token == TokenLeftSquareBracket)
     {
         /* add another array bound */
-        if (LexGetToken(Parser, NULL, FALSE) == TokenRightSquareBracket)
+        if (Parser->LexGetToken( NULL, FALSE) == TokenRightSquareBracket)
         {
             /* an unsized array */
-            LexGetToken(Parser, NULL, TRUE);
-			return Parser->pc->TypeGetMatching(Parser, TypeParseBack(Parser, FromType), TypeArray, 0, Parser->pc->StrEmpty, TRUE);
+            Parser->LexGetToken( NULL, TRUE);
+			return TypeGetMatching( TypeParseBack( FromType), TypeArray, 0, Parser->pc->StrEmpty, TRUE);
         }
         else
         {
@@ -462,13 +468,13 @@ struct ValueType *TypeParseBack(struct ParseState *Parser, struct ValueType *Fro
             enum RunMode OldMode = Parser->Mode;
             int ArraySize;
             Parser->Mode = RunModeRun;
-            ArraySize = ExpressionParseInt(Parser);
+            ArraySize = Parser->ExpressionParseInt();
             Parser->Mode = OldMode;
             
-            if (LexGetToken(Parser, NULL, TRUE) != TokenRightSquareBracket)
-                ProgramFail(Parser, "']' expected");
+            if (Parser->LexGetToken( NULL, TRUE) != TokenRightSquareBracket)
+                Parser->ProgramFail( "']' expected");
             
-			return Parser->pc->TypeGetMatching(Parser, TypeParseBack(Parser, FromType), TypeArray, ArraySize, Parser->pc->StrEmpty, TRUE);
+			return TypeGetMatching( TypeParseBack( FromType), TypeArray, ArraySize, Parser->pc->StrEmpty, TRUE);
         }
     }
     else
@@ -480,8 +486,9 @@ struct ValueType *TypeParseBack(struct ParseState *Parser, struct ValueType *Fro
 }
 
 /* parse a type - the part which is repeated with each identifier in a declaration list */
-void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, const char **Identifier)
+void ParseState::TypeParseIdentPart(struct ValueType *BasicTyp, struct ValueType **Typ, const char **Identifier)
 {
+	struct ParseState *Parser = this;
     struct ParseState Before;
     enum LexToken Token;
     struct Value *LexValue;
@@ -492,28 +499,28 @@ void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, s
     while (!Done)
     {
         ParserCopy(&Before, Parser);
-        Token = LexGetToken(Parser, &LexValue, TRUE);
+        Token = Parser->LexGetToken( &LexValue, TRUE);
         switch (Token)
         {
             case TokenOpenBracket:
                 if (*Typ != NULL)
-                    ProgramFail(Parser, "bad type declaration");
+                    Parser->ProgramFail( "bad type declaration");
                 
-                TypeParse(Parser, Typ, Identifier, NULL);
-                if (LexGetToken(Parser, NULL, TRUE) != TokenCloseBracket)
-                    ProgramFail(Parser, "')' expected");
+                Parser->TypeParse( Typ, Identifier, NULL);
+                if (Parser->LexGetToken( NULL, TRUE) != TokenCloseBracket)
+                    Parser->ProgramFail( "')' expected");
                 break;
                 
             case TokenAsterisk:
                 if (*Typ == NULL)
-                    ProgramFail(Parser, "bad type declaration");
+                    Parser->ProgramFail( "bad type declaration");
 
-				*Typ = Parser->pc->TypeGetMatching(Parser, *Typ, TypePointer, 0, Parser->pc->StrEmpty, TRUE);
+				*Typ = TypeGetMatching( *Typ, TypePointer, 0, Parser->pc->StrEmpty, TRUE);
                 break;
             
             case TokenIdentifier:
                 if (*Typ == NULL || *Identifier != Parser->pc->StrEmpty)
-                    ProgramFail(Parser, "bad type declaration");
+                    Parser->ProgramFail( "bad type declaration");
                 
                 *Identifier = LexValue->Val->Identifier;
                 Done = TRUE;
@@ -524,29 +531,31 @@ void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, s
     }
     
     if (*Typ == NULL)
-        ProgramFail(Parser, "bad type declaration");
+        Parser->ProgramFail( "bad type declaration");
 
     if (*Identifier != Parser->pc->StrEmpty)
     { 
         /* parse stuff after the identifier */
-        *Typ = TypeParseBack(Parser, *Typ);
+        *Typ = TypeParseBack( *Typ);
     }
 }
 
 /* parse a type - a complete declaration including identifier */
-void TypeParse(struct ParseState *Parser, struct ValueType **Typ, const char **Identifier, int *IsStatic)
+void ParseState::TypeParse(struct ValueType **Typ, const char **Identifier, int *IsStatic)
 {
+	struct ParseState *Parser = this;
     struct ValueType *BasicType;
     
-    TypeParseFront(Parser, &BasicType, IsStatic);
-    TypeParseIdentPart(Parser, BasicType, Typ, Identifier);
+    TypeParseFront( &BasicType, IsStatic);
+    TypeParseIdentPart( BasicType, Typ, Identifier);
 }
 
 /* check if a type has been fully defined - otherwise it's just a forward declaration */
-int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ)
+int ParseState::TypeIsForwardDeclared(struct ValueType *Typ)
 {
+	struct ParseState *Parser = this;
     if (Typ->Base == TypeArray)
-        return TypeIsForwardDeclared(Parser, Typ->FromType);
+        return TypeIsForwardDeclared( Typ->FromType);
     
     if ( (Typ->Base == TypeStruct || Typ->Base == TypeUnion) && Typ->Members == NULL)
         return TRUE;

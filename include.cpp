@@ -82,7 +82,10 @@ void Picoc::IncludeFile( const char *FileName)
             /* found it - protect against multiple inclusion */
             if (!VariableDefined( FileName))
             {
-                VariableDefine( NULL, FileName, NULL, &pc->VoidType, FALSE);
+				struct ParseState Parse;
+				Parse.setScopeID(-1);
+				Parse.pc = this;
+				Parse.VariableDefine(FileName, nullptr, &pc->VoidType, FALSE);
                 
                 /* run an extra startup function if there is one */
                 if (LInclude->SetupFunction != NULL)

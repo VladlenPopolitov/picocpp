@@ -12,7 +12,7 @@ void CTest (struct ParseState *Parser, struct Value *ReturnValue, struct Value *
 
 void CLineNo (struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
-    ReturnValue->Val->Integer = Parser->Line;
+    ReturnValue->Val->Integer = Parser->getLine();
 }
 
 /* list of all library functions and their prototypes */

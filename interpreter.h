@@ -67,7 +67,17 @@ typedef FILE IOFILE;
 struct Table;
 struct Picoc_Struct;
 
-typedef struct Picoc_Struct Picoc;
+using Picoc = struct Picoc_Struct;
+using AnyValue = class AnyValueClass;
+union UnionAnyValue;
+using UnionAnyValuePointer = UnionAnyValue *;
+using PointerType = void*;
+//using PointerType = VirtualPointer;
+
+/* data type */
+enum MemoryLocation {
+	LocationOnStack, LocationOnHeap, LocationVirtual
+};
 
 /* lexical tokens */
 enum LexToken
@@ -122,8 +132,13 @@ enum RunMode
 };
 
 /* parser state - has all this detail so we can parse nested files */
+
 struct ParseState
 {
+#ifdef PARSESTATE_CONSTR
+	ParseState();
+#endif
+public:
     Picoc *pc;                  /* the picoc instance this parser is a part of */
     const unsigned char *Pos;   /* the character position in the source text */
     const char *FileName;             /* what file we're executing (registered string) */
@@ -137,6 +152,140 @@ struct ParseState
     short int HashIfEvaluateToLevel;    /* if we're not evaluating an if branch, what the last evaluated level was */
     char DebugMode;             /* debugging mode */
     int ScopeID;                /* for keeping track of local variables (free them after they go out of scope) */
+public:
+
+	friend void *LexCopyTokens(struct ParseState *StartParser, struct ParseState *EndParser);
+	friend void ParserCopyPos(struct ParseState *To, struct ParseState *From);
+	friend void ParserCopy(struct ParseState *To, struct ParseState *From);
+	short getLine();
+	const unsigned char *getPos();
+	void setPos(const unsigned char* newPos);
+	int getScopeID();
+	void setScopeID(int newID);
+	void setTemp(Picoc *newPc);
+	/* lex.cpp */
+	void LexInitParser( Picoc *pc, const char *SourceText, void *TokenSource, 
+		const char *FileName, int RunIt, int SetDebugMode);
+	enum LexToken LexGetToken( struct Value **Value, int IncPos);
+	enum LexToken LexRawPeekToken();
+	void LexToEndOfLine();
+	/* parser.cpp*/
+	enum ParseResult ParseStatement( int CheckTrailingSemicolon);
+	struct Value *ParseFunctionDefinition( struct ValueType *ReturnType, const char *Identifier);
+	/* expression.cpp */
+	int ExpressionParse( struct Value **Result);
+	long ExpressionParseInt();
+	void ExpressionAssign( struct Value *DestValue, struct Value *SourceValue, int Force, const char *FuncName, int ParamNo, int AllowPointerCoercion);
+	/* type.c */
+	int TypeParseFront( struct ValueType **Typ, int *IsStatic);
+	void TypeParseIdentPart( struct ValueType *BasicTyp, struct ValueType **Typ, const char **Identifier);
+	void TypeParse( struct ValueType **Typ, const char **Identifier, int *IsStatic);
+	int TypeIsForwardDeclared( struct ValueType *Typ);
+
+
+
+	/* variable.c */
+	void VariableStackPop( struct Value *Var);
+	struct Value *VariableAllocValueFromExistingData( struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
+	struct Value *VariableAllocValueShared( struct Value *FromValue);
+	struct Value *VariableDefineButIgnoreIdentical( const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
+	void VariableRealloc( struct Value *FromValue, int NewSize);
+	void VariableStackFrameAdd( const char *FuncName, int NumParams);
+	void VariableStackFramePop();
+	PointerType VariableDereferencePointer( struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, 
+	struct ValueType **DerefType, int *DerefIsLValue);
+	int VariableScopeBegin(int* PrevScopeID);
+	void VariableScopeEnd( int ScopeID, int PrevScopeID);
+	void ParseState::ProgramFail(const char *Message, ...);
+	void ParseState::AssignFail(const char *Format, struct ValueType *Type1, struct ValueType *Type2,
+		int Num1, int Num2, const char *FuncName, int ParamNo);
+	void ParseState::DebugCheckStatement();
+
+private:
+	struct TableEntry *ParseState::DebugTableSearchBreakpoint();
+	void ParseState::DebugSetBreakpoint();
+	int ParseState::DebugClearBreakpoint();
+	void TypeParseStruct(struct ValueType **Typ, int IsStruct);
+	enum ParseResult ParseState::ParseStatementMaybeRun(int Condition, int CheckTrailingSemicolon);
+		int ParseState::ParseCountParams();
+		int ParseState::ParseArrayInitialiser(struct Value *NewVariable, int DoAssignment);
+		void ParseState::ParseDeclarationAssignment(struct Value *NewVariable, int DoAssignment);
+		int ParseState::ParseDeclaration(enum LexToken Token);
+		void ParseState::ParseMacroDefinition();
+		void ParseState::ParseFor();
+		enum RunMode ParseState::ParseBlock(int AbsorbOpenBrace, int Condition);
+		void ParseState::ParseTypedef();
+		/*expression.cpp*/
+		int ParseState::IsTypeToken(enum LexToken t, struct Value * LexValue);
+		long ParseState::ExpressionAssignInt(struct Value *DestValue, long FromInt, int After);
+		double ParseState::ExpressionAssignFP(struct Value *DestValue, double FromFP);
+		void ParseState::ExpressionStackPushValueNode(struct ExpressionStack **StackTop, struct Value *ValueLoc);
+		struct Value *ParseState::ExpressionStackPushValueByType(struct ExpressionStack **StackTop, struct ValueType *PushType);
+		// obsolete void ExpressionStackPushValue(struct ParseState *Parser, struct ExpressionStack **StackTop, struct Value *PushValue);
+		void ParseState::ExpressionStackPushValue(struct ExpressionStack **StackTop, struct Value *PushValue);
+		void ParseState::ExpressionStackPushLValue(struct ExpressionStack **StackTop, struct Value *PushValue, int Offset);
+		void ParseState::ExpressionStackPushDereference(struct ExpressionStack **StackTop, struct Value *DereferenceValue);
+		void ParseState::ExpressionPushInt(struct ExpressionStack **StackTop, long IntValue);
+#ifndef NO_FP
+		void ParseState::ExpressionPushFP(struct ExpressionStack **StackTop, double FPValue);
+#endif
+			void ParseState::ExpressionAssignToPointer(struct Value *ToValue, struct Value *FromValue,
+			const char *FuncName, int ParamNo, int AllowPointerCoercion);
+			void ParseState::ExpressionQuestionMarkOperator(struct ExpressionStack **StackTop, 
+			struct Value *BottomValue, struct Value *TopValue);
+			void ParseState::ExpressionColonOperator(struct ExpressionStack **StackTop, 
+			struct Value *BottomValue, struct Value *TopValue);
+			void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enum LexToken Op, struct Value *TopValue);
+			void ExpressionPostfixOperator(struct ExpressionStack **StackTop, enum LexToken Op, struct Value *TopValue);
+			void ParseState::ExpressionStackCollapse(struct ExpressionStack **StackTop, int Precedence, int *IgnorePrecedence);
+			void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum LexToken Op, 
+			struct Value *BottomValue, struct Value *TopValue);
+			void ParseState::ExpressionStackPushOperator(struct ExpressionStack **StackTop, enum OperatorOrder Order, 
+			enum LexToken Token, int Precedence);
+			void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, enum LexToken Token);
+			void ParseState::ExpressionParseMacroCall(struct ExpressionStack **StackTop, const char *MacroName, struct MacroDef *MDef);
+			void ParseState::ExpressionParseFunctionCall(struct ExpressionStack **StackTop, const char *FuncName, bool RunIt);
+			enum LexToken ParseState::LexGetRawToken(struct Value **Value, int IncPos);
+			void ParseState::LexHashIncPos(int IncPos);
+			void ParseState::LexHashIfdef(int IfNot);
+			void ParseState::LexHashIf();
+			void ParseState::LexHashElse();
+			void ParseState::LexHashEndif();
+			void ParseState::TypeParseEnum(struct ValueType **Typ);
+			struct ValueType *ParseState::TypeParseBack(struct ValueType *FromType);
+public:
+			void *VariableAlloc( int Size, MemoryLocation OnHeap);
+			//void VariableStackPop(struct ParseState *Parser, struct Value *Var);
+			struct Value *VariableAllocValueAndData( int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap);
+			struct Value *VariableAllocValueAndCopy( struct Value *FromValue, MemoryLocation OnHeap);
+			struct Value *VariableAllocValueFromType( struct ValueType *Typ, int IsLValue,
+			struct Value *LValueFrom, MemoryLocation OnHeap);
+			//struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
+			//struct Value *VariableAllocValueShared(struct ParseState *Parser, struct Value *FromValue);
+			struct Value *VariableDefine( const char *Ident, struct Value *InitValue, struct ValueType *Typ, int MakeWritable);
+			//struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
+			//void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);
+			void VariableGet( const char *Ident, struct Value **LVal);
+			void VariableDefinePlatformVar( const char *Ident, struct ValueType *Typ,
+				UnionAnyValuePointer FromValue, int IsWritable);
+			//void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
+			//void VariableStackFramePop(struct ParseState *Parser);
+			struct ValueType *TypeAdd( struct ValueType *ParentType, enum BaseType Base, int ArraySize,
+				const char *Identifier, int Sizeof, int AlignBytes);
+			struct ValueType *TypeGetMatching( struct ValueType *ParentType, enum BaseType Base,
+				int ArraySize, const char *Identifier, int AllowDuplicates);
+			struct ValueType *TypeCreateOpaqueStruct( const char *StructName, int Size);
+			//int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
+
+
+
+
+
+
+
+
+
+
 };
 
 /* values */
@@ -165,10 +314,6 @@ enum BaseType
     Type_Type                   /* a type for storing types */
 };
 
-/* data type */
-enum MemoryLocation {
-	LocationOnStack, LocationOnHeap, LocationVirtual
-};
 
 struct ValueType
 {
@@ -242,8 +387,6 @@ public:
 	void *ref_;
 };
 
-using PointerType = void*;
-//using PointerType = VirtualPointer;
 
 union UnionAnyValue
 {
@@ -274,8 +417,6 @@ private:
 	union AnyValueOld value_;
 };
 
-using AnyValue = class AnyValueClass;
-using UnionAnyValuePointer = UnionAnyValue *;
 
 struct Value 
 {
@@ -457,9 +598,9 @@ struct IncludeLibrary
     struct IncludeLibrary *NextLib;
 };
 
-#define FREELIST_BUCKETS 8                          /* freelists for 4, 8, 12 ... 32 byte allocs */
-#define SPLIT_MEM_THRESHOLD 16                      /* don't split memory which is close in size */
-#define BREAKPOINT_TABLE_SIZE 21
+const int FREELIST_BUCKETS = 8;                          /* freelists for 4, 8, 12 ... 32 byte allocs */
+const int SPLIT_MEM_THRESHOLD = 16;                      /* don't split memory which is close in size */
+const int BREAKPOINT_TABLE_SIZE = 21;
 
 
 /* the entire state of the picoc system */
@@ -594,6 +735,7 @@ public:
 	struct Value *TableDelete(struct Table *Tbl, const char *Key);
 	const char *TableSetIdentifier(struct Table *Tbl, const char *Ident, int IdentLen);
 	void TableStrFree();
+	struct Table * GetCurrentTable();
 	/* lex.c */
 	void LexInit();
 	void LexCleanup();
@@ -637,13 +779,7 @@ public:
 	//int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsStatic);
 	//void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, char **Identifier);
 	//void TypeParse(struct ParseState *Parser, struct ValueType **Typ, char **Identifier, int *IsStatic);
-	struct ValueType *TypeGetMatching( struct ParseState *Parser, struct ValueType *ParentType, enum BaseType Base, 
-		int ArraySize, const char *Identifier, int AllowDuplicates);
-	struct ValueType *TypeCreateOpaqueStruct( struct ParseState *Parser, const char *StructName, int Size);
-	//int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
 	//added
-	struct ValueType *TypeAdd(struct ParseState *Parser, struct ValueType *ParentType, enum BaseType Base, int ArraySize,
-		const char *Identifier, int Sizeof, int AlignBytes);
 	void TypeAddBaseType(struct ValueType *TypeNode, enum BaseType Base, int Sizeof, int AlignBytes);
 	void TypeCleanupNode(struct ValueType *Typ);
 	/* heap.c */
@@ -667,26 +803,13 @@ public:
 	void VariableCleanup();
 	void VariableFree(struct Value *Val);
 	void VariableTableCleanup( struct Table *HashTable);
-	void *VariableAlloc( struct ParseState *Parser, int Size, MemoryLocation OnHeap);
-	//void VariableStackPop(struct ParseState *Parser, struct Value *Var);
-	struct Value *VariableAllocValueAndData(struct ParseState *Parser, int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap);
-	struct Value *VariableAllocValueAndCopy(struct ParseState *Parser, struct Value *FromValue, MemoryLocation OnHeap);
-	struct Value *VariableAllocValueFromType(struct ParseState *Parser, struct ValueType *Typ, int IsLValue, 
-		struct Value *LValueFrom, MemoryLocation OnHeap);
-	//struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
-	//struct Value *VariableAllocValueShared(struct ParseState *Parser, struct Value *FromValue);
-	struct Value *VariableDefine( struct ParseState *Parser, const char *Ident, struct Value *InitValue, struct ValueType *Typ, int MakeWritable);
-	//struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
 	int VariableDefined( const char *Ident);
 	bool VariableDefinedAndOutOfScope( const char *Ident);
-	//void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);
-	void VariableGet( struct ParseState *Parser, const char *Ident, struct Value **LVal);
-	void VariableDefinePlatformVar( struct ParseState *Parser, const char *Ident, struct ValueType *Typ, 
-		UnionAnyValuePointer FromValue, int IsWritable);
-	//void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
-	//void VariableStackFramePop(struct ParseState *Parser);
 	struct Value *VariableStringLiteralGet( const char *Ident);
 	void VariableStringLiteralDefine( const char *Ident, struct Value *Val);
+	void VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
+		UnionAnyValuePointer FromValue, int IsWritable);
+
 	//void *VariableDereferencePointer(struct ParseState *Parser, struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, struct ValueType **DerefType, int *DerefIsLValue);
 	//int VariableScopeBegin(struct ParseState * Parser, int* PrevScopeID);
 	//void VariableScopeEnd(struct ParseState * Parser, int ScopeID, int PrevScopeID);
@@ -741,25 +864,25 @@ private:
 //int TableGet(struct Table *Tbl, const char *Key, struct Value **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn);
 
 /* lex.c */
-void LexInitParser(struct ParseState *Parser, Picoc *pc, const char *SourceText, void *TokenSource,const char *FileName, int RunIt, int SetDebugMode);
-enum LexToken LexGetToken(struct ParseState *Parser, struct Value **Value, int IncPos);
-enum LexToken LexRawPeekToken(struct ParseState *Parser);
-void LexToEndOfLine(struct ParseState *Parser);
-void *LexCopyTokens(struct ParseState *StartParser, struct ParseState *EndParser);
+// obsolete void LexInitParser(struct ParseState *Parser, Picoc *pc, const char *SourceText, void *TokenSource,const char *FileName, int RunIt, int SetDebugMode);
+// obsoleteenum LexToken LexGetToken(struct ParseState *Parser, struct Value **Value, int IncPos);
+// obsoleteenum LexToken LexRawPeekToken(struct ParseState *Parser);
+// obsoletevoid LexToEndOfLine(struct ParseState *Parser);
+// obsolete void *LexCopyTokens(struct ParseState *StartParser, struct ParseState *EndParser);
 
 /* parse.c */
 /* the following are defined in picoc.h:
  * void PicocParse(const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource);
  * void PicocParseInteractive(); */
-enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemicolon);
-struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueType *ReturnType, const char *Identifier);
-void ParserCopyPos(struct ParseState *To, struct ParseState *From);
-void ParserCopy(struct ParseState *To, struct ParseState *From);
+// obsolete enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemicolon);
+// obsolete struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueType *ReturnType, const char *Identifier);
+// obsolete void ParserCopyPos(struct ParseState *To, struct ParseState *From);
+// obsolete void ParserCopy(struct ParseState *To, struct ParseState *From);
 
 /* expression.c */
-int ExpressionParse(struct ParseState *Parser, struct Value **Result);
-long ExpressionParseInt(struct ParseState *Parser);
-void ExpressionAssign(struct ParseState *Parser, struct Value *DestValue, struct Value *SourceValue, int Force, const char *FuncName, int ParamNo, int AllowPointerCoercion);
+//obsolete int ExpressionParse(struct ParseState *Parser, struct Value **Result);
+// obsolete long ExpressionParseInt(struct ParseState *Parser);
+// obsolete void ExpressionAssign(struct ParseState *Parser, struct Value *DestValue, struct Value *SourceValue, int Force, const char *FuncName, int ParamNo, int AllowPointerCoercion);
 long ExpressionCoerceInteger(struct Value *Val);
 unsigned long ExpressionCoerceUnsignedInteger(struct Value *Val);
 #ifndef NO_FP
@@ -770,24 +893,24 @@ double ExpressionCoerceFP(struct Value *Val);
 int TypeSize(struct ValueType *Typ, int ArraySize, int Compact);
 int TypeSizeValue(struct Value *Val, int Compact);
 int TypeStackSizeValue(struct Value *Val);
-int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsStatic);
-void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, const char **Identifier);
-void TypeParse(struct ParseState *Parser, struct ValueType **Typ, const char **Identifier, int *IsStatic);
-int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
+// obsolete int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsStatic);
+// obsolete void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, const char **Identifier);
+// obsolete void TypeParse(struct ParseState *Parser, struct ValueType **Typ, const char **Identifier, int *IsStatic);
+// obsolete int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
 
 
 
 /* variable.c */
-void VariableStackPop(struct ParseState *Parser, struct Value *Var);
-struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
-struct Value *VariableAllocValueShared(struct ParseState *Parser, struct Value *FromValue);
-struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
-void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);
-void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
-void VariableStackFramePop(struct ParseState *Parser);
-PointerType VariableDereferencePointer(struct ParseState *Parser, struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, struct ValueType **DerefType, int *DerefIsLValue);
-int VariableScopeBegin(struct ParseState * Parser, int* PrevScopeID);
-void VariableScopeEnd(struct ParseState * Parser, int ScopeID, int PrevScopeID);
+// obsolete void VariableStackPop(struct ParseState *Parser, struct Value *Var);
+// obsolete struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
+// obsolete struct Value *VariableAllocValueShared(struct ParseState *Parser, struct Value *FromValue);
+// obsolete struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
+// obsolete void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);
+// obsolete void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
+// obsolete void VariableStackFramePop(struct ParseState *Parser);
+// obsolete PointerType VariableDereferencePointer(struct ParseState *Parser, struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, struct ValueType **DerefType, int *DerefIsLValue);
+// obsolete int VariableScopeBegin(struct ParseState * Parser, int* PrevScopeID);
+// obsolete void VariableScopeEnd(struct ParseState * Parser, int ScopeID, int PrevScopeID);
 
 /* clibrary.c */
 void PrintCh(char OutCh, IOFILE *Stream);
@@ -811,8 +934,8 @@ void PicocInitialise( int StackSize);
 void PicocCleanup();
 void PicocPlatformScanFile( const char *FileName);
 
-void ProgramFail(struct ParseState *Parser, const char *Message, ...);
-void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType *Type1, struct ValueType *Type2, int Num1, int Num2, const char *FuncName, int ParamNo);
+// obsolete void ProgramFail(struct ParseState *Parser, const char *Message, ...);
+// obsolete void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType *Type1, struct ValueType *Type2, int Num1, int Num2, const char *FuncName, int ParamNo);
 char *PlatformGetLine(char *Buf, int MaxLen, const char *Prompt);
 int PlatformGetCharacter();
 void PlatformPutc(unsigned char OutCh, union OutputStreamInfo *);
@@ -821,7 +944,7 @@ void PlatformVPrintf(IOFILE *Stream, const char *Format, va_list Args);
 
  
 /* debug.c */
-void DebugCheckStatement(struct ParseState *Parser);
+// obsolete void DebugCheckStatement(struct ParseState *Parser);
 
 
 /* stdio.c */

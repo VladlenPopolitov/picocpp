@@ -71,7 +71,7 @@ void StdlibSrand(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 
 void StdlibAbort(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ProgramFail(Parser, "abort");
+    Parser->ProgramFail( "abort");
 }
 
 void StdlibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -168,7 +168,7 @@ void StdlibSetupFunc(Picoc *pc)
 {
     /* define NULL, TRUE and FALSE */
     if (!pc->VariableDefined( pc->TableStrRegister( "NULL")))
-        pc->VariableDefinePlatformVar( NULL, "NULL", &pc->IntType, (UnionAnyValuePointer )&Stdlib_ZeroValue, FALSE);
+        pc->VariableDefinePlatformVar( "NULL", &pc->IntType, (UnionAnyValuePointer )&Stdlib_ZeroValue, FALSE);
 }
 
 #endif /* !BUILTIN_MINI_STDLIB */

@@ -62,16 +62,19 @@ void Picoc::PicocCallMain(int argc, char **argv)
 
     if (!VariableDefined( TableStrRegister( "main")))
         ProgramFailNoParser( "main() is not defined");
-        
-    VariableGet( nullptr, TableStrRegister( "main"), &FuncValue);
+	struct ParseState temp;
+	temp.setScopeID(-1);
+	temp.pc = pc;
+
+	temp.VariableGet(TableStrRegister("main"), &FuncValue);
     if (FuncValue->Typ->Base != TypeFunction)
         ProgramFailNoParser( "main is not a function - can't call it");
 
     if (FuncValue->Val->FuncDef.NumParams != 0)
     {
         /* define the arguments */
-        VariableDefinePlatformVar( NULL, "__argc", &pc->IntType, (UnionAnyValuePointer )&argc, FALSE);
-        VariableDefinePlatformVar( NULL, "__argv", pc->CharPtrPtrType, (UnionAnyValuePointer )&argv, FALSE);
+        temp.VariableDefinePlatformVar( "__argc", &pc->IntType, (UnionAnyValuePointer )&argc, FALSE);
+        temp.VariableDefinePlatformVar( "__argv", pc->CharPtrPtrType, (UnionAnyValuePointer )&argv, FALSE);
     }
 
     if (FuncValue->Val->FuncDef.ReturnType == &pc->VoidType)
@@ -83,7 +86,7 @@ void Picoc::PicocCallMain(int argc, char **argv)
     }
     else
     {
-        VariableDefinePlatformVar( NULL, "__exit_value", &pc->IntType, (UnionAnyValuePointer )&pc->PicocExitValue, TRUE);
+        temp.VariableDefinePlatformVar( "__exit_value", &pc->IntType, (UnionAnyValuePointer )&pc->PicocExitValue, TRUE);
     
         if (FuncValue->Val->FuncDef.NumParams == 0)
             PicocParse( "startup", CALL_MAIN_NO_ARGS_RETURN_INT, strlen(CALL_MAIN_NO_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
@@ -134,8 +137,9 @@ void PrintSourceTextErrorLine(IOFILE *Stream, const char *FileName, const char *
 }
 
 /* exit with a message */
-void ProgramFail(struct ParseState *Parser, const char *Message, ...)
+void ParseState::ProgramFail(const char *Message, ...)
 {
+	struct ParseState *Parser = this;
     va_list Args;
 
     PrintSourceTextErrorLine(Parser->pc->CStdOut, Parser->FileName, Parser->SourceText, Parser->Line, Parser->CharacterPos);
@@ -160,9 +164,10 @@ void Picoc::ProgramFailNoParser( const char *Message, ...)
 }
 
 /* like ProgramFail() but gives descriptive error messages for assignment */
-void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType *Type1, struct ValueType *Type2, 
+void ParseState::AssignFail(const char *Format, struct ValueType *Type1, struct ValueType *Type2,
 	int Num1, int Num2, const char *FuncName, int ParamNo)
 {
+	struct ParseState *Parser = this;
     IOFILE *Stream = Parser->pc->CStdOut;
     
     PrintSourceTextErrorLine(Parser->pc->CStdOut, Parser->FileName, Parser->SourceText, Parser->Line, Parser->CharacterPos);

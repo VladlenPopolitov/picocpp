@@ -333,7 +333,7 @@ int StdioBaseScanf(struct ParseState *Parser, FILE *Stream, char *StrIn, char *F
     void *ScanfArg[MAX_SCANF_ARGS];
     
     if (Args->NumArgs > MAX_SCANF_ARGS)
-        ProgramFail(Parser, "too many arguments to scanf() - %d max", MAX_SCANF_ARGS);
+        Parser->ProgramFail( "too many arguments to scanf() - %d max", MAX_SCANF_ARGS);
     
     for (ArgCount = 0; ArgCount < Args->NumArgs; ArgCount++)
     {
@@ -346,7 +346,7 @@ int StdioBaseScanf(struct ParseState *Parser, FILE *Stream, char *StrIn, char *F
             ScanfArg[ArgCount] = &ThisArg->Val->ArrayMem[0];
         
         else
-            ProgramFail(Parser, "non-pointer argument to scanf() - argument %d after format", ArgCount+1);
+            Parser->ProgramFail( "non-pointer argument to scanf() - argument %d after format", ArgCount+1);
     }
     
     if (Stream != NULL)
@@ -695,37 +695,39 @@ void StdioSetupFunc(Picoc *pc)
 {
 	struct ValueType *StructFileType;
 	struct ValueType *FilePtrType;
+	struct ParseState temp;
+	temp.setTemp(pc);
 
 	/* make a "struct __FILEStruct" which is the same size as a native FILE structure */
-	StructFileType = pc->TypeCreateOpaqueStruct( NULL, pc->TableStrRegister( "__FILEStruct"), sizeof(FILE));
+	StructFileType = temp.TypeCreateOpaqueStruct(  pc->TableStrRegister( "__FILEStruct"), sizeof(FILE));
 
 	/* get a FILE * type */
-	FilePtrType = pc->TypeGetMatching( NULL, StructFileType, TypePointer, 0, pc->StrEmpty, TRUE);
+	FilePtrType = temp.TypeGetMatching( StructFileType, TypePointer, 0, pc->StrEmpty, TRUE);
 
 	/* make a "struct __va_listStruct" which is the same size as our struct StdVararg */
-	pc->TypeCreateOpaqueStruct( NULL, pc->TableStrRegister( "__va_listStruct"), sizeof(FILE));
+	temp.TypeCreateOpaqueStruct( pc->TableStrRegister( "__va_listStruct"), sizeof(FILE));
 
 	/* define EOF equal to the system EOF */
-	 pc->VariableDefinePlatformVar( NULL, "EOF", &pc->IntType, (UnionAnyValuePointer )&EOFValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "SEEK_SET", &pc->IntType, (UnionAnyValuePointer )&SEEK_SETValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "SEEK_CUR", &pc->IntType, (UnionAnyValuePointer )&SEEK_CURValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "SEEK_END", &pc->IntType, (UnionAnyValuePointer )&SEEK_ENDValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "BUFSIZ", &pc->IntType, (UnionAnyValuePointer )&BUFSIZValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "FILENAME_MAX", &pc->IntType, (UnionAnyValuePointer )&FILENAME_MAXValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "_IOFBF", &pc->IntType, (UnionAnyValuePointer )&_IOFBFValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "_IOLBF", &pc->IntType, (UnionAnyValuePointer )&_IOLBFValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "_IONBF", &pc->IntType, (UnionAnyValuePointer )&_IONBFValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "L_tmpnam", &pc->IntType, (UnionAnyValuePointer )&L_tmpnamValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "GETS_MAX", &pc->IntType, (UnionAnyValuePointer )&GETS_MAXValue, FALSE);
+	 pc->VariableDefinePlatformVar( "EOF", &pc->IntType, (UnionAnyValuePointer )&EOFValue, FALSE);
+	 pc->VariableDefinePlatformVar( "SEEK_SET", &pc->IntType, (UnionAnyValuePointer )&SEEK_SETValue, FALSE);
+	 pc->VariableDefinePlatformVar( "SEEK_CUR", &pc->IntType, (UnionAnyValuePointer )&SEEK_CURValue, FALSE);
+	 pc->VariableDefinePlatformVar( "SEEK_END", &pc->IntType, (UnionAnyValuePointer )&SEEK_ENDValue, FALSE);
+	 pc->VariableDefinePlatformVar( "BUFSIZ", &pc->IntType, (UnionAnyValuePointer )&BUFSIZValue, FALSE);
+	 pc->VariableDefinePlatformVar( "FILENAME_MAX", &pc->IntType, (UnionAnyValuePointer )&FILENAME_MAXValue, FALSE);
+	 pc->VariableDefinePlatformVar( "_IOFBF", &pc->IntType, (UnionAnyValuePointer )&_IOFBFValue, FALSE);
+	 pc->VariableDefinePlatformVar( "_IOLBF", &pc->IntType, (UnionAnyValuePointer )&_IOLBFValue, FALSE);
+	 pc->VariableDefinePlatformVar( "_IONBF", &pc->IntType, (UnionAnyValuePointer )&_IONBFValue, FALSE);
+	 pc->VariableDefinePlatformVar( "L_tmpnam", &pc->IntType, (UnionAnyValuePointer )&L_tmpnamValue, FALSE);
+	 pc->VariableDefinePlatformVar( "GETS_MAX", &pc->IntType, (UnionAnyValuePointer )&GETS_MAXValue, FALSE);
 
 	/* define stdin, stdout and stderr */
-	 pc->VariableDefinePlatformVar( NULL, "stdin", FilePtrType, (UnionAnyValuePointer )&stdinValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "stdout", FilePtrType, (UnionAnyValuePointer )&stdoutValue, FALSE);
-	 pc->VariableDefinePlatformVar( NULL, "stderr", FilePtrType, (UnionAnyValuePointer )&stderrValue, FALSE);
+	 pc->VariableDefinePlatformVar( "stdin", FilePtrType, (UnionAnyValuePointer )&stdinValue, FALSE);
+	 pc->VariableDefinePlatformVar( "stdout", FilePtrType, (UnionAnyValuePointer )&stdoutValue, FALSE);
+	 pc->VariableDefinePlatformVar( "stderr", FilePtrType, (UnionAnyValuePointer )&stderrValue, FALSE);
 
 	/* define NULL, TRUE and FALSE */
 	if (!pc->VariableDefined( pc->TableStrRegister( "NULL")))
-		 pc->VariableDefinePlatformVar( NULL, "NULL", &pc->IntType, (UnionAnyValuePointer )&Stdio_ZeroValue, FALSE);
+		 pc->VariableDefinePlatformVar( "NULL", &pc->IntType, (UnionAnyValuePointer )&Stdio_ZeroValue, FALSE);
 }
 
 
