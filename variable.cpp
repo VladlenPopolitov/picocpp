@@ -82,7 +82,7 @@ void Picoc::VariableCleanup()
 void *ParseState::VariableAlloc( int Size, MemoryLocation OnHeap)
 {
 	struct ParseState *Parser = this;
-	Picoc *pc = Parser->pc;
+	/*obsolete Picoc *pc = Parser->pc; */
     void *NewValue;
     
     if (OnHeap==LocationOnHeap)
@@ -108,7 +108,7 @@ void *ParseState::VariableAlloc( int Size, MemoryLocation OnHeap)
 struct Value *ParseState::VariableAllocValueAndData(int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap)
 {
 	struct ParseState *Parser = this;
-	Picoc *pc = Parser->pc;
+	/*obsolete Picoc *pc = Parser->pc; */
     struct Value *NewValue = static_cast<struct Value*>(VariableAlloc(  MEM_ALIGN(sizeof(struct Value)) + DataSize, OnHeap));
     NewValue->setVal ((UnionAnyValuePointer )((char *)NewValue + MEM_ALIGN(sizeof(struct Value)))); // obsolete here - must be changed to virtual memory
 //	NewValue->setVal((UnionAnyValuePointer)(static_cast<char *>(VariableAlloc(Parser,  DataSize, LocationVirtual)))); // obsolete here - must be changed to virtual memory
@@ -129,8 +129,8 @@ struct Value *ParseState::VariableAllocValueAndData(int DataSize, int IsLValue, 
 struct Value *ParseState::VariableAllocValueFromType(struct ValueType *Typ, int IsLValue,
 struct Value *LValueFrom, MemoryLocation OnHeap)
 {
-	struct ParseState *Parser = this;
-	Picoc *pc = Parser->pc;
+	/*obsolete struct ParseState *Parser = this; */
+	/*obsolete Picoc *pc = Parser->pc; */
     int Size = TypeSize(Typ, Typ->ArraySize, FALSE);
     struct Value *NewValue = VariableAllocValueAndData( Size, IsLValue, LValueFrom, OnHeap);
     assert(Size >= 0 || Typ == &pc->VoidType);
@@ -143,11 +143,11 @@ struct Value *LValueFrom, MemoryLocation OnHeap)
 struct Value *ParseState::VariableAllocValueAndCopy(struct Value *FromValue, MemoryLocation OnHeap)
 {
 	struct ParseState *Parser = this;
-	Picoc *pc = Parser->pc;
+	/*obsolete Picoc *pc = Parser->pc;  */
     struct ValueType *DType = FromValue->Typ;
     struct Value *NewValue;
     char TmpBuf[MAX_TMP_COPY_BUF];
-    int CopySize = TypeSizeValue(FromValue, TRUE);
+	int CopySize = FromValue->TypeSizeValue(TRUE);
 
     assert(CopySize <= MAX_TMP_COPY_BUF);
     memcpy((void *)&TmpBuf[0], (void *)FromValue->getVal(), CopySize); // obsolete value
@@ -222,7 +222,7 @@ int ParseState::VariableScopeBegin(int* OldScopeID)
 #ifdef VAR_SCOPE_DEBUG
 					if (!FirstPrint) { PRINT_SOURCE_POS; }
 					FirstPrint = 1;
-					printf(">>> back into scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.Val->ScopeID, Entry->p.v.Val->Val->Integer);
+					printf(">>> back into scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.Val->ScopeID, Entry->p.v.Val->ValInteger());
 #endif
 				}
 	//		}
@@ -255,7 +255,7 @@ void ParseState::VariableScopeEnd(int ScopeID, int PrevScopeID)
 #ifdef VAR_SCOPE_DEBUG
 			if (!FirstPrint) { PRINT_SOURCE_POS; }
 			FirstPrint = 1;
-			printf(">>> out of scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.Val->ScopeID, Entry->p.v.Val->Val->Integer);
+			printf(">>> out of scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.Val->ScopeID, Entry->p.v.Val->ValInteger());
 #endif
 			Entry->p.v.Val->OutOfScope = TRUE;
 			Entry->p.v.Key = (char*)((intptr_t)Entry->p.v.Key | 1); /* alter the key so it won't be found by normal searches */
@@ -319,7 +319,7 @@ struct Value *ParseState::VariableDefine(const char *Ident, struct Value *InitVa
 struct Value *ParseState::VariableDefineButIgnoreIdentical( const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit)
 {
 	struct ParseState *Parser = this;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
     struct Value *ExistingValue;
     const char *DeclFileName;
     int DeclLine;
@@ -417,7 +417,7 @@ void ParseState::VariableDefinePlatformVar(const char *Ident, struct ValueType *
 	UnionAnyValuePointer FromValue, int IsWritable)
 {
 	struct ParseState *Parser = this;
-	Picoc *pc = Parser->pc;
+	/*obsolete Picoc *pc = Parser->pc; */
 	struct ParseState tempParserForPlatformVar;
 	tempParserForPlatformVar.setScopeID(-1);
 	tempParserForPlatformVar.pc = pc;
@@ -451,7 +451,7 @@ void ParseState::VariableStackPop(struct Value *Var)
 		Success = Parser->pc->HeapPopStack( Var, sizeof(struct Value));                       /* free from heap */
     }
     else if (Var->ValOnStack)
-		Success = Parser->pc->HeapPopStack(Var, sizeof(struct Value) + TypeSizeValue(Var, FALSE));  /* free from stack */
+		Success = Parser->pc->HeapPopStack(Var, sizeof(struct Value) + Var->TypeSizeValue(FALSE));  /* free from stack */
     else
 		Success = Parser->pc->HeapPopStack( Var, sizeof(struct Value));                       /* value isn't our problem */
         

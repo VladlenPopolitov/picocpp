@@ -15,7 +15,7 @@
 //for std::shared_ptr
 #include <memory>
 
-const size_t  picocStackSize = (128 * 1024);
+const size_t  picocStackSize = (1128 * 1024);
 
 /* handy definitions */
 #ifndef TRUE
@@ -355,14 +355,14 @@ struct MacroDef
 
 union AnyValueOld
 {
-	char Character;
-	short ShortInteger;
-	int Integer;
-	long LongInteger;
-	unsigned short UnsignedShortInteger;
-	unsigned int UnsignedInteger;
-	unsigned long UnsignedLongInteger;
-	unsigned char UnsignedCharacter;
+	char Character();
+	short ShortInteger();
+	int Integer();
+	long LongInteger();
+	unsigned short UnsignedShortInteger();
+	unsigned int UnsignedInteger();
+	unsigned long UnsignedLongInteger();
+	unsigned char UnsignedCharacter();
 	char *Identifier;
 	char ArrayMem[2];               /* placeholder for where the data starts, doesn't point to it */
 	struct ValueType *Typ;
@@ -391,16 +391,16 @@ public:
 union UnionAnyValue
 {
 public:
-    char Character;
-    short ShortInteger;
-    int Integer;
-    long LongInteger;
-    unsigned short UnsignedShortInteger;
-    unsigned int UnsignedInteger;
-    unsigned long UnsignedLongInteger;
-    unsigned char UnsignedCharacter;
+    char &Character();
+    short &ShortInteger();
+    int &Integer();
+    long &LongInteger();
+    unsigned short &UnsignedShortInteger();
+    unsigned int &UnsignedInteger();
+    unsigned long &UnsignedLongInteger();
+    unsigned char &UnsignedCharacter();
     const char *Identifier;
-    char ArrayMem[2];               /* placeholder for where the data starts, doesn't point to it */
+	char *AddressOfData();
     struct ValueType *Typ;
     struct FuncDef FuncDef;
     struct MacroDef MacroDef;
@@ -415,6 +415,15 @@ public:
 	int *PointerInt;
 private:
 	union AnyValueOld value_;
+	char character_;
+	short shortInteger_;
+	int integer_;
+	long longInteger_;
+	unsigned short unsignedShortInteger_;
+	unsigned int unsignedInteger_;
+	unsigned long unsignedLongInteger_;
+	unsigned char unsignedCharacter_;
+	char arrayMem[2];               /* placeholder for where the data starts, doesn't point to it */
 };
 
 
@@ -422,6 +431,14 @@ struct Value
 {
 public:
 	Value();
+	char &ValCharacter();
+	short &ValShortInteger();
+	int &ValInteger();
+	long &ValLongInteger();
+	unsigned short &ValUnsignedShortInteger();
+	unsigned int &ValUnsignedInteger();
+	unsigned long &ValUnsignedLongInteger();
+	unsigned char &ValUnsignedCharacter();
     struct ValueType *Typ;          /* the type of this value */
     struct Value *LValueFrom;       /* if an LValue, this is a Value our LValue is contained within (or NULL) */
     char ValOnHeap;                 /* this Value is on the heap */
@@ -434,8 +451,28 @@ public:
 	void setVal(UnionAnyValuePointer newVal);
 //private:
 	UnionAnyValuePointer Val;            /* pointer to the AnyValue which holds the actual content */
+	/* expression.c */
+	long ExpressionCoerceInteger();
+	unsigned long ExpressionCoerceUnsignedInteger();
+#ifndef NO_FP
+	double ExpressionCoerceFP();
+#endif
+
+	/* type.c */
+	int TypeSizeValue(int Compact);
+	int TypeStackSizeValue();
 
 };
+//obsolete long ExpressionCoerceInteger(struct Value *Val);
+//obsolete unsigned long ExpressionCoerceUnsignedInteger(struct Value *Val);
+//obsolete #ifndef NO_FP
+//obsolete double ExpressionCoerceFP(struct Value *Val);
+//obsolete #endif
+
+//obsolete /* type.c */
+//obsolete int TypeSizeValue(struct Value *Val, int Compact);
+//obsolete int TypeStackSizeValue(struct Value *Val);
+
 
 /* hash table data structure */
 struct TableEntry 
@@ -859,58 +896,8 @@ private:
 };
 
 
-/* table.c */
-//void TableInitTable(struct Table *Tbl, struct TableEntry **HashTable, int Size, int OnHeap);
-//int TableGet(struct Table *Tbl, const char *Key, struct Value **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn);
-
-/* lex.c */
-// obsolete void LexInitParser(struct ParseState *Parser, Picoc *pc, const char *SourceText, void *TokenSource,const char *FileName, int RunIt, int SetDebugMode);
-// obsoleteenum LexToken LexGetToken(struct ParseState *Parser, struct Value **Value, int IncPos);
-// obsoleteenum LexToken LexRawPeekToken(struct ParseState *Parser);
-// obsoletevoid LexToEndOfLine(struct ParseState *Parser);
-// obsolete void *LexCopyTokens(struct ParseState *StartParser, struct ParseState *EndParser);
-
-/* parse.c */
-/* the following are defined in picoc.h:
- * void PicocParse(const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource);
- * void PicocParseInteractive(); */
-// obsolete enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemicolon);
-// obsolete struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueType *ReturnType, const char *Identifier);
-// obsolete void ParserCopyPos(struct ParseState *To, struct ParseState *From);
-// obsolete void ParserCopy(struct ParseState *To, struct ParseState *From);
-
-/* expression.c */
-//obsolete int ExpressionParse(struct ParseState *Parser, struct Value **Result);
-// obsolete long ExpressionParseInt(struct ParseState *Parser);
-// obsolete void ExpressionAssign(struct ParseState *Parser, struct Value *DestValue, struct Value *SourceValue, int Force, const char *FuncName, int ParamNo, int AllowPointerCoercion);
-long ExpressionCoerceInteger(struct Value *Val);
-unsigned long ExpressionCoerceUnsignedInteger(struct Value *Val);
-#ifndef NO_FP
-double ExpressionCoerceFP(struct Value *Val);
-#endif
-
 /* type.c */
 int TypeSize(struct ValueType *Typ, int ArraySize, int Compact);
-int TypeSizeValue(struct Value *Val, int Compact);
-int TypeStackSizeValue(struct Value *Val);
-// obsolete int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsStatic);
-// obsolete void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, const char **Identifier);
-// obsolete void TypeParse(struct ParseState *Parser, struct ValueType **Typ, const char **Identifier, int *IsStatic);
-// obsolete int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
-
-
-
-/* variable.c */
-// obsolete void VariableStackPop(struct ParseState *Parser, struct Value *Var);
-// obsolete struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
-// obsolete struct Value *VariableAllocValueShared(struct ParseState *Parser, struct Value *FromValue);
-// obsolete struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
-// obsolete void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);
-// obsolete void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
-// obsolete void VariableStackFramePop(struct ParseState *Parser);
-// obsolete PointerType VariableDereferencePointer(struct ParseState *Parser, struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, struct ValueType **DerefType, int *DerefIsLValue);
-// obsolete int VariableScopeBegin(struct ParseState * Parser, int* PrevScopeID);
-// obsolete void VariableScopeEnd(struct ParseState * Parser, int ScopeID, int PrevScopeID);
 
 /* clibrary.c */
 void PrintCh(char OutCh, IOFILE *Stream);
@@ -922,30 +909,15 @@ void PrintType(struct ValueType *Typ, IOFILE *Stream);
 void LibPrintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs);
 
 /* platform.c */
-/* the following are defined in picoc.h:
- * void PicocCallMain(int argc, char **argv);
- * int PicocPlatformSetExitPoint();
- * void PicocInitialise(int StackSize);
- * void PicocPlatformScanFile(const char *FileName);
- * extern int PicocExitValue; */
-/* platform.c */
 void PicocCallMain( int argc, char **argv);
 void PicocInitialise( int StackSize);
 void PicocCleanup();
 void PicocPlatformScanFile( const char *FileName);
-
-// obsolete void ProgramFail(struct ParseState *Parser, const char *Message, ...);
-// obsolete void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType *Type1, struct ValueType *Type2, int Num1, int Num2, const char *FuncName, int ParamNo);
 char *PlatformGetLine(char *Buf, int MaxLen, const char *Prompt);
 int PlatformGetCharacter();
 void PlatformPutc(unsigned char OutCh, union OutputStreamInfo *);
 void PlatformPrintf(IOFILE *Stream, const char *Format, ...);
 void PlatformVPrintf(IOFILE *Stream, const char *Format, va_list Args);
-
- 
-/* debug.c */
-// obsolete void DebugCheckStatement(struct ParseState *Parser);
-
 
 /* stdio.c */
 extern const char StdioDefs[];

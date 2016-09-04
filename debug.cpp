@@ -26,7 +26,7 @@ struct TableEntry *ParseState::DebugTableSearchBreakpoint()
 {
 	struct ParseState *Parser = this;
     struct TableEntry *Entry;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
     // obsolete int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
 	Entry = pc->BreakpointTable.TableFindEntryIf(pc, [Parser](Picoc *pc, struct TableEntry *Entry)-> bool {
 		//obsolete for (Entry = pc->BreakpointHashTable[HashValue]; Entry != NULL; Entry = Entry->Next)
@@ -51,7 +51,7 @@ void ParseState::DebugSetBreakpoint()
 	struct ParseState *Parser = this;
     //int AddAt;
     struct TableEntry *FoundEntry = DebugTableSearchBreakpoint();
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
     
     if (FoundEntry == NULL)
     {   
@@ -77,7 +77,7 @@ void ParseState::DebugSetBreakpoint()
 int ParseState::DebugClearBreakpoint()
 {
 	struct ParseState *Parser = this;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
     //obsolete int HashValue = BREAKPOINT_HASH(Parser) % pc->BreakpointTable.Size;
 	return pc->BreakpointTable.TableDeleteIf(pc, [&Parser](Picoc *pc, struct TableEntry *DeleteEntry)->bool {
 		//obsolete for (EntryPtr = &pc->BreakpointHashTable[HashValue]; *EntryPtr != NULL; EntryPtr = &(*EntryPtr)->Next)
@@ -103,7 +103,7 @@ void ParseState::DebugCheckStatement()
 {
 	struct ParseState *Parser = this;
     int DoBreak = FALSE;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
     
     /* has the user manually pressed break? */
     if (pc->DebugManualBreak)

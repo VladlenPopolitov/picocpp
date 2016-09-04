@@ -59,17 +59,19 @@ struct ValueType *ParseState::TypeGetMatching(struct ValueType *ParentType, enum
 }
 
 /* stack space used by a value */
-int TypeStackSizeValue(struct Value *Val)
+int Value::TypeStackSizeValue()
 {
+	struct Value *Val = this;
     if (Val != NULL && Val->ValOnStack)
-        return TypeSizeValue(Val, FALSE);
+        return TypeSizeValue( FALSE);
     else
         return 0;
 }
 
 /* memory used by a value */
-int TypeSizeValue(struct Value *Val, int Compact)
+int Value::TypeSizeValue(int Compact)
 {
+	struct Value *Val = this;
     if (IS_INTEGER_NUMERIC(Val) && !Compact)
         return sizeof(ALIGN_TYPE);     /* allow some extra room for type extension */
     else if (Val->Typ->Base != TypeArray)
@@ -194,7 +196,7 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
     struct Value *MemberValue;
     enum LexToken Token;
     int AlignBoundary;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
     
 	Token = Parser->LexGetToken(&LexValue, FALSE);
     if (Token == TokenIdentifier)
@@ -247,15 +249,15 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
             if (((*Typ)->Sizeof & (AlignBoundary-1)) != 0)
                 (*Typ)->Sizeof += AlignBoundary - ((*Typ)->Sizeof & (AlignBoundary-1));
                 
-            MemberValue->Val->Integer = (*Typ)->Sizeof;
-            (*Typ)->Sizeof += TypeSizeValue(MemberValue, TRUE);
+            MemberValue->ValInteger() = (*Typ)->Sizeof;
+			(*Typ)->Sizeof += MemberValue->TypeSizeValue(TRUE);
         }
         else
         { 
             /* union members always start at 0, make sure it's big enough to hold the largest member */
-            MemberValue->Val->Integer = 0;
+            MemberValue->ValInteger() = 0;
             if (MemberValue->Typ->Sizeof > (*Typ)->Sizeof)
-                (*Typ)->Sizeof = TypeSizeValue(MemberValue, TRUE);
+				(*Typ)->Sizeof = MemberValue->TypeSizeValue(TRUE);
         }
 
         /* make sure to align to the size of the largest member's alignment */
@@ -305,7 +307,7 @@ void ParseState::TypeParseEnum(struct ValueType **Typ)
     enum LexToken Token;
     int EnumValue = 0;
     const char *EnumIdentifier;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
     
     Token = Parser->LexGetToken( &LexValue, FALSE);
     if (Token == TokenIdentifier)
@@ -371,7 +373,7 @@ int ParseState::TypeParseFront(struct ValueType **Typ, int *IsStatic)
     int Unsigned = FALSE;
     struct Value *VarValue;
     int StaticQualifier = FALSE;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
     *Typ = NULL;
 
     /* ignore leading type qualifiers */

@@ -14,12 +14,12 @@ void StdlibAtof(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 
 void StdlibAtoi(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Integer = atoi(Param[0]->Val->PointerChar);
+	ReturnValue->ValInteger() = atoi(Param[0]->Val->PointerChar);
 }
 
 void StdlibAtol(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Integer = atol(Param[0]->Val->PointerChar);
+	ReturnValue->ValInteger() = atol(Param[0]->Val->PointerChar);
 }
 
 #ifndef NO_FP
@@ -31,27 +31,27 @@ void StdlibStrtod(struct ParseState *Parser, struct Value *ReturnValue, struct V
 
 void StdlibStrtol(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = strtol(Param[0]->Val->PointerChar, Param[1]->Val->PointerCharChar, Param[2]->Val->Integer);
+    ReturnValue->ValInteger() = strtol(Param[0]->Val->PointerChar, Param[1]->Val->PointerCharChar, Param[2]->ValInteger());
 }
 
 void StdlibStrtoul(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = strtoul(Param[0]->Val->PointerChar, Param[1]->Val->PointerCharChar, Param[2]->Val->Integer);
+    ReturnValue->ValInteger() = strtoul(Param[0]->Val->PointerChar, Param[1]->Val->PointerCharChar, Param[2]->ValInteger());
 }
 
 void StdlibMalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = malloc(Param[0]->Val->Integer);
+    ReturnValue->Val->Pointer = malloc(Param[0]->ValInteger());
 }
 
 void StdlibCalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = calloc(Param[0]->Val->Integer, Param[1]->Val->Integer);
+    ReturnValue->Val->Pointer = calloc(Param[0]->ValInteger(), Param[1]->ValInteger());
 }
 
 void StdlibRealloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = realloc(Param[0]->Val->Pointer, Param[1]->Val->Integer);
+    ReturnValue->Val->Pointer = realloc(Param[0]->Val->Pointer, Param[1]->ValInteger());
 }
 
 void StdlibFree(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -61,12 +61,12 @@ void StdlibFree(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 
 void StdlibRand(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = rand();
+    ReturnValue->ValInteger() = rand();
 }
 
 void StdlibSrand(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    srand(Param[0]->Val->Integer);
+    srand(Param[0]->ValInteger());
 }
 
 void StdlibAbort(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -76,7 +76,7 @@ void StdlibAbort(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 
 void StdlibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	Parser->pc->PlatformExit(Param[0]->Val->Integer,"stdlib exit() is called");
+	Parser->pc->PlatformExit(Param[0]->ValInteger(),"stdlib exit() is called");
 }
 
 void StdlibGetenv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -86,35 +86,35 @@ void StdlibGetenv(struct ParseState *Parser, struct Value *ReturnValue, struct V
 
 void StdlibSystem(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = system(Param[0]->Val->PointerChar);
+    ReturnValue->ValInteger() = system(Param[0]->Val->PointerChar);
 }
 
 #if 0
 void StdlibBsearch(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = bsearch(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->Val->Integer, Param[3]->Val->Integer, (int (*)())Param[4]->Val->Pointer);
+    ReturnValue->Val->Pointer = bsearch(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->ValInteger(), Param[3]->ValInteger(), (int (*)())Param[4]->Val->Pointer);
 }
 #endif
 
 void StdlibAbs(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = abs(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = abs(Param[0]->ValInteger());
 }
 
 void StdlibLabs(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = labs(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = labs(Param[0]->ValInteger());
 }
 
 #if 0
 void StdlibDiv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = div(Param[0]->Val->Integer, Param[1]->Val->Integer);
+    ReturnValue->ValInteger() = div(Param[0]->ValInteger(), Param[1]->ValInteger());
 }
 
 void StdlibLdiv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = ldiv(Param[0]->Val->Integer, Param[1]->Val->Integer);
+    ReturnValue->ValInteger() = ldiv(Param[0]->ValInteger(), Param[1]->ValInteger());
 }
 #endif
 

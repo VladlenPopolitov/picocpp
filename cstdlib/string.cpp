@@ -12,17 +12,17 @@ void StringStrcpy(struct ParseState *Parser, struct Value *ReturnValue, struct V
 
 void StringStrncpy(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Pointer = strncpy(static_cast<char*>(Param[0]->Val->Pointer), static_cast<char*>(Param[1]->Val->Pointer), Param[2]->Val->Integer);
+	ReturnValue->Val->Pointer = strncpy(static_cast<char*>(Param[0]->Val->Pointer), static_cast<char*>(Param[1]->Val->Pointer), Param[2]->ValInteger());
 }
 
 void StringStrcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Integer = strcmp(static_cast<char*>(Param[0]->Val->Pointer), static_cast<char*>(Param[1]->Val->Pointer));
+	ReturnValue->ValInteger() = strcmp(static_cast<char*>(Param[0]->Val->Pointer), static_cast<char*>(Param[1]->Val->Pointer));
 }
 
 void StringStrncmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Integer = strncmp(static_cast<char*>(Param[0]->Val->Pointer), static_cast<char*>(Param[1]->Val->Pointer), Param[2]->Val->Integer);
+	ReturnValue->ValInteger() = strncmp(static_cast<char*>(Param[0]->Val->Pointer), static_cast<char*>(Param[1]->Val->Pointer), Param[2]->ValInteger());
 }
 
 void StringStrcat(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -33,79 +33,79 @@ void StringStrcat(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StringStrncat(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	ReturnValue->Val->Pointer = strncat(static_cast<char*>(Param[0]->Val->Pointer), static_cast<char*>(Param[1]->Val->Pointer),
-		Param[2]->Val->Integer);
+		Param[2]->ValInteger());
 }
 
 #ifndef WIN32
 void StringIndex(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = index(Param[0]->Val->Pointer, Param[1]->Val->Integer);
+    ReturnValue->Val->Pointer = index(Param[0]->Val->Pointer, Param[1]->ValInteger());
 }
 
 void StringRindex(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = rindex(Param[0]->Val->Pointer, Param[1]->Val->Integer);
+    ReturnValue->Val->Pointer = rindex(Param[0]->Val->Pointer, Param[1]->ValInteger());
 }
 #endif
 
 void StringStrlen(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Integer = strlen(static_cast<char*>(Param[0]->Val->Pointer));
+	ReturnValue->ValInteger() = strlen(static_cast<char*>(Param[0]->Val->Pointer));
 }
 
 void StringMemset(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = memset(Param[0]->Val->Pointer, Param[1]->Val->Integer, Param[2]->Val->Integer);
+    ReturnValue->Val->Pointer = memset(Param[0]->Val->Pointer, Param[1]->ValInteger(), Param[2]->ValInteger());
 }
 
 void StringMemcpy(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = memcpy(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->Val->Integer);
+    ReturnValue->Val->Pointer = memcpy(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->ValInteger());
 }
 
 void StringMemcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = memcmp(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->Val->Integer);
+    ReturnValue->ValInteger() = memcmp(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->ValInteger());
 }
 
 void StringMemmove(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = memmove(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->Val->Integer);
+    ReturnValue->Val->Pointer = memmove(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->ValInteger());
 }
 
 void StringMemchr(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = memchr(Param[0]->Val->Pointer, Param[1]->Val->Integer, Param[2]->Val->Integer);
+    ReturnValue->Val->Pointer = memchr(Param[0]->Val->Pointer, Param[1]->ValInteger(), Param[2]->ValInteger());
 }
 
 void StringStrchr(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Pointer = strchr(static_cast<char*>(Param[0]->Val->Pointer), Param[1]->Val->Integer);
+	ReturnValue->Val->Pointer = strchr(static_cast<char*>(Param[0]->Val->Pointer), Param[1]->ValInteger());
 }
 
 void StringStrrchr(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Pointer = strrchr(static_cast<char*>(Param[0]->Val->Pointer), Param[1]->Val->Integer);
+	ReturnValue->Val->Pointer = strrchr(static_cast<char*>(Param[0]->Val->Pointer), Param[1]->ValInteger());
 }
 
 void StringStrcoll(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Integer = strcoll(static_cast<char*>(Param[0]->Val->Pointer), static_cast<char*>(Param[1]->Val->Pointer));
+	ReturnValue->ValInteger() = strcoll(static_cast<char*>(Param[0]->Val->Pointer), static_cast<char*>(Param[1]->Val->Pointer));
 }
 
 void StringStrerror(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = strerror(Param[0]->Val->Integer);
+    ReturnValue->Val->Pointer = strerror(Param[0]->ValInteger());
 }
 
 void StringStrspn(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Integer = strspn(Param[0]->Val->PointerChar, Param[1]->Val->PointerChar);
+	ReturnValue->ValInteger() = strspn(Param[0]->Val->PointerChar, Param[1]->Val->PointerChar);
 }
 
 void StringStrcspn(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->Val->Integer = strcspn(Param[0]->Val->PointerChar, Param[1]->Val->PointerChar);
+	ReturnValue->ValInteger() = strcspn(Param[0]->Val->PointerChar, Param[1]->Val->PointerChar);
 }
 
 void StringStrpbrk(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -125,7 +125,7 @@ void StringStrtok(struct ParseState *Parser, struct Value *ReturnValue, struct V
 
 void StringStrxfrm(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = strxfrm(Param[0]->Val->PointerChar, Param[1]->Val->PointerChar, Param[2]->Val->Integer);
+    ReturnValue->ValInteger() = strxfrm(Param[0]->Val->PointerChar, Param[1]->Val->PointerChar, Param[2]->ValInteger());
 }
 
 #ifndef WIN32

@@ -1,1 +1,1 @@
-for %%a in (02*.c) do ..\msvc\picoc\Debug\picoc.exe %%a 
+for %%a in (59*.c) do ..\msvc\picoc\Debug\picoc.exe %%a 

@@ -70,7 +70,7 @@ struct Value *ParseState::ParseFunctionDefinition(struct ValueType *ReturnType, 
     struct Value *OldFuncValue;
     struct ParseState FuncBody;
     int ParamCount = 0;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
 
     if (pc->TopStackFrame() != nullptr)
         Parser->ProgramFail( "nested function definitions are not allowed");
@@ -196,7 +196,7 @@ int ParseState::ParseArrayInitialiser(struct Value *NewVariable, int DoAssignmen
         if (NewVariable->Typ->ArraySize == 0)
         {
 			NewVariable->Typ = TypeGetMatching( NewVariable->Typ->FromType, NewVariable->Typ->Base, NumElements, NewVariable->Typ->Identifier, TRUE);
-            Parser->VariableRealloc( NewVariable, TypeSizeValue(NewVariable, FALSE));
+			Parser->VariableRealloc(NewVariable, NewVariable->TypeSizeValue(FALSE));
         }
         #ifdef DEBUG_ARRAY_INITIALIZER
         PRINT_SOURCE_POS;
@@ -216,7 +216,8 @@ int ParseState::ParseArrayInitialiser(struct Value *NewVariable, int DoAssignmen
             if (Parser->Mode == RunModeRun && DoAssignment)
             {
                 SubArraySize = TypeSize(NewVariable->Typ->FromType, NewVariable->Typ->FromType->ArraySize, TRUE);
-                SubArray = Parser->VariableAllocValueFromExistingData( NewVariable->Typ->FromType, (UnionAnyValuePointer )(&NewVariable->Val->ArrayMem[0] + SubArraySize * ArrayIndex), TRUE, NewVariable);
+                SubArray = Parser->VariableAllocValueFromExistingData( NewVariable->Typ->FromType, 
+					(UnionAnyValuePointer )(NewVariable->Val->AddressOfData() + SubArraySize * ArrayIndex), TRUE, NewVariable);
                 #ifdef DEBUG_ARRAY_INITIALIZER
                 int FullArraySize = TypeSize(NewVariable->Typ, NewVariable->Typ->ArraySize, TRUE);
                 PRINT_SOURCE_POS;
@@ -256,7 +257,9 @@ int ParseState::ParseArrayInitialiser(struct Value *NewVariable, int DoAssignmen
                 #endif
                 if (ArrayIndex >= TotalSize)
                     Parser->ProgramFail( "too many array elements");
-                ArrayElement = Parser->VariableAllocValueFromExistingData( ElementType, (UnionAnyValuePointer )(&NewVariable->Val->ArrayMem[0] + ElementSize * ArrayIndex), TRUE, NewVariable);
+                ArrayElement = Parser->VariableAllocValueFromExistingData( ElementType, 
+					(UnionAnyValuePointer )(NewVariable->Val->AddressOfData() + ElementSize * ArrayIndex), 
+					TRUE, NewVariable);
             }
 
             /* this is a normal expression initialiser */
@@ -327,7 +330,7 @@ int ParseState::ParseDeclaration(enum LexToken Token)
     struct Value *NewVariable = NULL;
     int IsStatic = FALSE;
     int FirstVisit = FALSE;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
 
     TypeParseFront( &BasicType, &IsStatic);
     do
@@ -644,7 +647,7 @@ enum ParseResult ParseState::ParseStatement(int CheckTrailingSemicolon)
                             
                             #if 0
                             PRINT_SOURCE_POS;
-                            PlatformPrintf(Parser->pc->CStdOut, "%t %s = %d;\n", CValue->Typ, Identifier, CValue->Val->Integer);
+                            PlatformPrintf(Parser->pc->CStdOut, "%t %s = %d;\n", CValue->Typ, Identifier, CValue->ValInteger());
                             printf("%d\n", VariableDefined(Parser->pc, Identifier));
                             #endif
                             VariableDefine(Parser->pc, Parser, Identifier, CValue, CValue->Typ, TRUE);
@@ -878,7 +881,7 @@ enum ParseResult ParseState::ParseStatement(int CheckTrailingSemicolon)
                         Parser->ProgramFail( "value required in return");
                     
                     if (!Parser->pc->TopStackFrame()) /* return from top-level program? */
-						Parser->pc->PlatformExit(ExpressionCoerceInteger(CValue), "value required in return");
+						Parser->pc->PlatformExit(CValue->ExpressionCoerceInteger(), "value required in return");
                     else
                         Parser->ExpressionAssign( Parser->pc->TopStackFrame()->ReturnValue, CValue, TRUE, NULL, 0, FALSE);
 

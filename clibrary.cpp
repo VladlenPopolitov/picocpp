@@ -298,7 +298,7 @@ void GenericPrintf(struct ParseState *Parser, struct Value *ReturnValue, struct 
                                 if (NextArg->Typ->Base == TypePointer)
                                     Str = NextArg->Val->Pointer;
                                 else
-                                    Str = &NextArg->Val->ArrayMem[0];
+                                    Str = &NextArg->Val->AddressOfData();
                                     
                                 if (Str == NULL)
                                     PrintStr("NULL", Stream); 
@@ -363,12 +363,12 @@ void LibGets(struct ParseState *Parser, struct Value *ReturnValue, struct Value 
 
 void LibGetc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = PlatformGetCharacter();
+    ReturnValue->ValInteger() = PlatformGetCharacter();
 }
 
 void LibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    PlatformExit(Param[0]->Val->Integer);
+    PlatformExit(Param[0]->ValInteger());
 }
 
 #ifdef PICOC_LIBRARY
@@ -466,20 +466,20 @@ void LibFloor(struct ParseState *Parser, struct Value *ReturnValue, struct Value
 #ifndef NO_STRING_FUNCTIONS
 void LibMalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = malloc(Param[0]->Val->Integer);
+    ReturnValue->Val->Pointer = malloc(Param[0]->ValInteger());
 }
 
 #ifndef NO_CALLOC
 void LibCalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = calloc(Param[0]->Val->Integer, Param[1]->Val->Integer);
+    ReturnValue->Val->Pointer = calloc(Param[0]->ValInteger(), Param[1]->ValInteger());
 }
 #endif
 
 #ifndef NO_REALLOC
 void LibRealloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Pointer = realloc(Param[0]->Val->Pointer, Param[1]->Val->Integer);
+    ReturnValue->Val->Pointer = realloc(Param[0]->Val->Pointer, Param[1]->ValInteger());
 }
 #endif
 
@@ -503,7 +503,7 @@ void LibStrncpy(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 {
     char *To = (char *)Param[0]->Val->Pointer;
     char *From = (char *)Param[1]->Val->Pointer;
-    int Len = Param[2]->Val->Integer;
+    int Len = Param[2]->ValInteger();
     
     for (; *From != '\0' && Len > 0; Len--)
         *To++ = *From++;
@@ -520,27 +520,27 @@ void LibStrcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
     
     for (StrEnded = FALSE; !StrEnded; StrEnded = (*Str1 == '\0' || *Str2 == '\0'), Str1++, Str2++)
     {
-         if (*Str1 < *Str2) { ReturnValue->Val->Integer = -1; return; } 
-         else if (*Str1 > *Str2) { ReturnValue->Val->Integer = 1; return; }
+         if (*Str1 < *Str2) { ReturnValue->ValInteger() = -1; return; } 
+         else if (*Str1 > *Str2) { ReturnValue->ValInteger() = 1; return; }
     }
     
-    ReturnValue->Val->Integer = 0;
+    ReturnValue->ValInteger() = 0;
 }
 
 void LibStrncmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
     char *Str1 = (char *)Param[0]->Val->Pointer;
     char *Str2 = (char *)Param[1]->Val->Pointer;
-    int Len = Param[2]->Val->Integer;
+    int Len = Param[2]->ValInteger();
     int StrEnded;
     
     for (StrEnded = FALSE; !StrEnded && Len > 0; StrEnded = (*Str1 == '\0' || *Str2 == '\0'), Str1++, Str2++, Len--)
     {
-         if (*Str1 < *Str2) { ReturnValue->Val->Integer = -1; return; } 
-         else if (*Str1 > *Str2) { ReturnValue->Val->Integer = 1; return; }
+         if (*Str1 < *Str2) { ReturnValue->ValInteger() = -1; return; } 
+         else if (*Str1 > *Str2) { ReturnValue->ValInteger() = 1; return; }
     }
     
-    ReturnValue->Val->Integer = 0;
+    ReturnValue->ValInteger() = 0;
 }
 
 void LibStrcat(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -560,7 +560,7 @@ void LibStrcat(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
 void LibIndex(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
     char *Pos = (char *)Param[0]->Val->Pointer;
-    int SearchChar = Param[1]->Val->Integer;
+    int SearchChar = Param[1]->ValInteger();
 
     while (*Pos != '\0' && *Pos != SearchChar)
         Pos++;
@@ -574,7 +574,7 @@ void LibIndex(struct ParseState *Parser, struct Value *ReturnValue, struct Value
 void LibRindex(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
     char *Pos = (char *)Param[0]->Val->Pointer;
-    int SearchChar = Param[1]->Val->Integer;
+    int SearchChar = Param[1]->ValInteger();
 
     ReturnValue->Val->Pointer = NULL;
     for (; *Pos != '\0'; Pos++)
@@ -592,34 +592,34 @@ void LibStrlen(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
     for (Len = 0; *Pos != '\0'; Pos++)
         Len++;
     
-    ReturnValue->Val->Integer = Len;
+    ReturnValue->ValInteger() = Len;
 }
 
 void LibMemset(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
     /* we can use the system memset() */
-    memset(Param[0]->Val->Pointer, Param[1]->Val->Integer, Param[2]->Val->Integer);
+    memset(Param[0]->Val->Pointer, Param[1]->ValInteger(), Param[2]->ValInteger());
 }
 
 void LibMemcpy(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
     /* we can use the system memcpy() */
-    memcpy(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->Val->Integer);
+    memcpy(Param[0]->Val->Pointer, Param[1]->Val->Pointer, Param[2]->ValInteger());
 }
 
 void LibMemcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
     unsigned char *Mem1 = (unsigned char *)Param[0]->Val->Pointer;
     unsigned char *Mem2 = (unsigned char *)Param[1]->Val->Pointer;
-    int Len = Param[2]->Val->Integer;
+    int Len = Param[2]->ValInteger();
     
     for (; Len > 0; Mem1++, Mem2++, Len--)
     {
-         if (*Mem1 < *Mem2) { ReturnValue->Val->Integer = -1; return; } 
-         else if (*Mem1 > *Mem2) { ReturnValue->Val->Integer = 1; return; }
+         if (*Mem1 < *Mem2) { ReturnValue->ValInteger() = -1; return; } 
+         else if (*Mem1 > *Mem2) { ReturnValue->ValInteger() = 1; return; }
     }
     
-    ReturnValue->Val->Integer = 0;
+    ReturnValue->ValInteger() = 0;
 }
 #endif
 

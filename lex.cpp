@@ -177,7 +177,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
     }
     
     Value->Typ = &pc->LongType; /* ignored? */
-    Value->Val->LongInteger = Result;
+    Value->ValLongInteger() = Result;
 
     ResultToken = TokenIntegerConstant;
     
@@ -401,7 +401,7 @@ enum LexToken Picoc::LexGetCharacterConstant( struct LexState *Lexer, struct Val
 {
 	Picoc *pc = this;
     Value->Typ = &pc->CharType;
-    Value->Val->Character = LexUnEscapeCharacter(&Lexer->Pos, Lexer->End);
+    Value->ValCharacter() = LexUnEscapeCharacter(&Lexer->Pos, Lexer->End);
     if (Lexer->Pos != Lexer->End && *Lexer->Pos != '\'')
         LexFail( Lexer, "expected \"'\"");
         
@@ -645,7 +645,7 @@ enum LexToken ParseState::LexGetRawToken(struct Value **Value, int IncPos)
     enum LexToken Token = TokenNone;
     int ValueSize;
     char *Prompt = NULL;
-    Picoc *pc = Parser->pc;
+    /*obsolete Picoc *pc = Parser->pc; */
     
     do
     { 
@@ -826,7 +826,7 @@ void ParseState::LexHashIf()
         Parser->ProgramFail( "value expected");
     
     /* is the identifier defined? */
-    if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && IdentValue->Val->Character)
+    if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && IdentValue->ValCharacter())
     {
         /* #if is active, evaluate to this new level */
         Parser->HashIfEvaluateToLevel++;

@@ -6,83 +6,83 @@
 
 void StdIsalnum(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = isalnum(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = isalnum(Param[0]->ValInteger());
 }
 
 void StdIsalpha(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = isalpha(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = isalpha(Param[0]->ValInteger());
 }
 
 void StdIsblank(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    int ch = Param[0]->Val->Integer;
-    ReturnValue->Val->Integer = (ch == ' ') | (ch == '\t');
+    int ch = Param[0]->ValInteger();
+    ReturnValue->ValInteger() = (ch == ' ') | (ch == '\t');
 }
 
 void StdIscntrl(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = iscntrl(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = iscntrl(Param[0]->ValInteger());
 }
 
 void StdIsdigit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = isdigit(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = isdigit(Param[0]->ValInteger());
 }
 
 void StdIsgraph(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = isgraph(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = isgraph(Param[0]->ValInteger());
 }
 
 void StdIslower(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = islower(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = islower(Param[0]->ValInteger());
 }
 
 void StdIsprint(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = isprint(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = isprint(Param[0]->ValInteger());
 }
 
 void StdIspunct(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = ispunct(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = ispunct(Param[0]->ValInteger());
 }
 
 void StdIsspace(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = isspace(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = isspace(Param[0]->ValInteger());
 }
 
 void StdIsupper(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = isupper(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = isupper(Param[0]->ValInteger());
 }
 
 void StdIsxdigit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = isxdigit(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = isxdigit(Param[0]->ValInteger());
 }
 
 void StdTolower(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = tolower(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = tolower(Param[0]->ValInteger());
 }
 
 void StdToupper(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = toupper(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = toupper(Param[0]->ValInteger());
 }
 
 void StdIsascii(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = isascii(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = isascii(Param[0]->ValInteger());
 }
 
 void StdToascii(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->Integer = toascii(Param[0]->Val->Integer);
+    ReturnValue->ValInteger() = toascii(Param[0]->ValInteger());
 }
 
 /* all string.h functions */

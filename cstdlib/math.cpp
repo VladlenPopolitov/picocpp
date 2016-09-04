@@ -91,7 +91,7 @@ void MathFrexp(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
 
 void MathLdexp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->Val->FP = ldexp(Param[0]->Val->FP, Param[1]->Val->Integer);
+    ReturnValue->Val->FP = ldexp(Param[0]->Val->FP, Param[1]->ValInteger());
 }
 
 void MathLog(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)

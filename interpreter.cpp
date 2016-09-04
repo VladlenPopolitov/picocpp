@@ -11,6 +11,64 @@ void Value::setVal(UnionAnyValuePointer newVal){
 	Val = newVal;
 }
 
+unsigned char &UnionAnyValue::UnsignedCharacter(){
+	return unsignedCharacter_;
+}
+
+char &UnionAnyValue::Character(){
+	return character_;
+}
+short &UnionAnyValue::ShortInteger(){
+	return shortInteger_;
+}
+int &UnionAnyValue::Integer(){
+	return integer_;
+}
+long &UnionAnyValue::LongInteger(){
+	return longInteger_;
+}
+unsigned short &UnionAnyValue::UnsignedShortInteger(){
+	return unsignedShortInteger_;
+}
+unsigned int &UnionAnyValue::UnsignedInteger(){
+	return unsignedInteger_;
+}
+unsigned long &UnionAnyValue::UnsignedLongInteger(){
+	return unsignedLongInteger_;
+}
+
+char *UnionAnyValue::AddressOfData(){
+	return &arrayMem[0];
+}
+
+
+unsigned char &Value::ValUnsignedCharacter(){
+	return Val->UnsignedCharacter();
+}
+
+char &Value::ValCharacter(){
+	return Val->Character();
+}
+short &Value::ValShortInteger(){
+	return Val->ShortInteger();
+}
+int &Value::ValInteger(){
+	return Val->Integer();
+}
+long &Value::ValLongInteger(){
+	return Val->LongInteger();
+}
+unsigned short &Value::ValUnsignedShortInteger(){
+	return Val->UnsignedShortInteger();
+}
+unsigned int &Value::ValUnsignedInteger(){
+	return Val->UnsignedInteger();
+}
+unsigned long &Value::ValUnsignedLongInteger(){
+	return Val->UnsignedLongInteger();
+}
+
+
 #ifdef PARSESTATE_CONSTR
 ParseState::ParseState() :
 pc{},                  /* the picoc instance this parser is a part of */
