@@ -8,7 +8,7 @@
 #include "platform.h"
 
 #include <string>
-#include <map>
+#include <list>
 #include <vector>
 // for std::function
 #include <thread>
@@ -503,7 +503,11 @@ public:
         
     } p;
 };
-    
+   
+
+using TableIdentifierKey = const char * ;
+using TableMapClass = std::list<struct TableEntry* >;
+//using TableMapPair = std::list< struct TableEntry*>;
 struct Table
 {
 	/* table.c */
@@ -526,11 +530,11 @@ struct Table
 	struct TableEntry *TableSearchIdentifier(const std::string &Key);
 	const char *Table::TableSetIdentifier(const char *Ident, int IdentLen);
 private:
-	std::map<std::string, struct TableEntry*> publicMap;
+	TableMapClass publicMap;
 	short Size;
 	bool /* short */ OnHeap;
 	//struct TableEntry **HashTable;
-	std::map<std::string,struct TableEntry*> *hashTable_;
+	TableMapClass *hashTable_;
 };
 
 /* stack frame for function calls */

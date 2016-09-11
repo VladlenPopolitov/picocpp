@@ -2,6 +2,8 @@
  * and the shared string table. */
  
 #include "interpreter.h"
+// for std::find_if
+#include <algorithm>
 
 /* initialise the shared string system */
 void Picoc::TableInit()
@@ -46,18 +48,16 @@ void Table::TableInitTable( struct TableEntry **HashTable, int Size, bool OnHeap
 struct TableEntry *Table::TableSearch(const char *Key)
 {
 	if (!hashTable_->empty()){
-		auto it = hashTable_->find(std::string(Key));
+		auto it = std::find_if(hashTable_->begin(), hashTable_->end(), [Key](struct TableEntry *Entry){return Entry->p.v.Key == Key; });
 		if (it != hashTable_->end()){
-			return it->second;
+			return *it; // found
 		}
 	}
-	return nullptr;
+	return nullptr; // didn't find it in the container
 }
 
-void Table::TableSet(const char *Key, struct TableEntry* newEntry){
-	std::pair<std::string, struct TableEntry*> insertValue;
-	insertValue = make_pair(std::string(Key), newEntry);
-	hashTable_->insert(insertValue);
+ void Table::TableSet(const char *Key, struct TableEntry* newEntry){
+	hashTable_->push_front(newEntry);
 }
 
 
@@ -73,9 +73,8 @@ bool Table::TableSet(const char *Key, struct Value *Val, const char *DeclFileNam
 		NewEntry->DeclColumn = DeclColumn;
 		NewEntry->p.v.Key = Key;
 		NewEntry->p.v.Val = Val;
-		std::pair<std::string, struct TableEntry*> insertValue;
-		insertValue = make_pair(std::string(Key), NewEntry);
-		hashTable_->insert(insertValue);
+		// obsolete TableMapPair insertValue = std::make_pair(Key, NewEntry);
+		hashTable_->push_front(NewEntry);
 		return true;
 	}
 	return true;
@@ -93,11 +92,11 @@ int Picoc::TableSet(struct Table *Tbl, const char *Key, struct Value *Val, const
 bool Table::TableGet(const char *Key, struct Value **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn)
 {
 	struct Table *Tbl = this;
-	auto it = hashTable_->find(std::string(Key));
+	//obsolete auto it = hashTable_->find(Key);
 	//struct TableEntry *FoundEntry = it->second;
  	struct TableEntry *FoundEntry = Tbl->TableSearch(Key);
 	if (FoundEntry == nullptr) {
-		assert(it == hashTable_->end());
+		//obsolete assert(it == hashTable_->end());
 		return false;
 	}
     
@@ -110,19 +109,19 @@ bool Table::TableGet(const char *Key, struct Value **Val, const char **DeclFileN
         *DeclFileName = FoundEntry->DeclFileName;
         *DeclLine = FoundEntry->DeclLine;
         *DeclColumn = FoundEntry->DeclColumn;
-    }
-    
+    }   
     return true;
 }
 
+/** remove an entry from the table */
 struct Value *Table::TableDelete(const char *Key)
 {
 	struct Table *Tbl = this;
 	struct Value *retValue = nullptr;
-	auto it = Tbl->hashTable_->find(std::string(Key));
+	auto it = std::find_if(hashTable_->begin(), hashTable_->end(), [Key](struct TableEntry *Entry){return Entry->p.v.Key == Key; });
 	if (it != Tbl->hashTable_->end()){
-		retValue = it->second->p.v.Val;
-		delete it->second;
+		retValue = (*it)->p.v.Val;
+		delete *it;
 		Tbl->hashTable_->erase(it);
 	}
 	return retValue;
@@ -162,13 +161,13 @@ struct TableEntry *Table::TableSearchIdentifier(const std::string &Key)
 	struct Table *Tbl = this;
 	auto it = Tbl->hashTable_->begin();
 	for(auto itEnd = Tbl->hashTable_->end(); it != itEnd; ++it){
-		if (it->second->identifier_.compare(Key) == 0){
-			return it->second;
+		if ((*it)->identifier_.compare(Key) == 0){
+			return (*it);
 		}
 	}
 	return nullptr;
 }
-
+/** set an identifier and return the identifier. share if possible */
 const char *Table::TableSetIdentifier( const char *Ident, int IdentLen){
 	struct Table *Tbl = this;
 	std::string Key(Ident, IdentLen);
@@ -181,21 +180,19 @@ const char *Table::TableSetIdentifier( const char *Ident, int IdentLen){
 		struct TableEntry *NewEntry = new struct TableEntry;
 		NewEntry->identifier_ = Key;
 
-		std::pair<std::string, struct TableEntry*> insertValue;
-		insertValue = make_pair(std::string(Key), NewEntry);
-		hashTable_->insert(insertValue);
+		hashTable_->push_front(NewEntry);
 
 		return NewEntry->identifier_.c_str(); // &NewEntry->p.Key[0];
 	}
 }
-/* set an identifier and return the identifier. share if possible */
+/** set an identifier and return the identifier. share if possible */
 const char *Picoc::TableSetIdentifier( struct Table *Tbl, const char *Ident, int IdentLen)
 {
 	Picoc *pc = this;
 	return Tbl->TableSetIdentifier(Ident, IdentLen);
 }
 
-/* register a string in the shared string store */
+/** register a string in the shared string store */
 const char *Picoc::TableStrRegister2( const char *Str, int Len)
 {
 	Picoc *pc = this;
@@ -214,7 +211,7 @@ void Table::TableFree(){
 	//struct TableEntry *NextEntry;
 	//int Count;
 	for (auto it = hashTable_->begin(); it != hashTable_->end();++it){ 
-		delete it->second; 
+		delete (*it); 
 	};
 	hashTable_->clear();
 	/*
@@ -237,9 +234,9 @@ void Table::TableFree(Picoc *pc, void(func)(Picoc*, struct TableEntry *)){
 	if (!hashTable_->empty()){
 		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
 			assert(pc);
-			assert(it->second);
-			func(pc, it->second);
-			delete it->second;
+			assert(*it);
+			func(pc, *it);
+			delete *it;
 		};
 		hashTable_->clear();
 	}
@@ -261,7 +258,7 @@ void Table::TableForEach(Picoc *pc, const std::function< void (Picoc*, struct Ta
 	int Count = 0;
 	if (!hashTable_->empty()){
 		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
-			func(pc, it->second);
+			func(pc, *it);
 		};
 	}
 }
@@ -273,7 +270,7 @@ bool Table::TableFindIf(Picoc *pc, const std::function< bool (Picoc*, struct Tab
 	int Count = 0;
 	if (!hashTable_->empty()){
 		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
-			if (func(pc, it->second)) return true;
+			if (func(pc, *it)) return true;
 		};
 	}
 	return false;
@@ -284,7 +281,7 @@ struct TableEntry *Table::TableFindEntryIf(Picoc *pc, const std::function< bool(
 	int Count = 0;
 	if (!hashTable_->empty()){
 		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
-			if (func(pc, it->second)) return it->second;
+			if (func(pc, *it)) return *it;
 		};
 	}
 	return nullptr;
@@ -297,9 +294,9 @@ bool Table::TableDeleteIf(Picoc *pc, const std::function< bool(Picoc*, struct Ta
 	int Count = 0;
 	if (!hashTable_->empty()){
 		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
-			if (func(pc, it->second)) {
-				delete it->second;
-				hashTable_->erase(it);
+			if (func(pc, *it)) {
+				delete *it;
+				hashTable_->erase(it); // error here ?
 				return true;
 			}
 		};

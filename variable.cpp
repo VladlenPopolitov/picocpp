@@ -309,7 +309,8 @@ struct Value *ParseState::VariableDefine(const char *Ident, struct Value *InitVa
     AssignValue->ScopeID = scopeID;
     AssignValue->OutOfScope = FALSE;
 
-    if (!pc->TableSet( currentTable, Ident, AssignValue, Parser ? ((char *)Parser->FileName) : NULL, Parser ? Parser->Line : 0, Parser ? Parser->CharacterPos : 0))
+    if (!pc->TableSet( currentTable, Ident, AssignValue, 
+		Parser ? ((char *)Parser->FileName) : NULL, Parser ? Parser->Line : 0, Parser ? Parser->CharacterPos : 0))
 		Parser->ProgramFail( "'%s' is already defined", Ident);
     
     return AssignValue;

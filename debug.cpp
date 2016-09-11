@@ -49,7 +49,7 @@ struct TableEntry *ParseState::DebugTableSearchBreakpoint()
 void ParseState::DebugSetBreakpoint()
 {
 	struct ParseState *Parser = this;
-    //int AddAt;
+    // obsolete int AddAt;
     struct TableEntry *FoundEntry = DebugTableSearchBreakpoint();
     /*obsolete Picoc *pc = Parser->pc; */
     
@@ -65,9 +65,9 @@ void ParseState::DebugSetBreakpoint()
         NewEntry->p.b.FileName = Parser->FileName;
         NewEntry->p.b.Line = Parser->Line;
         NewEntry->p.b.CharacterPos = Parser->CharacterPos;
-        //NewEntry->Next = pc->BreakpointHashTable[AddAt];
-        //pc->BreakpointHashTable[AddAt] = NewEntry;
-		pc->BreakpointTable.TableSet(Key.c_str(),NewEntry);
+        // obsolete NewEntry->Next = pc->BreakpointHashTable[AddAt];
+        // obsolete pc->BreakpointHashTable[AddAt] = NewEntry;
+		pc->BreakpointTable.TableSet(Key.c_str(), NewEntry);
 
 		pc->BreakpointCount++;
     }
