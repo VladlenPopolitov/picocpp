@@ -16,10 +16,10 @@ void Picoc::DebugInit()
 }
 
 /* free the contents of the breakpoint table */
-void Picoc::DebugCleanup()
-{
-	BreakpointTable.TableFree();
-}
+// obsolete void Picoc::DebugCleanup()
+// obsolete {
+// obsolete 	BreakpointTable.TableFree();
+// obsolete }
 
 /* search the table for a breakpoint */
 struct TableEntry *ParseState::DebugTableSearchBreakpoint()

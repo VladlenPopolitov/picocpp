@@ -47,9 +47,9 @@ void Table::TableInitTable( struct TableEntry **HashTable, int Size, bool OnHeap
 /* check a hash table entry for a key */
 struct TableEntry *Table::TableSearch(const char *Key)
 {
-	if (!hashTable_->empty()){
-		auto it = std::find_if(hashTable_->begin(), hashTable_->end(), [Key](struct TableEntry *Entry){return Entry->p.v.Key == Key; });
-		if (it != hashTable_->end()){
+	if (!hashTable_.empty()){
+		auto it = std::find_if(hashTable_.begin(), hashTable_.end(), [Key](struct TableEntry *Entry){return Entry->p.v.Key == Key; });
+		if (it != hashTable_.end()){
 			return *it; // found
 		}
 	}
@@ -57,7 +57,7 @@ struct TableEntry *Table::TableSearch(const char *Key)
 }
 
  void Table::TableSet(const char *Key, struct TableEntry* newEntry){
-	hashTable_->push_front(newEntry);
+	hashTable_.push_front(newEntry);
 }
 
 
@@ -72,9 +72,9 @@ bool Table::TableSet(const char *Key, struct Value *Val, const char *DeclFileNam
 		NewEntry->DeclLine = DeclLine;
 		NewEntry->DeclColumn = DeclColumn;
 		NewEntry->p.v.Key = Key;
-		NewEntry->p.v.Val = Val;
+		NewEntry->p.v.ValInValueEntry = Val;
 		// obsolete TableMapPair insertValue = std::make_pair(Key, NewEntry);
-		hashTable_->push_front(NewEntry);
+		hashTable_.push_front(NewEntry);
 		return true;
 	}
 	return true;
@@ -92,15 +92,15 @@ int Picoc::TableSet(struct Table *Tbl, const char *Key, struct Value *Val, const
 bool Table::TableGet(const char *Key, struct Value **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn)
 {
 	struct Table *Tbl = this;
-	//obsolete auto it = hashTable_->find(Key);
+	//obsolete auto it = hashTable_.find(Key);
 	//struct TableEntry *FoundEntry = it->second;
  	struct TableEntry *FoundEntry = Tbl->TableSearch(Key);
 	if (FoundEntry == nullptr) {
-		//obsolete assert(it == hashTable_->end());
+		//obsolete assert(it == hashTable_.end());
 		return false;
 	}
     
-    *Val = FoundEntry->p.v.Val;
+    *Val = FoundEntry->p.v.ValInValueEntry;
     
     if (DeclFileName != nullptr)
     {
@@ -118,11 +118,11 @@ struct Value *Table::TableDelete(const char *Key)
 {
 	struct Table *Tbl = this;
 	struct Value *retValue = nullptr;
-	auto it = std::find_if(hashTable_->begin(), hashTable_->end(), [Key](struct TableEntry *Entry){return Entry->p.v.Key == Key; });
-	if (it != Tbl->hashTable_->end()){
-		retValue = (*it)->p.v.Val;
+	auto it = std::find_if(hashTable_.begin(), hashTable_.end(), [Key](struct TableEntry *Entry){return Entry->p.v.Key == Key; });
+	if (it != Tbl->hashTable_.end()){
+		retValue = (*it)->p.v.ValInValueEntry;
 		delete *it;
-		Tbl->hashTable_->erase(it);
+		Tbl->hashTable_.erase(it);
 	}
 	return retValue;
 }
@@ -143,8 +143,8 @@ struct Value *Picoc::TableDelete( struct Table *Tbl, const char *Key)
         if ((*EntryPtr)->p.v.Key == Key)
         {
             struct TableEntry *DeleteEntry = *EntryPtr;
-			assert(Val == DeleteEntry->p.v.Val);
-            Val = DeleteEntry->p.v.Val;
+			assert(Val == DeleteEntry->p.v.ValInValueEntry);
+            Val = DeleteEntry->p.v.ValInValueEntry;
             *EntryPtr = DeleteEntry->Next;
 			delete DeleteEntry; //HeapFreeMem( DeleteEntry);
 
@@ -159,8 +159,8 @@ struct Value *Picoc::TableDelete( struct Table *Tbl, const char *Key)
 struct TableEntry *Table::TableSearchIdentifier(const std::string &Key)
 {
 	struct Table *Tbl = this;
-	auto it = Tbl->hashTable_->begin();
-	for(auto itEnd = Tbl->hashTable_->end(); it != itEnd; ++it){
+	auto it = Tbl->hashTable_.begin();
+	for(auto itEnd = Tbl->hashTable_.end(); it != itEnd; ++it){
 		if ((*it)->identifier_.compare(Key) == 0){
 			return (*it);
 		}
@@ -180,7 +180,7 @@ const char *Table::TableSetIdentifier( const char *Ident, int IdentLen){
 		struct TableEntry *NewEntry = new struct TableEntry;
 		NewEntry->identifier_ = Key;
 
-		hashTable_->push_front(NewEntry);
+		hashTable_.push_front(NewEntry);
 
 		return NewEntry->identifier_.c_str(); // &NewEntry->p.Key[0];
 	}
@@ -210,10 +210,12 @@ void Table::TableFree(){
 	//struct TableEntry *Entry;
 	//struct TableEntry *NextEntry;
 	//int Count;
-	for (auto it = hashTable_->begin(); it != hashTable_->end();++it){ 
-		delete (*it); 
-	};
-	hashTable_->clear();
+	if (!hashTable_.empty()){
+		for (auto it = hashTable_.begin(); it != hashTable_.end(); ++it){
+			delete (*it);
+		};
+	}
+	hashTable_.clear();
 	/*
 	for (Count = 0; Count < this->Size; Count++)
 	{
@@ -230,15 +232,15 @@ void Table::TableFree(){
 void Table::TableFree(Picoc *pc, void(func)(Picoc*, struct TableEntry *)){
 	//struct TableEntry *Entry;
 	//struct TableEntry *NextEntry;
-	int Count=0;
-	if (!hashTable_->empty()){
-		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
+	//obsolete int Count=0;
+	if (!hashTable_.empty()){
+		for (auto it = hashTable_.begin(); it != hashTable_.end(); ++it){
 			assert(pc);
 			assert(*it);
 			func(pc, *it);
 			delete *it;
 		};
-		hashTable_->clear();
+		hashTable_.clear();
 	}
 	/*
 	for (Count = 0; Count < this->Size; Count++)
@@ -253,11 +255,11 @@ void Table::TableFree(Picoc *pc, void(func)(Picoc*, struct TableEntry *)){
 }
 
 void Table::TableForEach(Picoc *pc, const std::function< void (Picoc*, struct TableEntry *)> &func){
-	//struct TableEntry *Entry;
-	//struct TableEntry *NextEntry;
-	int Count = 0;
-	if (!hashTable_->empty()){
-		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
+	// obsolete struct TableEntry *Entry;
+	// obsolete struct TableEntry *NextEntry;
+	// obsolete int Count = 0;
+	if (!hashTable_.empty()){
+		for (auto it = hashTable_.begin(); it != hashTable_.end(); ++it){
 			func(pc, *it);
 		};
 	}
@@ -268,8 +270,8 @@ bool Table::TableFindIf(Picoc *pc, const std::function< bool (Picoc*, struct Tab
 	//struct TableEntry *Entry;
 	//struct TableEntry *NextEntry;
 	int Count = 0;
-	if (!hashTable_->empty()){
-		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
+	if (!hashTable_.empty()){
+		for (auto it = hashTable_.begin(); it != hashTable_.end(); ++it){
 			if (func(pc, *it)) return true;
 		};
 	}
@@ -279,8 +281,8 @@ struct TableEntry *Table::TableFindEntryIf(Picoc *pc, const std::function< bool(
 	//struct TableEntry *Entry;
 	//struct TableEntry *NextEntry;
 	int Count = 0;
-	if (!hashTable_->empty()){
-		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
+	if (!hashTable_.empty()){
+		for (auto it = hashTable_.begin(); it != hashTable_.end(); ++it){
 			if (func(pc, *it)) return *it;
 		};
 	}
@@ -292,12 +294,15 @@ bool Table::TableDeleteIf(Picoc *pc, const std::function< bool(Picoc*, struct Ta
 	//struct TableEntry *Entry;
 	//struct TableEntry *NextEntry;
 	int Count = 0;
-	if (!hashTable_->empty()){
-		for (auto it = hashTable_->begin(); it != hashTable_->end(); ++it){
+	if (!hashTable_.empty()){
+		for (auto it = hashTable_.begin(); it != hashTable_.end(); ){
 			if (func(pc, *it)) {
 				delete *it;
-				hashTable_->erase(it); // error here ?
+				it=hashTable_.erase(it); // error here ?
 				return true;
+			}
+			else {
+				++it;
 			}
 		};
 	}
@@ -306,10 +311,10 @@ bool Table::TableDeleteIf(Picoc *pc, const std::function< bool(Picoc*, struct Ta
 
 
 /* free all the strings */
-void Picoc::TableStrFree()
-{
-	Picoc *pc = this;
-	pc->StringTable.TableFree();
+// obsolete void Picoc::TableStrFree()
+// obsolete {
+// obsolete 	Picoc *pc = this;
+// obsolete 	pc->StringTable.TableFree();
 	/*
     struct TableEntry *Entry;
     struct TableEntry *NextEntry;
@@ -324,7 +329,7 @@ void Picoc::TableStrFree()
         }
     }
 	*/
-}
+// obsolete }
 
 struct Table * Picoc::GetCurrentTable(){
 	return (TopStackFrame() == nullptr) ? &(GlobalTable) : (TopStackFrame())->LocalTable.get();

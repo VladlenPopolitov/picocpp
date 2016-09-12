@@ -93,10 +93,10 @@ void Picoc::LexInit()
 	// obsolete pc->ReservedWordTable.TableInitTable(&pc->ReservedWordMapTable);
     for (Count = 0; Count < sizeof(ReservedWords) / sizeof(struct ReservedWord); Count++)
     {
-        TableSet( &pc->ReservedWordTable, TableStrRegister(ReservedWords[Count].Word), (struct Value *)&ReservedWords[Count], NULL, 0, 0);
+		pc->ReservedWordTable.TableSet(TableStrRegister(ReservedWords[Count].Word), (struct Value *)&ReservedWords[Count], nullptr, 0, 0);
     }
     
-    pc->LexValue.Typ = NULL;
+    pc->LexValue.TypeOfValue = nullptr;
     pc->LexValue.Val = &pc->LexAnyValue;
     pc->LexValue.LValueFrom = FALSE;
     pc->LexValue.ValOnHeap = FALSE;
@@ -109,12 +109,12 @@ void Picoc::LexInit()
 void Picoc::LexCleanup()
 {
 	Picoc *pc = this;
-    int Count;
+	// obsolete int Count;
 
     LexInteractiveClear( nullptr);
 
-    for (Count = 0; Count < sizeof(ReservedWords) / sizeof(struct ReservedWord); Count++)
-        TableDelete(&pc->ReservedWordTable, TableStrRegister(ReservedWords[Count].Word));
+	// obsolete  for (Count = 0; Count < sizeof(ReservedWords) / sizeof(struct ReservedWord); Count++)
+	// obsolete     TableDelete(&pc->ReservedWordTable, TableStrRegister(ReservedWords[Count].Word));
 }
 
 /* check if a word is a reserved word - used while scanning */
@@ -176,7 +176,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
         /* IsLong = 1; */
     }
     
-    Value->Typ = &pc->LongType; /* ignored? */
+    Value->TypeOfValue = &pc->LongType; /* ignored? */
     Value->ValLongInteger() = Result;
 
     ResultToken = TokenIntegerConstant;
@@ -195,7 +195,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
         return ResultToken;
     }
     
-    Value->Typ = &pc->FPType;
+    Value->TypeOfValue = &pc->FPType;
     FPResult = (double)Result;
     
     if (*Lexer->Pos == '.')
@@ -228,7 +228,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
         FPResult *= pow((double)Base, (double)Result * ExponentSign);
     }
     
-    Value->Val->FP = FPResult;
+    Value->ValFP() = FPResult;
 
     if (*Lexer->Pos == 'f' || *Lexer->Pos == 'F')
         LEXER_INC(Lexer);
@@ -250,10 +250,10 @@ enum LexToken Picoc::LexGetWord( struct LexState *Lexer, struct Value *Value)
         LEXER_INC(Lexer);
     } while (Lexer->Pos != Lexer->End && isCident((int)*Lexer->Pos));
     
-    Value->Typ = NULL;
-    Value->Val->Identifier = TableStrRegister2( StartPos, Lexer->Pos - StartPos);
+    Value->TypeOfValue = NULL;
+    Value->ValIdentifierOfAnyValue() = TableStrRegister2( StartPos, Lexer->Pos - StartPos);
     
-    Token = LexCheckReservedWord(Value->Val->Identifier);
+    Token = LexCheckReservedWord(Value->ValIdentifierOfAnyValue());
     switch (Token)
     {
         case TokenHashInclude: Lexer->Mode = LexModeHashInclude; break;
@@ -382,14 +382,14 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
 
 		/* create and store this string literal */
        ArrayValue = temp.VariableAllocValueAndData( 0, FALSE, NULL, LocationOnHeap);
-        ArrayValue->Typ = pc->CharArrayType;
+        ArrayValue->TypeOfValue = pc->CharArrayType;
         ArrayValue->Val = (UnionAnyValuePointer )RegString;
         VariableStringLiteralDefine( RegString, ArrayValue);
     }
 
     /* create the the pointer for this char* */
-    Value->Typ = pc->CharPtrType;
-    Value->Val->Pointer = const_cast<void*>(static_cast<const void*>(RegString)); // unsafe assignment and unsafe cast @todo \todo 
+    Value->TypeOfValue = pc->CharPtrType;
+    Value->ValPointer() = const_cast<void*>(static_cast<const void*>(RegString)); // unsafe assignment and unsafe cast @todo \todo 
     if (*Lexer->Pos == EndChar)
         LEXER_INC(Lexer);
     
@@ -400,7 +400,7 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
 enum LexToken Picoc::LexGetCharacterConstant( struct LexState *Lexer, struct Value *Value)
 {
 	Picoc *pc = this;
-    Value->Typ = &pc->CharType;
+    Value->TypeOfValue = &pc->CharType;
     Value->ValCharacter() = LexUnEscapeCharacter(&Lexer->Pos, Lexer->End);
     if (Lexer->Pos != Lexer->End && *Lexer->Pos != '\'')
         LexFail( Lexer, "expected \"'\"");
@@ -733,12 +733,12 @@ enum LexToken ParseState::LexGetRawToken(struct Value **Value, int IncPos)
         { 
             switch (Token)
             {
-                case TokenStringConstant:       pc->LexValue.Typ = pc->CharPtrType; break;
-                case TokenIdentifier:           pc->LexValue.Typ = NULL; break;
-                case TokenIntegerConstant:      pc->LexValue.Typ = &pc->LongType; break;
-                case TokenCharacterConstant:    pc->LexValue.Typ = &pc->CharType; break;
+                case TokenStringConstant:       pc->LexValue.TypeOfValue = pc->CharPtrType; break;
+                case TokenIdentifier:           pc->LexValue.TypeOfValue = NULL; break;
+                case TokenIntegerConstant:      pc->LexValue.TypeOfValue = &pc->LongType; break;
+                case TokenCharacterConstant:    pc->LexValue.TypeOfValue = &pc->CharType; break;
 #ifndef NO_FP
-                case TokenFPConstant:           pc->LexValue.Typ = &pc->FPType; break;
+                case TokenFPConstant:           pc->LexValue.TypeOfValue = &pc->FPType; break;
 #endif
                 default: break;
             }
@@ -789,7 +789,7 @@ void ParseState::LexHashIfdef(int IfNot)
         Parser->ProgramFail( "identifier expected");
     
     /* is the identifier defined? */
-	IsDefined = Parser->pc->GlobalTable.TableGet(IdentValue->Val->Identifier, &SavedValue, NULL, NULL, NULL);
+	IsDefined = Parser->pc->GlobalTable.TableGet(IdentValue->ValIdentifierOfAnyValue(), &SavedValue, NULL, NULL, NULL);
     if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && ( (IsDefined && !IfNot) || (!IsDefined && IfNot)) )
     {
         /* #if is active, evaluate to this new level */
@@ -812,13 +812,13 @@ void ParseState::LexHashIf()
     if (Token == TokenIdentifier)
     {
         /* look up a value from a macro definition */
-		if (!Parser->pc->GlobalTable.TableGet(IdentValue->Val->Identifier, &SavedValue, NULL, NULL, NULL))
-            Parser->ProgramFail( "'%s' is undefined", IdentValue->Val->Identifier);
+		if (!Parser->pc->GlobalTable.TableGet(IdentValue->ValIdentifierOfAnyValue(), &SavedValue, NULL, NULL, NULL))
+            Parser->ProgramFail( "'%s' is undefined", IdentValue->ValIdentifierOfAnyValue());
         
-        if (SavedValue->Typ->Base != TypeMacro)
+        if (SavedValue->TypeOfValue->Base != TypeMacro)
             Parser->ProgramFail( "value expected");
         
-        ParserCopy(&MacroParser, &SavedValue->Val->MacroDef.Body);
+        ParserCopy(&MacroParser, &SavedValue->ValMacroDef().Body);
 		Token = MacroParser.LexGetRawToken(&IdentValue, TRUE);
     }
     

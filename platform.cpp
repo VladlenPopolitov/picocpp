@@ -33,15 +33,15 @@ void Picoc::PicocInitialise( int StackSize)
 void Picoc::PicocCleanup()
 {
 	//Picoc *pc = this;
-    DebugCleanup();
+	// obsolete  DebugCleanup();  // table distr BreakpointTable
 #ifndef NO_HASH_INCLUDE
     IncludeCleanup();
 #endif
     ParseCleanup();
-    LexCleanup();
-    VariableCleanup();
+    LexCleanup(); 
+	VariableCleanup(); // table distr : VariableTableCleanup(&pc->GlobalTable); StringLiteralTable
     TypeCleanup();
-    TableStrFree();
+	// obsolete TableStrFree(); // table distr StringTable
     HeapCleanup();
     PlatformCleanup();
 }
@@ -67,19 +67,19 @@ void Picoc::PicocCallMain(int argc, char **argv)
 	temp.pc = pc;
 
 	temp.VariableGet(TableStrRegister("main"), &FuncValue);
-    if (FuncValue->Typ->Base != TypeFunction)
+    if (FuncValue->TypeOfValue->Base != TypeFunction)
         ProgramFailNoParser( "main is not a function - can't call it");
 
-    if (FuncValue->Val->FuncDef.NumParams != 0)
+    if (FuncValue->ValFuncDef().NumParams != 0)
     {
         /* define the arguments */
         temp.VariableDefinePlatformVar( "__argc", &pc->IntType, (UnionAnyValuePointer )&argc, FALSE);
         temp.VariableDefinePlatformVar( "__argv", pc->CharPtrPtrType, (UnionAnyValuePointer )&argv, FALSE);
     }
 
-    if (FuncValue->Val->FuncDef.ReturnType == &pc->VoidType)
+    if (FuncValue->ValFuncDef().ReturnType == &pc->VoidType)
     {
-        if (FuncValue->Val->FuncDef.NumParams == 0)
+        if (FuncValue->ValFuncDef().NumParams == 0)
             PicocParse( "startup", CALL_MAIN_NO_ARGS_RETURN_VOID, strlen(CALL_MAIN_NO_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
         else
             PicocParse( "startup", CALL_MAIN_WITH_ARGS_RETURN_VOID, strlen(CALL_MAIN_WITH_ARGS_RETURN_VOID), TRUE, TRUE, FALSE, TRUE);
@@ -88,7 +88,7 @@ void Picoc::PicocCallMain(int argc, char **argv)
     {
         temp.VariableDefinePlatformVar( "__exit_value", &pc->IntType, (UnionAnyValuePointer )&pc->PicocExitValue, TRUE);
     
-        if (FuncValue->Val->FuncDef.NumParams == 0)
+        if (FuncValue->ValFuncDef().NumParams == 0)
             PicocParse( "startup", CALL_MAIN_NO_ARGS_RETURN_INT, strlen(CALL_MAIN_NO_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);
         else
             PicocParse( "startup", CALL_MAIN_WITH_ARGS_RETURN_INT, strlen(CALL_MAIN_WITH_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);

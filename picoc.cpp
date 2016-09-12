@@ -27,7 +27,7 @@ int main(int argcc, char **argvc)
 				"        picoc -i                               : interactive mode\n");
 			exit(1);
 		}
-		for (int i = 0; i < 100; ++i){ // for test
+		for (int i = 0; i < 1 ; ++i){ // for test
 			int ParamCount = 1;
 			int argc = argcc;
 			char **argv = argvc;

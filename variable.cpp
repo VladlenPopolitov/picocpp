@@ -21,27 +21,28 @@ void Picoc::VariableInit()
 }
 
 /* deallocate the contents of a variable */
-void Picoc::VariableFree(struct Value *Val)
+void Picoc::VariableFree(struct Value *ValueIn)
 {
 	Picoc *pc = this;
-    if (Val->ValOnHeap || Val->AnyValOnHeap)
+	if (ValueIn->ValOnHeap || ValueIn->AnyValOnHeap)
     {
         /* free function bodies */
-        if (Val->Typ == &pc->FunctionType && Val->getVal()->FuncDef.Intrinsic == nullptr && Val->getVal()->FuncDef.Body.getPos() != nullptr)
-            HeapFreeMem( (void *)Val->getVal()->FuncDef.Body.getPos());
+		if (ValueIn->TypeOfValue == &pc->FunctionType && ValueIn->getVal()->FuncDef().Intrinsic == nullptr &&
+			ValueIn->getVal()->FuncDef().Body.getPos() != nullptr)
+			HeapFreeMem((void *)ValueIn->getVal()->FuncDef().Body.getPos());
 
         /* free macro bodies */
-        if (Val->Typ == &pc->MacroType)
-            HeapFreeMem( (void *)Val->getVal()->MacroDef.Body.getPos());
+		if (ValueIn->TypeOfValue == &pc->MacroType)
+            HeapFreeMem( (void *)ValueIn->getVal()->MacroDef().Body.getPos());
 
         /* free the AnyValue */
-        if (Val->AnyValOnHeap)
-            HeapFreeMem( Val->getVal());
+		if (ValueIn->AnyValOnHeap)
+            HeapFreeMem( ValueIn->getVal());
     }
 
     /* free the value */
-    if (Val->ValOnHeap)
-        HeapFreeMem( Val);
+	if (ValueIn->ValOnHeap)
+		HeapFreeMem(ValueIn);
 }
 
 /* deallocate the global table and the string literal table */
@@ -50,7 +51,7 @@ void Picoc::VariableTableCleanup(struct Table *HashTable)
 
 	Picoc *pc = this;
 	HashTable->TableFree(pc, [](Picoc *pc, 
-	 struct TableEntry *Entry) { pc->VariableFree(Entry->p.v.Val); } // call this function and delete entry
+	 struct TableEntry *Entry) { pc->VariableFree(Entry->p.v.ValInValueEntry); } // call this function and delete entry
 	);
 	/*
     struct TableEntry *Entry;
@@ -62,7 +63,7 @@ void Picoc::VariableTableCleanup(struct Table *HashTable)
         for (Entry = HashTable->HashTable[Count]; Entry != NULL; Entry = NextEntry)
         {
             NextEntry = Entry->Next;
-            VariableFree(Entry->p.v.Val);
+            VariableFree(Entry->p.v.ValInValueEntry);
                 
             // free the hash table entry
             HeapFreeMem( Entry);
@@ -73,7 +74,7 @@ void Picoc::VariableTableCleanup(struct Table *HashTable)
 
 void Picoc::VariableCleanup()
 {
-	Picoc *pc = this;
+ 	Picoc *pc = this;
     VariableTableCleanup( &pc->GlobalTable);
     VariableTableCleanup( &pc->StringLiteralTable);
 }
@@ -134,7 +135,7 @@ struct Value *LValueFrom, MemoryLocation OnHeap)
     int Size = TypeSize(Typ, Typ->ArraySize, FALSE);
     struct Value *NewValue = VariableAllocValueAndData( Size, IsLValue, LValueFrom, OnHeap);
     assert(Size >= 0 || Typ == &pc->VoidType);
-    NewValue->Typ = Typ;
+    NewValue->TypeOfValue = Typ;
     
     return NewValue;
 }
@@ -144,7 +145,7 @@ struct Value *ParseState::VariableAllocValueAndCopy(struct Value *FromValue, Mem
 {
 	struct ParseState *Parser = this;
 	/*obsolete Picoc *pc = Parser->pc;  */
-    struct ValueType *DType = FromValue->Typ;
+    struct ValueType *DType = FromValue->TypeOfValue;
     struct Value *NewValue;
     char TmpBuf[MAX_TMP_COPY_BUF];
 	int CopySize = FromValue->TypeSizeValue(TRUE);
@@ -152,7 +153,7 @@ struct Value *ParseState::VariableAllocValueAndCopy(struct Value *FromValue, Mem
     assert(CopySize <= MAX_TMP_COPY_BUF);
     memcpy((void *)&TmpBuf[0], (void *)FromValue->getVal(), CopySize); // obsolete value
     NewValue = VariableAllocValueAndData(  CopySize, FromValue->IsLValue, FromValue->LValueFrom, OnHeap);
-    NewValue->Typ = DType;
+    NewValue->TypeOfValue = DType;
     memcpy((void *)NewValue->getVal(), (void *)&TmpBuf[0], CopySize); // obsolete value
     
     return NewValue;
@@ -164,7 +165,7 @@ struct Value *ParseState::VariableAllocValueFromExistingData(struct ValueType *T
 {
 	struct ParseState *Parser = this;
 	struct Value *NewValue = static_cast<struct Value*>(VariableAlloc( sizeof(struct Value), LocationOnStack));
-    NewValue->Typ = Typ;
+    NewValue->TypeOfValue = Typ;
     NewValue->setVal( FromValue );
     NewValue->ValOnHeap = FALSE;
     NewValue->AnyValOnHeap = FALSE;
@@ -178,7 +179,7 @@ struct Value *ParseState::VariableAllocValueFromExistingData(struct ValueType *T
 /* allocate a value either on the heap or the stack from an existing Value, sharing the value */
 struct Value *ParseState::VariableAllocValueShared(struct Value *FromValue)
 {
-	return VariableAllocValueFromExistingData( FromValue->Typ, FromValue->getVal(), FromValue->IsLValue, FromValue->IsLValue ? FromValue : NULL);
+	return VariableAllocValueFromExistingData( FromValue->TypeOfValue, FromValue->getVal(), FromValue->IsLValue, FromValue->IsLValue ? FromValue : NULL);
 }
 
 /* reallocate a variable so its data has a new size */
@@ -215,14 +216,14 @@ int ParseState::VariableScopeBegin(int* OldScopeID)
 	//		for (Entry = HashTable->HashTable[Count]; Entry != NULL; Entry = NextEntry)
 	//		{
 	//			NextEntry = Entry->Next;
-				if (Entry->p.v.Val->ScopeID == Parser->ScopeID && Entry->p.v.Val->OutOfScope)
+				if (Entry->p.v.ValInValueEntry->ScopeID == Parser->ScopeID && Entry->p.v.ValInValueEntry->OutOfScope)
 				{
-					Entry->p.v.Val->OutOfScope = FALSE;
+					Entry->p.v.ValInValueEntry->OutOfScope = FALSE;
 					Entry->p.v.Key = (char*)((intptr_t)Entry->p.v.Key & ~1);
 #ifdef VAR_SCOPE_DEBUG
 					if (!FirstPrint) { PRINT_SOURCE_POS; }
 					FirstPrint = 1;
-					printf(">>> back into scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.Val->ScopeID, Entry->p.v.Val->ValInteger());
+					printf(">>> back into scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.ValInValueEntry->ScopeID, Entry->p.v.ValInValueEntry->ValInteger());
 #endif
 				}
 	//		}
@@ -250,14 +251,14 @@ void ParseState::VariableScopeEnd(int ScopeID, int PrevScopeID)
 		//      for (Entry = HashTable->HashTable[Count]; Entry != NULL; Entry = NextEntry)
 		//      {
 		//          NextEntry = Entry->Next;
-		if (Entry->p.v.Val->ScopeID == ScopeID && !Entry->p.v.Val->OutOfScope)
+		if (Entry->p.v.ValInValueEntry->ScopeID == ScopeID && !Entry->p.v.ValInValueEntry->OutOfScope)
 		{
 #ifdef VAR_SCOPE_DEBUG
 			if (!FirstPrint) { PRINT_SOURCE_POS; }
 			FirstPrint = 1;
-			printf(">>> out of scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.Val->ScopeID, Entry->p.v.Val->ValInteger());
+			printf(">>> out of scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.ValInValueEntry->ScopeID, Entry->p.v.ValInValueEntry->ValInteger());
 #endif
-			Entry->p.v.Val->OutOfScope = TRUE;
+			Entry->p.v.ValInValueEntry->OutOfScope = TRUE;
 			Entry->p.v.Key = (char*)((intptr_t)Entry->p.v.Key | 1); /* alter the key so it won't be found by normal searches */
 		}
 		//    }
@@ -278,7 +279,7 @@ bool Picoc::VariableDefinedAndOutOfScope( const char* Ident)
 		//{
 		//	for (Entry = HashTable->HashTable[Count]; Entry != NULL; Entry = Entry->Next)
 		//	{
-		if (Entry->p.v.Val->OutOfScope && (char*)((intptr_t)Entry->p.v.Key & ~1) == Ident)
+		if (Entry->p.v.ValInValueEntry->OutOfScope && (char*)((intptr_t)Entry->p.v.Key & ~1) == Ident)
 			return true;
 		else
 			return false;
@@ -367,7 +368,7 @@ struct Value *ParseState::VariableDefineButIgnoreIdentical( const char *Ident, s
         }
 
         /* static variable exists in the global scope - now make a mirroring variable in our own scope with the short name */
-		VariableDefinePlatformVar( Ident, ExistingValue->Typ, ExistingValue->Val, TRUE);
+		VariableDefinePlatformVar( Ident, ExistingValue->TypeOfValue, ExistingValue->Val, TRUE);
         return ExistingValue;
     }
     else
@@ -423,7 +424,7 @@ void ParseState::VariableDefinePlatformVar(const char *Ident, struct ValueType *
 	tempParserForPlatformVar.setScopeID(-1);
 	tempParserForPlatformVar.pc = pc;
     struct Value *SomeValue = tempParserForPlatformVar.VariableAllocValueAndData( 0, IsWritable, nullptr, LocationOnHeap);
-    SomeValue->Typ = Typ;
+    SomeValue->TypeOfValue = Typ;
     SomeValue->Val = FromValue;
     
     if (!pc->TableSet( (pc->TopStackFrame() == nullptr) ? &pc->GlobalTable : pc->TopStackFrame()->LocalTable.get(), 
@@ -535,7 +536,7 @@ PointerType ParseState::VariableDereferencePointer(struct Value *PointerValue,
         *DerefVal = nullptr;
         
     if (DerefType != nullptr)
-        *DerefType = PointerValue->Typ->FromType;
+        *DerefType = PointerValue->TypeOfValue->FromType;
         
     if (DerefOffset != nullptr)
         *DerefOffset = 0;
@@ -543,7 +544,7 @@ PointerType ParseState::VariableDereferencePointer(struct Value *PointerValue,
     if (DerefIsLValue != nullptr)
         *DerefIsLValue = TRUE;
 
-    return PointerValue->Val->Pointer;
+    return PointerValue->ValPointer();
 }
 
 	void Picoc::VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,

@@ -1,6 +1,6 @@
 #include "interpreter.h"
 
-Value::Value() : Typ{}, Val{}, LValueFrom{}, ValOnHeap{}, ValOnStack{},
+Value::Value() : TypeOfValue{}, Val{}, LValueFrom{}, ValOnHeap{}, ValOnStack{},
 AnyValOnHeap{}, IsLValue{}, ScopeID{}, OutOfScope{}
 {}
 
@@ -41,34 +41,139 @@ char *UnionAnyValue::AddressOfData(){
 	return &arrayMem[0];
 }
 
+PointerType &UnionAnyValue::Pointer(){						/* unsafe native pointers */
+	return Pointer_;
+}
+
+char* &UnionAnyValue::PointerChar(){						/* unsafe native pointers */
+	return PointerChar_;
+}
+
+char ** &UnionAnyValue::PointerCharChar()				  /* unsafe native pointers */
+{
+	return PointerCharChar_;
+}
+unsigned char *&UnionAnyValue::PointerUChar()      /* unsafe native pointers */
+{
+	return PointerUChar_;
+}
+double * &UnionAnyValue::PointerDouble(){
+	return PointerDouble_;
+}
+int * &UnionAnyValue::PointerInt(){
+	return PointerInt_;
+}
+double &UnionAnyValue::FP(){
+	return FP_;
+}
+
+struct ValueType * &UnionAnyValue::TypeOfAnyValue(){
+	return TypeOfAnyValue_;
+}
+StructFuncDef &UnionAnyValue::FuncDef(){
+	return FuncDef_;
+}
+StructMacroDef &UnionAnyValue::MacroDef(){
+	return MacroDef_;
+}
+
+const char * &UnionAnyValue::IdentifierOfAnyValue(){
+	return IdentifierOfAnyValue_;
+}
+
+
+#ifndef NO_FP
+double &Value::ValFP(){
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->FP();
+}
+#endif
+PointerType &Value::ValPointer()						/* unsafe native pointers */
+{
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->Pointer();
+}
+char * &Value::ValPointerChar()				  /* unsafe native pointers */
+{
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->PointerChar();
+}
+char ** &Value::ValPointerCharChar()				  /* unsafe native pointers */
+{
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->PointerCharChar();
+}
+unsigned char *&Value::ValPointerUChar()     /* unsafe native pointers */
+{
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->PointerUChar();
+}
+double * &Value::ValPointerDouble(){
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->PointerDouble();
+}
+int * &Value::ValPointerInt(){
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->PointerInt();
+}
 
 unsigned char &Value::ValUnsignedCharacter(){
-	return Val->UnsignedCharacter();
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->UnsignedCharacter();
 }
 
 char &Value::ValCharacter(){
-	return Val->Character();
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->Character();
 }
 short &Value::ValShortInteger(){
-	return Val->ShortInteger();
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->ShortInteger();
 }
 int &Value::ValInteger(){
-	return Val->Integer();
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->Integer();
 }
 long &Value::ValLongInteger(){
-	return Val->LongInteger();
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->LongInteger();
 }
 unsigned short &Value::ValUnsignedShortInteger(){
-	return Val->UnsignedShortInteger();
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->UnsignedShortInteger();
 }
 unsigned int &Value::ValUnsignedInteger(){
-	return Val->UnsignedInteger();
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->UnsignedInteger();
 }
 unsigned long &Value::ValUnsignedLongInteger(){
-	return Val->UnsignedLongInteger();
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->UnsignedLongInteger();
 }
 
+struct ValueType * &Value::ValTypeOfAnyValue(){
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->TypeOfAnyValue();
 
+}
+StructFuncDef &Value::ValFuncDef(){
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->FuncDef();
+}
+StructMacroDef &Value::ValMacroDef(){
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->MacroDef();
+}
+
+const char * &Value::ValIdentifierOfAnyValue(){
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->IdentifierOfAnyValue();
+}
+
+char *Value::ValAddressOfData(){
+	UnionAnyValuePointer Val1 = Val;
+	return Val1->AddressOfData();
+}
 #ifdef PARSESTATE_CONSTR
 ParseState::ParseState() :
 pc{},                  /* the picoc instance this parser is a part of */
@@ -109,7 +214,7 @@ void ParseState::setTemp(Picoc *newPc){
 	setScopeID(-1);
 }
 
-TableEntry::TableEntry() : Next{},        /* next item in this hash chain */
+TableEntry::TableEntry() : // obsolete  Next{},        /* next item in this hash chain */
 DeclFileName{},       /* where the variable was declared */
 DeclLine{}, DeclColumn{},
 identifier_{}{
@@ -119,12 +224,15 @@ identifier_{}{
 }
 
 
-Table::Table() : Size{ 0 }, OnHeap{ false }, //HashTable{ nullptr }, 
-hashTable_{}, publicMap{}
+Table::Table() :  
+hashTable_{}
 {
-	hashTable_ = &publicMap;
+// obsolete 	hashTable_ = &publicMap;
 }
 
+Table::~Table(){
+	TableFree();
+}
 
 // obsolete void Table::TableInitTable(std::map<std::string, struct TableEntry*> *hashTable) { 
 //	hashTable_ = hashTable; 

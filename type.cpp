@@ -17,10 +17,10 @@ struct ValueType *ParseState::TypeAdd(  struct ValueType *ParentType, enum BaseT
     NewType->ArraySize = ArraySize;
     NewType->Sizeof = Sizeof;
     NewType->AlignBytes = AlignBytes;
-    NewType->Identifier = Identifier;
-    NewType->Members = NULL;
+    NewType->IdentifierOfValueType = Identifier;
+    NewType->Members = nullptr;
     NewType->FromType = ParentType;
-    NewType->DerivedTypeList = NULL;
+    NewType->DerivedTypeList = nullptr;
     NewType->OnHeap = LocationOnHeap;
     NewType->Next = ParentType->DerivedTypeList;
     ParentType->DerivedTypeList = NewType;
@@ -36,7 +36,7 @@ struct ValueType *ParseState::TypeGetMatching(struct ValueType *ParentType, enum
     int Sizeof;
     int AlignBytes;
     struct ValueType *ThisType = ParentType->DerivedTypeList;
-    while (ThisType != nullptr && (ThisType->Base != Base || ThisType->ArraySize != ArraySize || ThisType->Identifier != Identifier))
+    while (ThisType != nullptr && (ThisType->Base != Base || ThisType->ArraySize != ArraySize || ThisType->IdentifierOfValueType != Identifier))
         ThisType = ThisType->Next;
     
     if (ThisType != nullptr)
@@ -74,10 +74,10 @@ int Value::TypeSizeValue(int Compact)
 	struct Value *Val = this;
     if (IS_INTEGER_NUMERIC(Val) && !Compact)
         return sizeof(ALIGN_TYPE);     /* allow some extra room for type extension */
-    else if (Val->Typ->Base != TypeArray)
-        return Val->Typ->Sizeof;
+    else if (Val->TypeOfValue->Base != TypeArray)
+        return Val->TypeOfValue->Sizeof;
     else
-        return Val->Typ->FromType->Sizeof * Val->Typ->ArraySize;
+        return Val->TypeOfValue->FromType->Sizeof * Val->TypeOfValue->ArraySize;
 }
 
 /* memory used by a variable given its type and array size */
@@ -99,7 +99,7 @@ void Picoc::TypeAddBaseType( struct ValueType *TypeNode, enum BaseType Base, int
     TypeNode->ArraySize = 0;
     TypeNode->Sizeof = Sizeof;
     TypeNode->AlignBytes = AlignBytes;
-    TypeNode->Identifier = pc->StrEmpty;
+	TypeNode->IdentifierOfValueType = pc->StrEmpty;
     TypeNode->Members = NULL;
     TypeNode->FromType = NULL;
     TypeNode->DerivedTypeList = NULL;
@@ -202,7 +202,7 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
     if (Token == TokenIdentifier)
     {
 		Parser->LexGetToken( &LexValue, TRUE);
-        StructIdentifier = LexValue->Val->Identifier;
+        StructIdentifier = LexValue->ValIdentifierOfAnyValue();
 		Token = Parser->LexGetToken( NULL, FALSE);
     }
     else
@@ -221,7 +221,7 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
         /* use the already defined structure */
 #if 0
         if ((*Typ)->Members == NULL)
-            Parser->ProgramFail( "structure '%s' isn't defined", LexValue->Val->Identifier);
+            Parser->ProgramFail( "structure '%s' isn't defined", LexValue->ValIdentifierOfAnyValue());
 #endif            
         return;
     }
@@ -241,11 +241,11 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
             Parser->ProgramFail( "invalid type in struct");
         
 		MemberValue = VariableAllocValueAndData( sizeof(int), FALSE, NULL, LocationOnHeap);
-        MemberValue->Typ = MemberType;
+        MemberValue->TypeOfValue = MemberType;
         if (IsStruct)
         { 
             /* allocate this member's location in the struct */
-            AlignBoundary = MemberValue->Typ->AlignBytes;
+            AlignBoundary = MemberValue->TypeOfValue->AlignBytes;
             if (((*Typ)->Sizeof & (AlignBoundary-1)) != 0)
                 (*Typ)->Sizeof += AlignBoundary - ((*Typ)->Sizeof & (AlignBoundary-1));
                 
@@ -256,13 +256,13 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
         { 
             /* union members always start at 0, make sure it's big enough to hold the largest member */
             MemberValue->ValInteger() = 0;
-            if (MemberValue->Typ->Sizeof > (*Typ)->Sizeof)
+            if (MemberValue->TypeOfValue->Sizeof > (*Typ)->Sizeof)
 				(*Typ)->Sizeof = MemberValue->TypeSizeValue(TRUE);
         }
 
         /* make sure to align to the size of the largest member's alignment */
-        if ((*Typ)->AlignBytes < MemberValue->Typ->AlignBytes)
-            (*Typ)->AlignBytes = MemberValue->Typ->AlignBytes;
+        if ((*Typ)->AlignBytes < MemberValue->TypeOfValue->AlignBytes)
+            (*Typ)->AlignBytes = MemberValue->TypeOfValue->AlignBytes;
         
         /* define it */
         if (!pc->TableSet( (*Typ)->Members, MemberIdentifier, MemberValue, Parser->FileName, Parser->Line, Parser->CharacterPos))
@@ -313,7 +313,7 @@ void ParseState::TypeParseEnum(struct ValueType **Typ)
     if (Token == TokenIdentifier)
     {
         Parser->LexGetToken( &LexValue, TRUE);
-        EnumIdentifier = LexValue->Val->Identifier;
+        EnumIdentifier = LexValue->ValIdentifierOfAnyValue();
         Token = Parser->LexGetToken( NULL, FALSE);
     }
     else
@@ -338,14 +338,14 @@ void ParseState::TypeParseEnum(struct ValueType **Typ)
         
     Parser->LexGetToken( NULL, TRUE);    
     (*Typ)->Members = &pc->GlobalTable;
-    memset((void *)&InitValue, '\0', sizeof(struct Value));
-    InitValue.Typ = &pc->IntType;
+    // obsolete memset((void *)&InitValue, '\0', sizeof(struct Value));
+    InitValue.TypeOfValue = &pc->IntType;
     InitValue.Val = (UnionAnyValuePointer )&EnumValue;
     do {
         if (Parser->LexGetToken( &LexValue, TRUE) != TokenIdentifier)
             Parser->ProgramFail( "identifier expected");
         
-        EnumIdentifier = LexValue->Val->Identifier;
+        EnumIdentifier = LexValue->ValIdentifierOfAnyValue();
         if (Parser->LexGetToken( NULL, FALSE) == TokenAssign)
         {
             Parser->LexGetToken( NULL, TRUE);
@@ -436,8 +436,8 @@ int ParseState::TypeParseFront(struct ValueType **Typ, int *IsStatic)
         
         case TokenIdentifier:
             /* we already know it's a typedef-defined type because we got here */
-            VariableGet( LexerValue->Val->Identifier, &VarValue);
-            *Typ = VarValue->Val->Typ;
+            VariableGet( LexerValue->ValIdentifierOfAnyValue(), &VarValue);
+            *Typ = VarValue->ValTypeOfAnyValue();
             break;
 
         default: ParserCopy(Parser, &Before); return FALSE;
@@ -524,7 +524,7 @@ void ParseState::TypeParseIdentPart(struct ValueType *BasicTyp, struct ValueType
                 if (*Typ == NULL || *Identifier != Parser->pc->StrEmpty)
                     Parser->ProgramFail( "bad type declaration");
                 
-                *Identifier = LexValue->Val->Identifier;
+                *Identifier = LexValue->ValIdentifierOfAnyValue();
                 Done = TRUE;
                 break;
                 

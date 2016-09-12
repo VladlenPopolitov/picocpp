@@ -48,18 +48,18 @@ typedef FILE IOFILE;
 
 /* coercion of numeric types to other numeric types */
 #ifndef NO_FP
-#define IS_FP(v) ((v)->Typ->Base == TypeFP)
-#define FP_VAL(v) ((v)->Val->FP)
+#define IS_FP(v) ((v)->TypeOfValue->Base == TypeFP)
+#define FP_VAL(v) ((v)->ValFP())
 #else
 #define IS_FP(v) 0
 #define FP_VAL(v) 0
 #endif
 
-#define IS_POINTER_COERCIBLE(v, ap) ((ap) ? ((v)->Typ->Base == TypePointer) : 0)
-#define POINTER_COERCE(v) ((int)(v)->Val->Pointer)
+#define IS_POINTER_COERCIBLE(v, ap) ((ap) ? ((v)->TypeOfValue->Base == TypePointer) : 0)
+#define POINTER_COERCE(v) (static_cast<int>((v)->ValPointer()))
 
 #define IS_INTEGER_NUMERIC_TYPE(t) ((t)->Base >= TypeInt && (t)->Base <= TypeUnsignedLong)
-#define IS_INTEGER_NUMERIC(v) IS_INTEGER_NUMERIC_TYPE((v)->Typ)
+#define IS_INTEGER_NUMERIC(v) IS_INTEGER_NUMERIC_TYPE((v)->TypeOfValue)
 #define IS_NUMERIC_COERCIBLE(v) (IS_INTEGER_NUMERIC(v) || IS_FP(v))
 #define IS_NUMERIC_COERCIBLE_PLUS_POINTERS(v,ap) (IS_NUMERIC_COERCIBLE(v) || IS_POINTER_COERCIBLE(v,ap))
 
@@ -73,6 +73,11 @@ union UnionAnyValue;
 using UnionAnyValuePointer = UnionAnyValue *;
 using PointerType = void*;
 //using PointerType = VirtualPointer;
+struct Value;
+struct FuncDef__;
+using StructFuncDef = struct FuncDef__;
+struct MacroDef__;
+using StructMacroDef = struct MacroDef__;
 
 /* data type */
 enum MemoryLocation {
@@ -130,6 +135,7 @@ enum RunMode
     RunModeContinue,            /* as above but repeat the loop */
     RunModeGoto                 /* searching for a goto label */
 };
+
 
 /* parser state - has all this detail so we can parse nested files */
 
@@ -243,7 +249,7 @@ private:
 			void ParseState::ExpressionStackPushOperator(struct ExpressionStack **StackTop, enum OperatorOrder Order, 
 			enum LexToken Token, int Precedence);
 			void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, enum LexToken Token);
-			void ParseState::ExpressionParseMacroCall(struct ExpressionStack **StackTop, const char *MacroName, struct MacroDef *MDef);
+			void ParseState::ExpressionParseMacroCall(struct ExpressionStack **StackTop, const char *MacroName, StructMacroDef *MDef);
 			void ParseState::ExpressionParseFunctionCall(struct ExpressionStack **StackTop, const char *FuncName, bool RunIt);
 			enum LexToken ParseState::LexGetRawToken(struct Value **Value, int IncPos);
 			void ParseState::LexHashIncPos(int IncPos);
@@ -275,17 +281,7 @@ public:
 			struct ValueType *TypeGetMatching( struct ValueType *ParentType, enum BaseType Base,
 				int ArraySize, const char *Identifier, int AllowDuplicates);
 			struct ValueType *TypeCreateOpaqueStruct( const char *StructName, int Size);
-			//int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
-
-
-
-
-
-
-
-
-
-
+			//obsolete int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
 };
 
 /* values */
@@ -321,7 +317,7 @@ struct ValueType
     int ArraySize;                  /* the size of an array type */
     int Sizeof;                     /* the storage required */
     int AlignBytes;                 /* the alignment boundary of this type */
-    const char *Identifier;         /* the name of a struct or union */
+    const char *IdentifierOfValueType;         /* the name of a struct or union */
     struct ValueType *FromType;     /* the type we're derived from (or NULL) */
     struct ValueType *DerivedTypeList;  /* first in a list of types derived from this one */
     struct ValueType *Next;         /* next item in the derived type list */
@@ -332,24 +328,25 @@ struct ValueType
 
 /* function definition */
 struct Value;
-struct FuncDef
+struct FuncDef__
 {
-    struct ValueType *ReturnType;   /* the return value type */
-    int NumParams;                  /* the number of parameters */
-    int VarArgs;                    /* has a variable number of arguments after the explicitly specified ones */
-    struct ValueType **ParamType;   /* array of parameter types */
-    const char **ParamName;               /* array of parameter names */
-    void (*Intrinsic)(ParseState*,Value*,Value**,int);            /* intrinsic call address or NULL */
-    struct ParseState Body;         /* lexical tokens of the function body if not intrinsic */
+	struct ValueType *ReturnType;   /* the return value type */
+	int NumParams;                  /* the number of parameters */
+	int VarArgs;                    /* has a variable number of arguments after the explicitly specified ones */
+	struct ValueType **ParamType;   /* array of parameter types */
+	const char **ParamName;               /* array of parameter names */
+	void(*Intrinsic)(ParseState*, Value*, Value**, int);            /* intrinsic call address or NULL */
+	struct ParseState Body;         /* lexical tokens of the function body if not intrinsic */
 };
 
 /* macro definition */
-struct MacroDef
+struct MacroDef__
 {
-    int NumParams;                  /* the number of parameters */
-    const char **ParamName;               /* array of parameter names */
-    struct ParseState Body;         /* lexical tokens of the function body if not intrinsic */
+	int NumParams;                  /* the number of parameters */
+	const char **ParamName;               /* array of parameter names */
+	struct ParseState Body;         /* lexical tokens of the function body if not intrinsic */
 };
+
 
 /* values */
 
@@ -366,17 +363,17 @@ union AnyValueOld
 	char *Identifier;
 	char ArrayMem[2];               /* placeholder for where the data starts, doesn't point to it */
 	struct ValueType *Typ;
-	struct FuncDef FuncDef;
-	struct MacroDef MacroDef;
+	StructFuncDef FuncDef();
+	StructMacroDef MacroDef();
 #ifndef NO_FP
-	double FP;
+	double FP();
 #endif
-	void *Pointer;						/* unsafe native pointers */
-	char *PointerChar;				  /* unsafe native pointers */
-	char **PointerCharChar;				  /* unsafe native pointers */
-	unsigned char *PointerUChar;      /* unsafe native pointers */
-	double *PointerDouble;
-	int *PointerInt;
+	void *Pointer();						/* unsafe native pointers */
+	char *PointerChar();				  /* unsafe native pointers */
+	char **PointerCharChar();				  /* unsafe native pointers */
+	unsigned char *PointerUChar();      /* unsafe native pointers */
+	double *PointerDouble();
+	int *PointerInt();
 };
 
 class VirtualPointer {
@@ -399,20 +396,20 @@ public:
     unsigned int &UnsignedInteger();
     unsigned long &UnsignedLongInteger();
     unsigned char &UnsignedCharacter();
-    const char *Identifier;
+    const char * &IdentifierOfAnyValue();
 	char *AddressOfData();
-    struct ValueType *Typ;
-    struct FuncDef FuncDef;
-    struct MacroDef MacroDef;
+	struct ValueType * &TypeOfAnyValue();
+    StructFuncDef &FuncDef();
+    StructMacroDef &MacroDef();
 #ifndef NO_FP
-    double FP;
+    double &FP();
 #endif
-    PointerType Pointer;						/* unsafe native pointers */
-	char *PointerChar;				  /* unsafe native pointers */
-	char **PointerCharChar;				  /* unsafe native pointers */
-	unsigned char *PointerUChar;      /* unsafe native pointers */
-	double *PointerDouble;
-	int *PointerInt;
+    PointerType &Pointer();						/* unsafe native pointers */
+	char * &PointerChar();				  /* unsafe native pointers */
+	char ** &PointerCharChar();				  /* unsafe native pointers */
+	unsigned char *&PointerUChar();      /* unsafe native pointers */
+	double * &PointerDouble();
+	int * &PointerInt();
 private:
 	union AnyValueOld value_;
 	char character_;
@@ -424,6 +421,17 @@ private:
 	unsigned long unsignedLongInteger_;
 	unsigned char unsignedCharacter_;
 	char arrayMem[2];               /* placeholder for where the data starts, doesn't point to it */
+	PointerType Pointer_;						/* unsafe native pointers */
+	char *PointerChar_;				  /* unsafe native pointers */
+	char **PointerCharChar_;				  /* unsafe native pointers */
+	unsigned char *PointerUChar_;      /* unsafe native pointers */
+	double *PointerDouble_;
+	int *PointerInt_;
+	double FP_;
+	struct ValueType *TypeOfAnyValue_;
+	StructFuncDef FuncDef_;
+	StructMacroDef MacroDef_;
+	const char *IdentifierOfAnyValue_;
 };
 
 
@@ -439,7 +447,22 @@ public:
 	unsigned int &ValUnsignedInteger();
 	unsigned long &ValUnsignedLongInteger();
 	unsigned char &ValUnsignedCharacter();
-    struct ValueType *Typ;          /* the type of this value */
+#ifndef NO_FP
+	double &Value::ValFP();
+#endif
+	PointerType &Value::ValPointer();						/* unsafe native pointers */
+	char * &Value::ValPointerChar();				  /* unsafe native pointers */
+	char ** &Value::ValPointerCharChar();				  /* unsafe native pointers */
+	unsigned char *&Value::ValPointerUChar();      /* unsafe native pointers */
+	double * &Value::ValPointerDouble();
+	int * &Value::ValPointerInt();
+	struct ValueType * &ValTypeOfAnyValue();
+	StructFuncDef &ValFuncDef();
+	StructMacroDef &ValMacroDef();
+	const char * &ValIdentifierOfAnyValue();
+	char *ValAddressOfData();
+
+    struct ValueType *TypeOfValue;          /* the type of this value */
     struct Value *LValueFrom;       /* if an LValue, this is a Value our LValue is contained within (or NULL) */
     char ValOnHeap;                 /* this Value is on the heap */
     char ValOnStack;                /* the AnyValue is on the stack along with this Value */
@@ -451,6 +474,7 @@ public:
 	void setVal(UnionAnyValuePointer newVal);
 //private:
 	UnionAnyValuePointer Val;            /* pointer to the AnyValue which holds the actual content */
+public:
 	/* expression.c */
 	long ExpressionCoerceInteger();
 	unsigned long ExpressionCoerceUnsignedInteger();
@@ -463,23 +487,13 @@ public:
 	int TypeStackSizeValue();
 
 };
-//obsolete long ExpressionCoerceInteger(struct Value *Val);
-//obsolete unsigned long ExpressionCoerceUnsignedInteger(struct Value *Val);
-//obsolete #ifndef NO_FP
-//obsolete double ExpressionCoerceFP(struct Value *Val);
-//obsolete #endif
-
-//obsolete /* type.c */
-//obsolete int TypeSizeValue(struct Value *Val, int Compact);
-//obsolete int TypeStackSizeValue(struct Value *Val);
-
 
 /* hash table data structure */
 struct TableEntry 
 {
 public:
 	TableEntry();
-    struct TableEntry *Next;        /* next item in this hash chain */
+    //struct TableEntry *Next;        /* next item in this hash chain */
     const char *DeclFileName;       /* where the variable was declared */
     unsigned short DeclLine;
     unsigned short DeclColumn;
@@ -489,7 +503,7 @@ public:
         struct ValueEntry
         {
             const char *Key;              /* points to the shared string table */
-            struct Value *Val;      /* the value we're storing */
+            struct Value *ValInValueEntry;      /* the value we're storing */
         } v;                        /* used for tables of values */
         
         char Key[1];                /* dummy size - used for the shared string table */
@@ -512,6 +526,7 @@ struct Table
 {
 	/* table.c */
 	Table();
+	~Table();
 	//void TableInitTable(struct TableEntry **HashTable, int Size, bool OnHeap);
 	//void TableInitTable(std::map<std::string,struct TableEntry*> *hashTable) ;
 	void Table::TableInitTable(std::vector<struct TableEntry> &HashTable, size_t Size, bool OnHeap);
@@ -530,11 +545,8 @@ struct Table
 	struct TableEntry *TableSearchIdentifier(const std::string &Key);
 	const char *Table::TableSetIdentifier(const char *Ident, int IdentLen);
 private:
-	TableMapClass publicMap;
-	short Size;
-	bool /* short */ OnHeap;
-	//struct TableEntry **HashTable;
-	TableMapClass *hashTable_;
+	//TableMapClass publicMap;
+	TableMapClass hashTable_;
 };
 
 /* stack frame for function calls */
@@ -814,9 +826,7 @@ public:
 	void TypeInit();
 	void TypeCleanup();
 	//int TypeSize(struct ValueType *Typ, int ArraySize, int Compact);
-	//int TypeSizeValue(struct Value *Val, int Compact);
-	//int TypeStackSizeValue(struct Value *Val);
-	int TypeLastAccessibleOffset( struct Value *Val);
+	// obsolete int TypeLastAccessibleOffset( struct Value *Val);
 	//int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsStatic);
 	//void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, char **Identifier);
 	//void TypeParse(struct ParseState *Parser, struct ValueType **Typ, char **Identifier, int *IsStatic);
