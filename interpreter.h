@@ -695,7 +695,8 @@ public:
     int PicocExitValue;
 
     /* a list of libraries we can include */
-    struct IncludeLibrary *IncludeLibList;
+    // obsolete struct IncludeLibrary *IncludeLibList;
+	std::vector<struct IncludeLibrary> IncludeLibList;
 
     /* heap memory */
 #ifdef USE_MALLOC_STACK

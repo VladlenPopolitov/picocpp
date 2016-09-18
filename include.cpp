@@ -3,6 +3,7 @@
  
 #include "picoc.h"
 #include "interpreter.h"
+#include <algorithm>
 
 #ifndef NO_HASH_INCLUDE
 
@@ -31,7 +32,8 @@ void Picoc::IncludeInit()
 /* clean up space used by the include system */
 void Picoc::IncludeCleanup()
 {
-	Picoc *pc = this;
+	IncludeLibList.clear();
+/* obsolete	Picoc *pc = this;
     struct IncludeLibrary *ThisInclude = pc->IncludeLibList;
     struct IncludeLibrary *NextInclude;
     
@@ -43,11 +45,21 @@ void Picoc::IncludeCleanup()
     }
 
     pc->IncludeLibList = NULL;
+	*/
 }
 
 /* register a new build-in include file */
 void Picoc::IncludeRegister( const char *IncludeName, void (*SetupFunction)(Picoc *pc), struct LibraryFunction *FuncList, const char *SetupCSource)
 {
+	Picoc *pc = this;
+	struct IncludeLibrary NewLib{};
+	NewLib.IncludeName = TableStrRegister(IncludeName);
+	NewLib.SetupFunction = SetupFunction;
+	NewLib.FuncList = FuncList;
+	NewLib.SetupCSource = SetupCSource;
+	// obsolete NewLib->NextLib = pc->IncludeLibList;
+	pc->IncludeLibList.push_back(NewLib);
+	/* obsolete 
 	Picoc *pc = this;
 	struct IncludeLibrary *NewLib = static_cast<IncludeLibrary*>(HeapAllocMem( sizeof(struct IncludeLibrary)));
     NewLib->IncludeName = TableStrRegister( IncludeName);
@@ -56,16 +68,21 @@ void Picoc::IncludeRegister( const char *IncludeName, void (*SetupFunction)(Pico
     NewLib->SetupCSource = SetupCSource;
     NewLib->NextLib = pc->IncludeLibList;
     pc->IncludeLibList = NewLib;
+	*/
 }
 
 /* include all of the system headers */
 void Picoc::PicocIncludeAllSystemHeaders()
 {
 	Picoc *pc = this;
-    struct IncludeLibrary *ThisInclude = pc->IncludeLibList;
+    // obsolete struct IncludeLibrary *ThisInclude = pc->IncludeLibList;
     
-    for (; ThisInclude != nullptr; ThisInclude = ThisInclude->NextLib)
-        IncludeFile( ThisInclude->IncludeName);
+	// obsolete for (; ThisInclude != nullptr; ThisInclude = ThisInclude->NextLib)
+	// obsolete     IncludeFile( ThisInclude->IncludeName);
+	std::for_each(std::begin(pc->IncludeLibList), std::end(pc->IncludeLibList), [pc](struct IncludeLibrary &ThisInclude){
+		pc->IncludeFile(ThisInclude.IncludeName);
+	});
+
 }
 
 /* include one of a number of predefined libraries, or perhaps an actual file */
@@ -75,8 +92,9 @@ void Picoc::IncludeFile( const char *FileName)
     struct IncludeLibrary *LInclude;
     
     /* scan for the include file name to see if it's in our list of predefined includes */
-    for (LInclude = pc->IncludeLibList; LInclude != NULL; LInclude = LInclude->NextLib)
-    {
+    // obsolete for (LInclude = pc->IncludeLibList; LInclude != NULL; LInclude = LInclude->NextLib)
+	for (auto LInclude = pc->IncludeLibList.begin(); LInclude != pc->IncludeLibList.end(); ++LInclude)
+		{
         if (strcmp(LInclude->IncludeName, FileName) == 0)
         {
             /* found it - protect against multiple inclusion */
