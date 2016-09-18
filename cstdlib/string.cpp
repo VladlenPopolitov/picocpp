@@ -42,15 +42,36 @@ void StringStrncat(struct ParseState *Parser, struct Value *ReturnValue, struct 
 		Param[2]->ValInteger(pc));
 }
 
-#ifndef WIN32
+#ifndef WIN32_2
 void StringIndex(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = index(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
+char *Pos = (char *)Param[0]->ValPointer(pc);
+int SearchChar = Param[1]->ValInteger(pc);
+
+while (*Pos != '\0' && *Pos != SearchChar)
+Pos++;
+
+if (*Pos != SearchChar)
+ReturnValue->ValPointer(pc) = NULL;
+else
+ReturnValue->ValPointer(pc) = Pos;
+
+    //ReturnValue->ValPointer(pc) = index(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
 }
 
 void StringRindex(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = rindex(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
+char *Pos = (char *)Param[0]->ValPointer(pc);
+int SearchChar = Param[1]->ValInteger(pc);
+
+ReturnValue->ValPointer(pc) = NULL;
+for (; *Pos != '\0'; Pos++)
+{
+	if (*Pos == SearchChar)
+		ReturnValue->ValPointer(pc) = Pos;
+}
+
+//ReturnValue->ValPointer(pc) = rindex(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
 }
 #endif
 
@@ -166,7 +187,7 @@ void StringStrtok_r(struct ParseState *Parser, struct Value *ReturnValue, struct
 /* all string.h functions */
 struct LibraryFunction StringFunctions[] =
 {
-#ifndef WIN32
+#ifndef WIN32_2
 	{ StringIndex,         "char *index(char *,int);" },
     { StringRindex,        "char *rindex(char *,int);" },
 #endif
