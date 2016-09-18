@@ -41,7 +41,7 @@ struct ExpressionStack
     unsigned char Order;                /* the evaluation order of this operator */
 };
 
-/* operator precedence definitions */
+/* operator precedence definitions  */
 struct OpPrecedence
 {
     unsigned int PrefixPrecedence:4;
