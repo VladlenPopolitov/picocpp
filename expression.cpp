@@ -2,6 +2,7 @@
  * which handles operator precedence */
  
 #include "interpreter.h"
+//#define DEBUG_EXPRESSIONS 1 
 
 /* whether evaluation is left to right for a given precedence level */
 #define IS_LEFT_TO_RIGHT(p) ((p) != 2 && (p) != 14)
@@ -35,7 +36,7 @@ enum OperatorOrder
 struct ExpressionStack
 {
     struct ExpressionStack *Next;       /* the next lower item on the stack */
-    struct Value *Val;                  /* the value for this stack node */
+    struct Value *ExprVal;                  /* the value for this stack node */
     enum LexToken Op;                   /* the operator */
     short unsigned int Precedence;      /* the operator precedence of this node */
     unsigned char Order;                /* the evaluation order of this operator */
@@ -88,40 +89,40 @@ void ExpressionStackShow(Picoc *pc, struct ExpressionStack *StackTop)
         if (StackTop->Order == OrderNone)
         { 
             /* it's a value */
-            if (StackTop->Val->IsLValue)
+            if (StackTop->ExprVal->IsLValue)
                 printf("lvalue=");
             else
                 printf("value=");
                 
-            switch (StackTop->ValTypeOfAnyValue()->Base)
+            switch (StackTop->ExprVal->TypeOfValue->Base)
             {
                 case TypeVoid:      printf("void"); break;
-                case TypeInt:       printf("%d:int", StackTop->Val->ValInteger()); break;
-                case TypeShort:     printf("%d:short", StackTop->Val->ValShortInteger()); break;
-                case TypeChar:      printf("%d:char", StackTop->Val->ValCharacter()); break;
-                case TypeLong:      printf("%ld:long", StackTop->Val->ValLongInteger()); break;
-                case TypeUnsignedShort: printf("%d:unsigned short", StackTop->Val->ValUnsignedShortInteger()); break;
-                case TypeUnsignedInt: printf("%d:unsigned int", StackTop->Val->ValUnsignedInteger()); break;
-                case TypeUnsignedLong: printf("%ld:unsigned long", StackTop->Val->ValUnsignedLongInteger()); break;
-                case TypeFP:        printf("%f:fp", StackTop->Val->ValFP()); break;
-                case TypeFunction:  printf("%s:function", StackTop->Val->ValIdentifierOfAnyValue()); break;
-                case TypeMacro:     printf("%s:macro", StackTop->Val->ValIdentifierOfAnyValue()); break;
+                case TypeInt:       printf("%d:int", StackTop->ExprVal->ValInteger()); break;
+                case TypeShort:     printf("%d:short", StackTop->ExprVal->ValShortInteger()); break;
+                case TypeChar:      printf("%d:char", StackTop->ExprVal->ValCharacter()); break;
+                case TypeLong:      printf("%ld:long", StackTop->ExprVal->ValLongInteger()); break;
+                case TypeUnsignedShort: printf("%d:unsigned short", StackTop->ExprVal->ValUnsignedShortInteger()); break;
+                case TypeUnsignedInt: printf("%d:unsigned int", StackTop->ExprVal->ValUnsignedInteger()); break;
+                case TypeUnsignedLong: printf("%ld:unsigned long", StackTop->ExprVal->ValUnsignedLongInteger()); break;
+                case TypeFP:        printf("%f:fp", StackTop->ExprVal->ValFP()); break;
+                case TypeFunction:  printf("%s:function", StackTop->ExprVal->ValIdentifierOfAnyValue()); break;
+                case TypeMacro:     printf("%s:macro", StackTop->ExprVal->ValIdentifierOfAnyValue()); break;
                 case TypePointer:
-                    if (StackTop->Val->ValPointer() == NULL)
+                    if (StackTop->ExprVal->ValPointer() == NULL)
                         printf("ptr(NULL)");
-                    else if (StackTop->ValTypeOfAnyValue()->FromType->Base == TypeChar)
-                        printf("\"%s\":string", (char *)StackTop->Val->ValPointer());
+					else if (StackTop->ExprVal->TypeOfValue->FromType->Base == TypeChar)
+                        printf("\"%s\":string", (char *)StackTop->ExprVal->ValPointer());
                     else
-                        printf("ptr(0x%lx)", (long)StackTop->Val->ValPointer()); 
+                        printf("ptr(0x%lx)", (long)StackTop->ExprVal->ValPointer()); 
                     break;
                 case TypeArray:     printf("array"); break;
-                case TypeStruct:    printf("%s:struct", StackTop->Val->ValIdentifierOfAnyValue()); break;
-                case TypeUnion:     printf("%s:union", StackTop->Val->ValIdentifierOfAnyValue()); break;
-                case TypeEnum:      printf("%s:enum", StackTop->Val->ValIdentifierOfAnyValue()); break;
-                case Type_Type:     PrintType(StackTop->Val->ValTypeOfAnyValue(), pc->CStdOut); printf(":type"); break;
+                case TypeStruct:    printf("%s:struct", StackTop->ExprVal->ValIdentifierOfAnyValue()); break;
+                case TypeUnion:     printf("%s:union", StackTop->ExprVal->ValIdentifierOfAnyValue()); break;
+                case TypeEnum:      printf("%s:enum", StackTop->ExprVal->ValIdentifierOfAnyValue()); break;
+                case Type_Type:     PrintType(StackTop->ExprVal->TypeOfValue, pc->CStdOut); printf(":type"); break;
                 default:            printf("unknown"); break;
             }
-            printf("[0x%lx,0x%lx]", (long)StackTop, (long)StackTop->Val);
+            printf("[0x%lx,0x%lx]", (long)StackTop, (long)StackTop->ExprVal);
         }
         else
         { 
@@ -291,7 +292,7 @@ void ParseState::ExpressionStackPushValueNode(struct ExpressionStack **StackTop,
 	struct ParseState *Parser = this;
 	struct ExpressionStack *StackNode = static_cast<ExpressionStack*>(VariableAlloc( sizeof(struct ExpressionStack), LocationOnStack));
     StackNode->Next = *StackTop;
-    StackNode->Val = ValueLoc;
+    StackNode->ExprVal = ValueLoc;
     *StackTop = StackNode;
 #ifdef FANCY_ERROR_MESSAGES
     StackNode->Line = Parser->Line;
@@ -957,7 +958,7 @@ void ParseState::ExpressionStackCollapse(struct ExpressionStack **StackTop, int 
                 case OrderPrefix:
                     /* prefix evaluation */
                     debugf("prefix evaluation\n");
-                    TopValue = TopStackNode->Val;
+                    TopValue = TopStackNode->ExprVal;
                     
                     /* pop the value and then the prefix operator - assume they'll still be there until we're done */
 					Parser->pc->HeapPopStack(NULL, sizeof(struct ExpressionStack) + sizeof(struct Value) + TopValue->TypeStackSizeValue());
@@ -980,7 +981,7 @@ void ParseState::ExpressionStackCollapse(struct ExpressionStack **StackTop, int 
                 case OrderPostfix:
                     /* postfix evaluation */
                     debugf("postfix evaluation\n");
-                    TopValue = TopStackNode->Next->Val;
+                    TopValue = TopStackNode->Next->ExprVal;
                     
                     /* pop the postfix operator and then the value - assume they'll still be there until we're done */
 					Parser->pc->HeapPopStack( nullptr, sizeof(struct ExpressionStack));
@@ -1003,10 +1004,10 @@ void ParseState::ExpressionStackCollapse(struct ExpressionStack **StackTop, int 
                 case OrderInfix:
                     /* infix evaluation */
                     debugf("infix evaluation\n");
-                    TopValue = TopStackNode->Val;
+                    TopValue = TopStackNode->ExprVal;
                     if (TopValue != NULL)
                     {
-                        BottomValue = TopOperatorNode->Next->Val;
+                        BottomValue = TopOperatorNode->Next->ExprVal;
                         
                         /* pop a value, the operator and another value - assume they'll still be there until we're done */
 						Parser->pc->HeapPopStack(NULL, sizeof(struct ExpressionStack) + sizeof(struct Value) + TopValue->TypeStackSizeValue());
@@ -1084,7 +1085,7 @@ void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, e
     if (Parser->Mode == RunModeRun)
     { 
         /* look up the struct element */
-        struct Value *ParamVal = (*StackTop)->Val;
+        struct Value *ParamVal = (*StackTop)->ExprVal;
         struct Value *StructVal = ParamVal;
         struct ValueType *StructType = ParamVal->TypeOfValue;
         char *DerefDataLoc = (char *)ParamVal->Val;
@@ -1249,9 +1250,9 @@ int ParseState::ExpressionParse(struct Value **Result)
                     else
                     { 
                         /* if it's a && or || operator we may not need to evaluate the right hand side of the expression */
-                        if ( (Token == TokenLogicalOr || Token == TokenLogicalAnd) && IS_NUMERIC_COERCIBLE(StackTop->Val))
+                        if ( (Token == TokenLogicalOr || Token == TokenLogicalAnd) && IS_NUMERIC_COERCIBLE(StackTop->ExprVal))
                         {
-							long LHSInt = StackTop->Val->ExpressionCoerceInteger();
+							long LHSInt = StackTop->ExprVal->ExpressionCoerceInteger();
                             if ( ( (Token == TokenLogicalOr && LHSInt) || (Token == TokenLogicalAnd && !LHSInt) ) &&
                                  (IgnorePrecedence > Precedence) )
                                 IgnorePrecedence = Precedence;
@@ -1380,11 +1381,11 @@ int ParseState::ExpressionParse(struct Value **Result)
             if (StackTop->Order != OrderNone || StackTop->Next != NULL)
                 Parser->ProgramFail( "invalid expression");
                 
-            *Result = StackTop->Val;
+            *Result = StackTop->ExprVal;
 			Parser->pc->HeapPopStack( StackTop, sizeof(struct ExpressionStack));
         }
         else
-			Parser->pc->HeapPopStack(StackTop->Val, sizeof(struct ExpressionStack) + sizeof(struct Value) + StackTop->Val->TypeStackSizeValue());
+			Parser->pc->HeapPopStack(StackTop->ExprVal, sizeof(struct ExpressionStack) + sizeof(struct Value) + StackTop->ExprVal->TypeStackSizeValue());
     }
     
     debugf("ExpressionParse() done\n\n");
@@ -1413,7 +1414,7 @@ void ParseState::ExpressionParseMacroCall(struct ExpressionStack **StackTop, con
 #else
         ExpressionStackPushValueByType(/*Parser,*/ StackTop, &Parser->pc->IntType);  /* largest return type there is */
 #endif
-        ReturnValue = (*StackTop)->Val;
+        ReturnValue = (*StackTop)->ExprVal;
 		Parser->pc->HeapPushStackFrame();
 		ParamArray = static_cast<struct Value**>(Parser->pc->HeapAllocStack( sizeof(struct Value *) * MDef->NumParams));
         if (ParamArray == NULL)
@@ -1506,7 +1507,7 @@ void ParseState::ExpressionParseFunctionCall(struct ExpressionStack **StackTop, 
             Parser->ProgramFail( "%t is not a function - can't call", FuncValue->TypeOfValue);
     
         ExpressionStackPushValueByType(/*Parser,*/ StackTop, FuncValue->ValFuncDef().ReturnType);
-        ReturnValue = (*StackTop)->Val;
+        ReturnValue = (*StackTop)->ExprVal;
 		Parser->pc->HeapPushStackFrame();
 		ParamArray = static_cast<struct Value**>(Parser->pc->HeapAllocStack( sizeof(struct Value *) * FuncValue->ValFuncDef().NumParams));
         if (ParamArray == NULL)
