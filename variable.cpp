@@ -223,7 +223,7 @@ int ParseState::VariableScopeBegin(int* OldScopeID)
 #ifdef VAR_SCOPE_DEBUG
 					if (!FirstPrint) { PRINT_SOURCE_POS; }
 					FirstPrint = 1;
-					printf(">>> back into scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.ValInValueEntry->ScopeID, Entry->p.v.ValInValueEntry->ValInteger());
+					printf(">>> back into scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.ValInValueEntry->ScopeID, Entry->p.v.ValInValueEntry->ValInteger(pc));
 #endif
 				}
 	//		}
@@ -256,7 +256,7 @@ void ParseState::VariableScopeEnd(int ScopeID, int PrevScopeID)
 #ifdef VAR_SCOPE_DEBUG
 			if (!FirstPrint) { PRINT_SOURCE_POS; }
 			FirstPrint = 1;
-			printf(">>> out of scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.ValInValueEntry->ScopeID, Entry->p.v.ValInValueEntry->ValInteger());
+			printf(">>> out of scope: %s %x %d\n", Entry->p.v.Key, Entry->p.v.ValInValueEntry->ScopeID, Entry->p.v.ValInValueEntry->ValInteger(pc));
 #endif
 			Entry->p.v.ValInValueEntry->OutOfScope = TRUE;
 			Entry->p.v.Key = (char*)((intptr_t)Entry->p.v.Key | 1); /* alter the key so it won't be found by normal searches */
@@ -544,7 +544,7 @@ PointerType ParseState::VariableDereferencePointer(struct Value *PointerValue,
     if (DerefIsLValue != nullptr)
         *DerefIsLValue = TRUE;
 
-    return PointerValue->ValPointer();
+    return PointerValue->ValPointer(pc);
 }
 
 	void Picoc::VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,

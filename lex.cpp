@@ -177,7 +177,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
     }
     
     Value->TypeOfValue = &pc->LongType; /* ignored? */
-    Value->ValLongInteger() = Result;
+    Value->ValLongInteger(pc) = Result;
 
     ResultToken = TokenIntegerConstant;
     
@@ -228,7 +228,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
         FPResult *= pow((double)Base, (double)Result * ExponentSign);
     }
     
-    Value->ValFP() = FPResult;
+    Value->ValFP(pc) = FPResult;
 
     if (*Lexer->Pos == 'f' || *Lexer->Pos == 'F')
         LEXER_INC(Lexer);
@@ -251,9 +251,9 @@ enum LexToken Picoc::LexGetWord( struct LexState *Lexer, struct Value *Value)
     } while (Lexer->Pos != Lexer->End && isCident((int)*Lexer->Pos));
     
     Value->TypeOfValue = NULL;
-    Value->ValIdentifierOfAnyValue() = TableStrRegister2( StartPos, Lexer->Pos - StartPos);
+    Value->ValIdentifierOfAnyValue(pc) = TableStrRegister2( StartPos, Lexer->Pos - StartPos);
     
-    Token = LexCheckReservedWord(Value->ValIdentifierOfAnyValue());
+    Token = LexCheckReservedWord(Value->ValIdentifierOfAnyValue(pc));
     switch (Token)
     {
         case TokenHashInclude: Lexer->Mode = LexModeHashInclude; break;
@@ -389,7 +389,7 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
 
     /* create the the pointer for this char* */
     Value->TypeOfValue = pc->CharPtrType;
-    Value->ValPointer() = const_cast<void*>(static_cast<const void*>(RegString)); // unsafe assignment and unsafe cast @todo \todo 
+    Value->ValPointer(pc) = const_cast<void*>(static_cast<const void*>(RegString)); // unsafe assignment and unsafe cast @todo \todo 
     if (*Lexer->Pos == EndChar)
         LEXER_INC(Lexer);
     
@@ -401,7 +401,7 @@ enum LexToken Picoc::LexGetCharacterConstant( struct LexState *Lexer, struct Val
 {
 	Picoc *pc = this;
     Value->TypeOfValue = &pc->CharType;
-    Value->ValCharacter() = LexUnEscapeCharacter(&Lexer->Pos, Lexer->End);
+    Value->ValCharacter(pc) = LexUnEscapeCharacter(&Lexer->Pos, Lexer->End);
     if (Lexer->Pos != Lexer->End && *Lexer->Pos != '\'')
         LexFail( Lexer, "expected \"'\"");
         
@@ -789,7 +789,7 @@ void ParseState::LexHashIfdef(int IfNot)
         Parser->ProgramFail( "identifier expected");
     
     /* is the identifier defined? */
-	IsDefined = Parser->pc->GlobalTable.TableGet(IdentValue->ValIdentifierOfAnyValue(), &SavedValue, NULL, NULL, NULL);
+	IsDefined = Parser->pc->GlobalTable.TableGet(IdentValue->ValIdentifierOfAnyValue(pc), &SavedValue, NULL, NULL, NULL);
     if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && ( (IsDefined && !IfNot) || (!IsDefined && IfNot)) )
     {
         /* #if is active, evaluate to this new level */
@@ -812,13 +812,13 @@ void ParseState::LexHashIf()
     if (Token == TokenIdentifier)
     {
         /* look up a value from a macro definition */
-		if (!Parser->pc->GlobalTable.TableGet(IdentValue->ValIdentifierOfAnyValue(), &SavedValue, NULL, NULL, NULL))
-            Parser->ProgramFail( "'%s' is undefined", IdentValue->ValIdentifierOfAnyValue());
+		if (!Parser->pc->GlobalTable.TableGet(IdentValue->ValIdentifierOfAnyValue(pc), &SavedValue, NULL, NULL, NULL))
+            Parser->ProgramFail( "'%s' is undefined", IdentValue->ValIdentifierOfAnyValue(pc));
         
         if (SavedValue->TypeOfValue->Base != TypeMacro)
             Parser->ProgramFail( "value expected");
         
-        ParserCopy(&MacroParser, &SavedValue->ValMacroDef().Body);
+        ParserCopy(&MacroParser, &SavedValue->ValMacroDef(pc).Body);
 		Token = MacroParser.LexGetRawToken(&IdentValue, TRUE);
     }
     
@@ -826,7 +826,7 @@ void ParseState::LexHashIf()
         Parser->ProgramFail( "value expected");
     
     /* is the identifier defined? */
-    if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && IdentValue->ValCharacter())
+    if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && IdentValue->ValCharacter(pc))
     {
         /* #if is active, evaluate to this new level */
         Parser->HashIfEvaluateToLevel++;

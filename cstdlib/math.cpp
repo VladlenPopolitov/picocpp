@@ -21,119 +21,142 @@ static double M_SQRT1_2Value =  0.70710678118654752440;  /* 1/sqrt(2) */
 
 void MathSin(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = sin(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = sin(Param[0]->ValFP(pc));
 }
 
 void MathCos(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = cos(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = cos(Param[0]->ValFP(pc));
 }
 
 void MathTan(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = tan(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = tan(Param[0]->ValFP(pc));
 }
 
 void MathAsin(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = asin(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = asin(Param[0]->ValFP(pc));
 }
 
 void MathAcos(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = acos(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = acos(Param[0]->ValFP(pc));
 }
 
 void MathAtan(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = atan(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = atan(Param[0]->ValFP(pc));
 }
 
 void MathAtan2(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = atan2(Param[0]->ValFP(), Param[1]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = atan2(Param[0]->ValFP(pc), Param[1]->ValFP(pc));
 }
 
 void MathSinh(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = sinh(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = sinh(Param[0]->ValFP(pc));
 }
 
 void MathCosh(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = cosh(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = cosh(Param[0]->ValFP(pc));
 }
 
 void MathTanh(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = tanh(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = tanh(Param[0]->ValFP(pc));
 }
 
 void MathExp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = exp(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = exp(Param[0]->ValFP(pc));
 }
 
 void MathFabs(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = fabs(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = fabs(Param[0]->ValFP(pc));
 }
 
 void MathFmod(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = fmod(Param[0]->ValFP(), Param[1]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = fmod(Param[0]->ValFP(pc), Param[1]->ValFP(pc));
 }
 
 void MathFrexp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = frexp(Param[0]->ValFP(), Param[1]->ValPointerInt());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = frexp(Param[0]->ValFP(pc), Param[1]->ValPointerInt(pc));
 }
 
 void MathLdexp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = ldexp(Param[0]->ValFP(), Param[1]->ValInteger());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = ldexp(Param[0]->ValFP(pc), Param[1]->ValInteger(pc));
 }
 
 void MathLog(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = log(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = log(Param[0]->ValFP(pc));
 }
 
 void MathLog10(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = log10(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = log10(Param[0]->ValFP(pc));
 }
 
 void MathModf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = modf(Param[0]->ValFP(), Param[0]->ValPointerDouble());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = modf(Param[0]->ValFP(pc), Param[0]->ValPointerDouble(pc));
 }
 
 void MathPow(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = pow(Param[0]->ValFP(), Param[1]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = pow(Param[0]->ValFP(pc), Param[1]->ValFP(pc));
 }
 
 void MathSqrt(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = sqrt(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = sqrt(Param[0]->ValFP(pc));
 }
 
 void MathRound(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
+	Picoc *pc = Parser->pc;
     /* this awkward definition of "round()" due to it being inconsistently
      * declared in math.h */
-    ReturnValue->ValFP() = ceil(Param[0]->ValFP() - 0.5);
+    ReturnValue->ValFP(pc) = ceil(Param[0]->ValFP(pc) - 0.5);
 }
 
 void MathCeil(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = ceil(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = ceil(Param[0]->ValFP(pc));
 }
 
 void MathFloor(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = floor(Param[0]->ValFP());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = floor(Param[0]->ValFP(pc));
 }
 
 /* all math.h functions */

@@ -6,13 +6,15 @@ void MsvcSetupFunc(Picoc *pc)
 
 void CTest (struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
-    printf("test(%d)\n", Param[0]->ValInteger());
-    Param[0]->ValInteger() = 1234;
+	Picoc *pc = Parser->pc;
+    printf("test(%d)\n", Param[0]->ValInteger(pc));
+    Param[0]->ValInteger(pc) = 1234;
 }
 
 void CLineNo (struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
-    ReturnValue->ValInteger() = Parser->getLine();
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValInteger(pc) = Parser->getLine();
 }
 
 /* list of all library functions and their prototypes */

@@ -83,94 +83,94 @@ const char * &UnionAnyValue::IdentifierOfAnyValue(){
 
 
 #ifndef NO_FP
-double &Value::ValFP(){
+double &Value::ValFP(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->FP();
 }
 #endif
-PointerType &Value::ValPointer()						/* unsafe native pointers */
+PointerType &Value::ValPointer(Picoc *pc)						/* unsafe native pointers */
 {
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->Pointer();
 }
-char * &Value::ValPointerChar()				  /* unsafe native pointers */
+char * &Value::ValPointerChar(Picoc *pc)				  /* unsafe native pointers */
 {
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->PointerChar();
 }
-char ** &Value::ValPointerCharChar()				  /* unsafe native pointers */
+char ** &Value::ValPointerCharChar(Picoc *pc)				  /* unsafe native pointers */
 {
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->PointerCharChar();
 }
-unsigned char *&Value::ValPointerUChar()     /* unsafe native pointers */
+unsigned char *&Value::ValPointerUChar(Picoc *pc)     /* unsafe native pointers */
 {
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->PointerUChar();
 }
-double * &Value::ValPointerDouble(){
+double * &Value::ValPointerDouble(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->PointerDouble();
 }
-int * &Value::ValPointerInt(){
+int * &Value::ValPointerInt(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->PointerInt();
 }
 
-unsigned char &Value::ValUnsignedCharacter(){
+unsigned char &Value::ValUnsignedCharacter(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->UnsignedCharacter();
 }
 
-char &Value::ValCharacter(){
+char &Value::ValCharacter(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->Character();
 }
-short &Value::ValShortInteger(){
+short &Value::ValShortInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->ShortInteger();
 }
-int &Value::ValInteger(){
+int &Value::ValInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->Integer();
 }
-long &Value::ValLongInteger(){
+long &Value::ValLongInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->LongInteger();
 }
-unsigned short &Value::ValUnsignedShortInteger(){
+unsigned short &Value::ValUnsignedShortInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->UnsignedShortInteger();
 }
-unsigned int &Value::ValUnsignedInteger(){
+unsigned int &Value::ValUnsignedInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->UnsignedInteger();
 }
-unsigned long &Value::ValUnsignedLongInteger(){
+unsigned long &Value::ValUnsignedLongInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->UnsignedLongInteger();
 }
 
-struct ValueType * &Value::ValTypeOfAnyValue(){
+struct ValueType * &Value::ValTypeOfAnyValue(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->TypeOfAnyValue();
 
 }
-StructFuncDef &Value::ValFuncDef(){
+StructFuncDef &Value::ValFuncDef(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->FuncDef();
 }
-StructMacroDef &Value::ValMacroDef(){
+StructMacroDef &Value::ValMacroDef(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->MacroDef();
 }
 
-const char * &Value::ValIdentifierOfAnyValue(){
+const char * &Value::ValIdentifierOfAnyValue(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->IdentifierOfAnyValue();
 }
 
-char *Value::ValAddressOfData(){
+char *Value::ValAddressOfData(Picoc *pc){
 	UnionAnyValuePointer Val1 = Val;
 	return Val1->AddressOfData();
 }

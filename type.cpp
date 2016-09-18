@@ -202,7 +202,7 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
     if (Token == TokenIdentifier)
     {
 		Parser->LexGetToken( &LexValue, TRUE);
-        StructIdentifier = LexValue->ValIdentifierOfAnyValue();
+        StructIdentifier = LexValue->ValIdentifierOfAnyValue(pc);
 		Token = Parser->LexGetToken( NULL, FALSE);
     }
     else
@@ -221,7 +221,7 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
         /* use the already defined structure */
 #if 0
         if ((*Typ)->Members == NULL)
-            Parser->ProgramFail( "structure '%s' isn't defined", LexValue->ValIdentifierOfAnyValue());
+            Parser->ProgramFail( "structure '%s' isn't defined", LexValue->ValIdentifierOfAnyValue(pc));
 #endif            
         return;
     }
@@ -249,13 +249,13 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
             if (((*Typ)->Sizeof & (AlignBoundary-1)) != 0)
                 (*Typ)->Sizeof += AlignBoundary - ((*Typ)->Sizeof & (AlignBoundary-1));
                 
-            MemberValue->ValInteger() = (*Typ)->Sizeof;
+            MemberValue->ValInteger(pc) = (*Typ)->Sizeof;
 			(*Typ)->Sizeof += MemberValue->TypeSizeValue(TRUE);
         }
         else
         { 
             /* union members always start at 0, make sure it's big enough to hold the largest member */
-            MemberValue->ValInteger() = 0;
+            MemberValue->ValInteger(pc) = 0;
             if (MemberValue->TypeOfValue->Sizeof > (*Typ)->Sizeof)
 				(*Typ)->Sizeof = MemberValue->TypeSizeValue(TRUE);
         }
@@ -313,7 +313,7 @@ void ParseState::TypeParseEnum(struct ValueType **Typ)
     if (Token == TokenIdentifier)
     {
         Parser->LexGetToken( &LexValue, TRUE);
-        EnumIdentifier = LexValue->ValIdentifierOfAnyValue();
+        EnumIdentifier = LexValue->ValIdentifierOfAnyValue(pc);
         Token = Parser->LexGetToken( NULL, FALSE);
     }
     else
@@ -345,7 +345,7 @@ void ParseState::TypeParseEnum(struct ValueType **Typ)
         if (Parser->LexGetToken( &LexValue, TRUE) != TokenIdentifier)
             Parser->ProgramFail( "identifier expected");
         
-        EnumIdentifier = LexValue->ValIdentifierOfAnyValue();
+        EnumIdentifier = LexValue->ValIdentifierOfAnyValue(pc);
         if (Parser->LexGetToken( NULL, FALSE) == TokenAssign)
         {
             Parser->LexGetToken( NULL, TRUE);
@@ -436,8 +436,8 @@ int ParseState::TypeParseFront(struct ValueType **Typ, int *IsStatic)
         
         case TokenIdentifier:
             /* we already know it's a typedef-defined type because we got here */
-            VariableGet( LexerValue->ValIdentifierOfAnyValue(), &VarValue);
-            *Typ = VarValue->ValTypeOfAnyValue();
+            VariableGet( LexerValue->ValIdentifierOfAnyValue(pc), &VarValue);
+            *Typ = VarValue->ValTypeOfAnyValue(pc);
             break;
 
         default: ParserCopy(Parser, &Before); return FALSE;
@@ -524,7 +524,7 @@ void ParseState::TypeParseIdentPart(struct ValueType *BasicTyp, struct ValueType
                 if (*Typ == NULL || *Identifier != Parser->pc->StrEmpty)
                     Parser->ProgramFail( "bad type declaration");
                 
-                *Identifier = LexValue->ValIdentifierOfAnyValue();
+                *Identifier = LexValue->ValIdentifierOfAnyValue(pc);
                 Done = TRUE;
                 break;
                 

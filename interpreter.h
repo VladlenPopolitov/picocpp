@@ -49,14 +49,14 @@ typedef FILE IOFILE;
 /* coercion of numeric types to other numeric types */
 #ifndef NO_FP
 #define IS_FP(v) ((v)->TypeOfValue->Base == TypeFP)
-#define FP_VAL(v) ((v)->ValFP())
+#define FP_VAL(v) ((v)->ValFP(pc))
 #else
 #define IS_FP(v) 0
 #define FP_VAL(v) 0
 #endif
 
 #define IS_POINTER_COERCIBLE(v, ap) ((ap) ? ((v)->TypeOfValue->Base == TypePointer) : 0)
-#define POINTER_COERCE(v) (static_cast<int>((v)->ValPointer()))
+#define POINTER_COERCE(v) (static_cast<int>((v)->ValPointer(pc)))
 
 #define IS_INTEGER_NUMERIC_TYPE(t) ((t)->Base >= TypeInt && (t)->Base <= TypeUnsignedLong)
 #define IS_INTEGER_NUMERIC(v) IS_INTEGER_NUMERIC_TYPE((v)->TypeOfValue)
@@ -439,28 +439,28 @@ struct Value
 {
 public:
 	Value();
-	char &ValCharacter();
-	short &ValShortInteger();
-	int &ValInteger();
-	long &ValLongInteger();
-	unsigned short &ValUnsignedShortInteger();
-	unsigned int &ValUnsignedInteger();
-	unsigned long &ValUnsignedLongInteger();
-	unsigned char &ValUnsignedCharacter();
+	char &ValCharacter(Picoc *pc);
+	short &ValShortInteger(Picoc *pc);
+	int &ValInteger(Picoc *pc);
+	long &ValLongInteger(Picoc *pc);
+	unsigned short &ValUnsignedShortInteger(Picoc *pc);
+	unsigned int &ValUnsignedInteger(Picoc *pc);
+	unsigned long &ValUnsignedLongInteger(Picoc *pc);
+	unsigned char &ValUnsignedCharacter(Picoc *pc);
 #ifndef NO_FP
-	double &Value::ValFP();
+	double &Value::ValFP(Picoc *pc);
 #endif
-	PointerType &Value::ValPointer();						/* unsafe native pointers */
-	char * &Value::ValPointerChar();				  /* unsafe native pointers */
-	char ** &Value::ValPointerCharChar();				  /* unsafe native pointers */
-	unsigned char *&Value::ValPointerUChar();      /* unsafe native pointers */
-	double * &Value::ValPointerDouble();
-	int * &Value::ValPointerInt();
-	struct ValueType * &ValTypeOfAnyValue();
-	StructFuncDef &ValFuncDef();
-	StructMacroDef &ValMacroDef();
-	const char * &ValIdentifierOfAnyValue();
-	char *ValAddressOfData();
+	PointerType &Value::ValPointer(Picoc *pc);						/* unsafe native pointers */
+	char * &Value::ValPointerChar(Picoc *pc);				  /* unsafe native pointers */
+	char ** &Value::ValPointerCharChar(Picoc *pc);				  /* unsafe native pointers */
+	unsigned char *&Value::ValPointerUChar(Picoc *pc);      /* unsafe native pointers */
+	double * &Value::ValPointerDouble(Picoc *pc);
+	int * &Value::ValPointerInt(Picoc *pc);
+	struct ValueType * &ValTypeOfAnyValue(Picoc *pc);
+	StructFuncDef &ValFuncDef(Picoc *pc);
+	StructMacroDef &ValMacroDef(Picoc *pc);
+	const char * &ValIdentifierOfAnyValue(Picoc *pc);
+	char *ValAddressOfData(Picoc *pc);
 
     struct ValueType *TypeOfValue;          /* the type of this value */
     struct Value *LValueFrom;       /* if an LValue, this is a Value our LValue is contained within (or NULL) */
@@ -476,10 +476,10 @@ public:
 	UnionAnyValuePointer Val;            /* pointer to the AnyValue which holds the actual content */
 public:
 	/* expression.c */
-	long ExpressionCoerceInteger();
-	unsigned long ExpressionCoerceUnsignedInteger();
+	long ExpressionCoerceInteger(Picoc *pc);
+	unsigned long ExpressionCoerceUnsignedInteger(Picoc *pc);
 #ifndef NO_FP
-	double ExpressionCoerceFP();
+	double ExpressionCoerceFP(Picoc *pc);
 #endif
 
 	/* type.c */
@@ -934,7 +934,7 @@ void PlatformPrintf(IOFILE *Stream, const char *Format, ...);
 void PlatformVPrintf(IOFILE *Stream, const char *Format, va_list Args);
 
 /* stdio.c */
-extern const char StdioDefs[];
+extern const char *StdioDefs;
 extern struct LibraryFunction StdioFunctions[];
 void StdioSetupFunc(Picoc *pc);
 
@@ -951,7 +951,7 @@ extern struct LibraryFunction StdlibFunctions[];
 void StdlibSetupFunc(Picoc *pc);
 
 /* time.c */
-extern const char StdTimeDefs[];
+extern const char *StdTimeDefs;
 extern struct LibraryFunction StdTimeFunctions[];
 void StdTimeSetupFunc(Picoc *pc);
 
@@ -962,7 +962,7 @@ void StdErrnoSetupFunc(Picoc *pc);
 extern struct LibraryFunction StdCtypeFunctions[];
 
 /* stdbool.c */
-extern const char StdboolDefs[];
+extern const char *StdboolDefs;
 void StdboolSetupFunc(Picoc *pc);
 
 /* unistd.c */

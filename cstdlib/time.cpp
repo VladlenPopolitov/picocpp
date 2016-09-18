@@ -16,50 +16,59 @@ static int CLK_TCKValue = CLK_TCK;
 
 void StdAsctime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->ValPointer() = asctime(static_cast<tm*>(Param[0]->ValPointer()));
+	Picoc *pc = Parser->pc;
+	ReturnValue->ValPointer(pc) = asctime(static_cast<tm*>(Param[0]->ValPointer(pc)));
 }
 
 void StdClock(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValInteger() = clock();
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValInteger(pc) = clock();
 }
 
 void StdCtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->ValPointer() = ctime(static_cast<time_t*>(Param[0]->ValPointer()));
+	Picoc *pc = Parser->pc;
+	ReturnValue->ValPointer(pc) = ctime(static_cast<time_t*>(Param[0]->ValPointer(pc)));
 }
 
 #ifndef NO_FP
 void StdDifftime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP() = difftime((time_t)Param[0]->ValInteger(), Param[1]->ValInteger());
+	Picoc *pc = Parser->pc;
+    ReturnValue->ValFP(pc) = difftime((time_t)Param[0]->ValInteger(pc), Param[1]->ValInteger(pc));
 }
 #endif
 
 void StdGmtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->ValPointer() = gmtime(static_cast<time_t*>(Param[0]->ValPointer()));
+	Picoc *pc = Parser->pc;
+	ReturnValue->ValPointer(pc) = gmtime(static_cast<time_t*>(Param[0]->ValPointer(pc)));
 }
 
 void StdLocaltime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->ValPointer() = localtime(static_cast<time_t*>(Param[0]->ValPointer()));
+	Picoc *pc = Parser->pc;
+	ReturnValue->ValPointer(pc) = localtime(static_cast<time_t*>(Param[0]->ValPointer(pc)));
 }
 
 void StdMktime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->ValInteger() = (int)mktime(static_cast<tm*>(Param[0]->ValPointer()));
+	Picoc *pc = Parser->pc;
+	ReturnValue->ValInteger(pc) = (int)mktime(static_cast<tm*>(Param[0]->ValPointer(pc)));
 }
 
 void StdTime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->ValInteger() = (int)time(static_cast<time_t*>(Param[0]->ValPointer()));
+	Picoc *pc = Parser->pc;
+	ReturnValue->ValInteger(pc) = (int)time(static_cast<time_t*>(Param[0]->ValPointer(pc)));
 }
 
 void StdStrftime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-	ReturnValue->ValInteger() = strftime(static_cast<char*>(Param[0]->ValPointer()), Param[1]->ValInteger(), Param[2]->ValPointerChar(), 
-		static_cast<tm*>(Param[3]->ValPointer()));
+	Picoc *pc = Parser->pc;
+	ReturnValue->ValInteger(pc) = strftime(static_cast<char*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc), Param[2]->ValPointerChar(pc), 
+		static_cast<tm*>(Param[3]->ValPointer(pc)));
 }
 
 #ifndef WIN32
@@ -67,22 +76,22 @@ void StdStrptime(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 {
 	  extern char *strptime(const char *s, const char *format, struct tm *tm);
 	  
-    ReturnValue->ValPointer() = strptime(Param[0]->ValPointer(), Param[1]->ValPointer(), Param[2]->ValPointer());
+    ReturnValue->ValPointer(pc) = strptime(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValPointer(pc));
 }
 
 void StdGmtime_r(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValPointer() = gmtime_r(Param[0]->ValPointer(), Param[1]->ValPointer());
+    ReturnValue->ValPointer(pc) = gmtime_r(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc));
 }
 
 void StdTimegm(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValInteger() = timegm(Param[0]->ValPointer());
+    ReturnValue->ValInteger(pc) = timegm(Param[0]->ValPointer(pc));
 }
 #endif
 
 /* handy structure definitions */
-const char StdTimeDefs[] = "\
+const char *StdTimeDefs = "\
 typedef int time_t; \
 typedef int clock_t;\
 ";
