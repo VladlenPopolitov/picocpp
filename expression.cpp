@@ -22,7 +22,7 @@ void debugf(char *Format, ...)
 }
 #endif
 
-/* local prototypes */
+/* local prototypes  */
 enum OperatorOrder
 {
     OrderNone,
