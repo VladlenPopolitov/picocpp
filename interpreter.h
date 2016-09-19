@@ -440,6 +440,7 @@ struct Value
 public:
 	Value();
 	char &ValCharacter(Picoc *pc);
+	void setValCharacter(Picoc *pc, char newVal);
 	short &ValShortInteger(Picoc *pc);
 	int &ValInteger(Picoc *pc);
 	long &ValLongInteger(Picoc *pc);

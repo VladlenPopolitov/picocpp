@@ -401,7 +401,7 @@ enum LexToken Picoc::LexGetCharacterConstant( struct LexState *Lexer, struct Val
 {
 	Picoc *pc = this;
     Value->TypeOfValue = &pc->CharType;
-    Value->ValCharacter(pc) = LexUnEscapeCharacter(&Lexer->Pos, Lexer->End);
+    Value->setValCharacter(pc, LexUnEscapeCharacter(&Lexer->Pos, Lexer->End));
     if (Lexer->Pos != Lexer->End && *Lexer->Pos != '\'')
         LexFail( Lexer, "expected \"'\"");
         
