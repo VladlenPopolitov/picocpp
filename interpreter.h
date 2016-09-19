@@ -472,8 +472,9 @@ public:
     char OutOfScope;
 	UnionAnyValuePointer getVal();
 	void setVal(UnionAnyValuePointer newVal);
-//private:
-	UnionAnyValuePointer Val;            /* pointer to the AnyValue which holds the actual content */
+	UnionAnyValuePointer &Val();
+private:
+	UnionAnyValuePointer Val_;            /* pointer to the AnyValue which holds the actual content */
 public:
 	/* expression.c */
 	long ExpressionCoerceInteger(Picoc *pc);
@@ -648,7 +649,7 @@ struct IncludeLibrary
     void (*SetupFunction)(Picoc *pc);
     struct LibraryFunction *FuncList;
     const char *SetupCSource;
-    struct IncludeLibrary *NextLib;
+   // obsolete struct IncludeLibrary *NextLib;
 };
 
 const int FREELIST_BUCKETS = 8;                          /* freelists for 4, 8, 12 ... 32 byte allocs */
@@ -704,6 +705,11 @@ public:
     void *HeapBottom;                   /* the bottom of the (downward-growing) heap */
     std::vector<void *> CurrentStackFrame;                   /* the current stack frame */
     void *HeapStackTop;                 /* the top of the stack */
+	unsigned char *HeapMemoryVirtual;          /* stack memory since our heap is malloc()ed */
+	void *HeapBottomVirtual;                   /* the bottom of the (downward-growing) heap */
+	std::vector<void *> CurrentStackFrameVirtual;                   /* the current stack frame */
+	void *HeapStackTopVirtual;                 /* the top of the stack */
+
 #else
 # ifdef SURVEYOR_HOST
     unsigned char *HeapMemory;          /* all memory - stack and heap */

@@ -1,14 +1,14 @@
 #include "interpreter.h"
 
-Value::Value() : TypeOfValue{}, Val{}, LValueFrom{}, ValOnHeap{}, ValOnStack{},
+Value::Value() : TypeOfValue{}, Val_{}, LValueFrom{}, ValOnHeap{}, ValOnStack{},
 AnyValOnHeap{}, IsLValue{}, ScopeID{}, OutOfScope{}
 {}
 
 UnionAnyValuePointer Value::getVal(){
-	return Val;
+	return Val_;
 }
 void Value::setVal(UnionAnyValuePointer newVal){
-	Val = newVal;
+	Val_ = newVal;
 }
 
 unsigned char &UnionAnyValue::UnsignedCharacter(){
@@ -84,95 +84,99 @@ const char * &UnionAnyValue::IdentifierOfAnyValue(){
 
 #ifndef NO_FP
 double &Value::ValFP(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->FP();
 }
 #endif
 PointerType &Value::ValPointer(Picoc *pc)						/* unsafe native pointers */
 {
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->Pointer();
 }
 char * &Value::ValPointerChar(Picoc *pc)				  /* unsafe native pointers */
 {
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->PointerChar();
 }
 char ** &Value::ValPointerCharChar(Picoc *pc)				  /* unsafe native pointers */
 {
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->PointerCharChar();
 }
 unsigned char *&Value::ValPointerUChar(Picoc *pc)     /* unsafe native pointers */
 {
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->PointerUChar();
 }
 double * &Value::ValPointerDouble(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->PointerDouble();
 }
 int * &Value::ValPointerInt(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->PointerInt();
 }
 
 unsigned char &Value::ValUnsignedCharacter(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->UnsignedCharacter();
 }
 
 char &Value::ValCharacter(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->Character();
 }
 short &Value::ValShortInteger(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->ShortInteger();
 }
 int &Value::ValInteger(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->Integer();
 }
 long &Value::ValLongInteger(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->LongInteger();
 }
 unsigned short &Value::ValUnsignedShortInteger(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->UnsignedShortInteger();
 }
 unsigned int &Value::ValUnsignedInteger(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->UnsignedInteger();
 }
 unsigned long &Value::ValUnsignedLongInteger(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->UnsignedLongInteger();
 }
 
 struct ValueType * &Value::ValTypeOfAnyValue(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->TypeOfAnyValue();
 
 }
 StructFuncDef &Value::ValFuncDef(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->FuncDef();
 }
 StructMacroDef &Value::ValMacroDef(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->MacroDef();
 }
 
 const char * &Value::ValIdentifierOfAnyValue(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->IdentifierOfAnyValue();
 }
 
 char *Value::ValAddressOfData(Picoc *pc){
-	UnionAnyValuePointer Val1 = Val;
+	UnionAnyValuePointer Val1 = Val();
 	return Val1->AddressOfData();
+}
+
+UnionAnyValuePointer &Value::Val(){
+	return Val_;
 }
 #ifdef PARSESTATE_CONSTR
 ParseState::ParseState() :
@@ -312,6 +316,10 @@ HeapMemory{},          /* stack memory since our heap is malloc()ed */
 HeapBottom{},                   /* the bottom of the (downward-growing) heap */
 CurrentStackFrame{},                   /* the current stack frame */
 HeapStackTop{},                 /* the top of the stack */
+HeapMemoryVirtual{},          /* stack memory since our heap is malloc()ed */
+HeapBottomVirtual{},                   /* the bottom of the (downward-growing) heap */
+CurrentStackFrameVirtual{},                   /* the current stack frame */
+HeapStackTopVirtual{},                 /* the top of the stack */
 #else
 # ifdef SURVEYOR_HOST
 HeapMemory;          /* all memory - stack and heap */

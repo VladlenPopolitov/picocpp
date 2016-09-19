@@ -25,12 +25,17 @@ void Picoc::HeapInit( int StackOrHeapSize)
 	Picoc *pc = this;
     // obsolete int Count;
     int AlignOffset = 0;
-    
+	int AlignOffsetVirtual = 0;
 #ifdef USE_MALLOC_STACK
 	pc->HeapMemory = new unsigned char[StackOrHeapSize]; // obsolete  static_cast<unsigned char*>(malloc(StackOrHeapSize));
     pc->HeapBottom = nullptr;                     /* the bottom of the (downward-growing) heap */
     // obsolete pc->CurrentStackFrame = nullptr;                     /* the current stack frame */
     pc->HeapStackTop = nullptr;                          /* the top of the stack */
+	pc->HeapMemoryVirtual = new unsigned char[StackOrHeapSize]; // obsolete  static_cast<unsigned char*>(malloc(StackOrHeapSize));
+	pc->HeapBottomVirtual = nullptr;                     /* the bottom of the (downward-growing) heap */
+	// obsolete pc->CurrentStackFrame = nullptr;                     /* the current stack frame */
+	pc->HeapStackTopVirtual = nullptr;                          /* the top of the stack */
+
 #else
 # ifdef SURVEYOR_HOST
     pc->HeapMemory = (unsigned char *)C_HEAPSTART;      /* all memory - stack and heap */
@@ -49,19 +54,21 @@ void Picoc::HeapInit( int StackOrHeapSize)
         AlignOffset++;
     pc->CurrentStackFrame.push_back( &(pc->HeapMemory)[AlignOffset] );
     pc->HeapStackTop = &(pc->HeapMemory)[AlignOffset];
-    // obsolete *static_cast<void **>(pc->CurrentStackFrame) = nullptr;
     pc->HeapBottom = &(pc->HeapMemory)[StackOrHeapSize-sizeof(ALIGN_TYPE)+AlignOffset];
-#ifndef USE_MALLOC_HEAP
-    pc->FreeListBig = NULL;
-#endif
-    // obsolete for (Count = 0; Count < FREELIST_BUCKETS; Count++)
-    // obsolete     pc->FreeListBucket[Count] = NULL;
+
+	while (((unsigned long)&pc->HeapMemoryVirtual[AlignOffsetVirtual] & (sizeof(ALIGN_TYPE) - 1)) != 0)
+		AlignOffsetVirtual++;
+	pc->CurrentStackFrameVirtual.push_back(&(pc->HeapMemoryVirtual)[AlignOffsetVirtual]);
+	pc->HeapStackTopVirtual = &(pc->HeapMemoryVirtual)[AlignOffsetVirtual];
+	pc->HeapBottomVirtual = &(pc->HeapMemoryVirtual)[StackOrHeapSize - sizeof(ALIGN_TYPE) + AlignOffsetVirtual];
+
 }
 
 void Picoc::HeapCleanup()
 {
 	Picoc *pc = this;
 #ifdef USE_MALLOC_STACK
+	delete[] pc->HeapMemoryVirtual; // obsolete free(pc->HeapMemory);
 	delete[] pc->HeapMemory; // obsolete free(pc->HeapMemory);
 #endif
 }
