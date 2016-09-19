@@ -472,7 +472,7 @@ public:
     char OutOfScope;
 	UnionAnyValuePointer getVal();
 	void setVal(UnionAnyValuePointer newVal);
-	UnionAnyValuePointer &Val();
+	//UnionAnyValuePointer &getVal();
 private:
 	UnionAnyValuePointer Val_;            /* pointer to the AnyValue which holds the actual content */
 public:
@@ -486,7 +486,6 @@ public:
 	/* type.c */
 	int TypeSizeValue(int Compact);
 	int TypeStackSizeValue();
-
 };
 
 /* hash table data structure */

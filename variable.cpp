@@ -187,9 +187,9 @@ void ParseState::VariableRealloc(struct Value *FromValue, int NewSize)
 {
 	struct ParseState *Parser = this;
     if (FromValue->AnyValOnHeap)
-		Parser->pc->HeapFreeMem(FromValue->Val());
+		Parser->pc->HeapFreeMem(FromValue->getVal());
         
-	FromValue->Val() = static_cast<UnionAnyValuePointer >(VariableAlloc( NewSize, LocationVirtual));
+	FromValue->setVal(  static_cast<UnionAnyValuePointer >(VariableAlloc( NewSize, LocationVirtual)));
     FromValue->AnyValOnHeap = TRUE; 
 }
 
@@ -368,7 +368,7 @@ struct Value *ParseState::VariableDefineButIgnoreIdentical( const char *Ident, s
         }
 
         /* static variable exists in the global scope - now make a mirroring variable in our own scope with the short name */
-		VariableDefinePlatformVar( Ident, ExistingValue->TypeOfValue, ExistingValue->Val(), TRUE);
+		VariableDefinePlatformVar( Ident, ExistingValue->TypeOfValue, ExistingValue->getVal(), TRUE);
         return ExistingValue;
     }
     else
@@ -425,7 +425,7 @@ void ParseState::VariableDefinePlatformVar(const char *Ident, struct ValueType *
 	tempParserForPlatformVar.pc = pc;
     struct Value *SomeValue = tempParserForPlatformVar.VariableAllocValueAndData( 0, IsWritable, nullptr, LocationOnHeap);
     SomeValue->TypeOfValue = Typ;
-    SomeValue->Val() = FromValue;
+    SomeValue->setVal(  FromValue );
     
     if (!pc->TableSet( (pc->TopStackFrame() == nullptr) ? &pc->GlobalTable : pc->TopStackFrame()->LocalTable.get(), 
 		pc->TableStrRegister( Ident), SomeValue, 
@@ -447,8 +447,8 @@ void ParseState::VariableStackPop(struct Value *Var)
         
     if (Var->ValOnHeap)
     { 
-        if (Var->Val() != NULL)
-			Parser->pc->HeapFreeMem(Var->Val());
+        if (Var->getVal() != NULL)
+			Parser->pc->HeapFreeMem(Var->getVal());
             
 		Success = Parser->pc->HeapPopStack( Var, sizeof(struct Value));                       /* free from heap */
     }

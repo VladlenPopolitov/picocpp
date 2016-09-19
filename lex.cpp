@@ -97,7 +97,7 @@ void Picoc::LexInit()
     }
     
     pc->LexValue.TypeOfValue = nullptr;
-    pc->LexValue.Val() = &pc->LexAnyValue;
+    pc->LexValue.setVal(  &pc->LexAnyValue );
     pc->LexValue.LValueFrom = FALSE;
     pc->LexValue.ValOnHeap = FALSE;
     pc->LexValue.ValOnStack = FALSE;
@@ -383,7 +383,7 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
 		/* create and store this string literal */
        ArrayValue = temp.VariableAllocValueAndData( 0, FALSE, NULL, LocationOnHeap);
         ArrayValue->TypeOfValue = pc->CharArrayType;
-        ArrayValue->Val() = (UnionAnyValuePointer )RegString;
+        ArrayValue->setVal(  (UnionAnyValuePointer )RegString );
         VariableStringLiteralDefine( RegString, ArrayValue);
     }
 
@@ -572,7 +572,7 @@ void *Picoc::LexTokenise( struct LexState *Lexer, int *TokenLen)
         if (ValueSize > 0)
         { 
             /* store a value as well */
-            memcpy((void *)TokenPos, (void *)GotValue->Val(), ValueSize);
+            memcpy((void *)TokenPos, (void *)GotValue->getVal(), ValueSize);
             TokenPos += ValueSize;
             MemUsed += ValueSize;
         }
@@ -743,7 +743,7 @@ enum LexToken ParseState::LexGetRawToken(struct Value **Value, int IncPos)
                 default: break;
             }
             
-            memcpy((void *)pc->LexValue.Val(), (void *)((char *)Parser->Pos + TOKEN_DATA_OFFSET), ValueSize);
+            memcpy((void *)pc->LexValue.getVal(), (void *)((char *)Parser->Pos + TOKEN_DATA_OFFSET), ValueSize);
             pc->LexValue.ValOnHeap = FALSE;
             pc->LexValue.ValOnStack = FALSE;
             pc->LexValue.IsLValue = FALSE;
