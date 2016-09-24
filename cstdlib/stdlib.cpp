@@ -9,7 +9,7 @@ static int Stdlib_ZeroValue = 0;
 void StdlibAtof(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValFP(pc) = atof(Param[0]->ValPointerChar(pc));
+	ReturnValue->setValFP(pc,  atof(Param[0]->ValPointerChar(pc)));
 }
 #endif
 
@@ -29,7 +29,7 @@ void StdlibAtol(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 void StdlibStrtod(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValFP(pc) = strtod(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc));
+	ReturnValue->setValFP(pc,  strtod(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc)));
 }
 #endif
 

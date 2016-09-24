@@ -439,7 +439,7 @@ struct Value
 {
 public:
 	Value();
-	char &ValCharacter(Picoc *pc);
+	char ValCharacter(Picoc *pc);
 	void setValCharacter(Picoc *pc, char newVal);
 	short &ValShortInteger(Picoc *pc);
 	int &ValInteger(Picoc *pc);
@@ -449,9 +449,12 @@ public:
 	unsigned long &ValUnsignedLongInteger(Picoc *pc);
 	unsigned char &ValUnsignedCharacter(Picoc *pc);
 #ifndef NO_FP
-	double &Value::ValFP(Picoc *pc);
+	double Value::ValFP(Picoc *pc);
+	void Value::setValFP(Picoc *pc, double newVal);
+
 #endif
 	PointerType &Value::ValPointer(Picoc *pc);						/* unsafe native pointers */
+	void Value::setValPointer(Picoc *pc, PointerType newVal);						/* unsafe native pointers */
 	char * &Value::ValPointerChar(Picoc *pc);				  /* unsafe native pointers */
 	char ** &Value::ValPointerCharChar(Picoc *pc);				  /* unsafe native pointers */
 	unsigned char *&Value::ValPointerUChar(Picoc *pc);      /* unsafe native pointers */

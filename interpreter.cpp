@@ -83,17 +83,27 @@ const char * &UnionAnyValue::IdentifierOfAnyValue(){
 
 
 #ifndef NO_FP
-double &Value::ValFP(Picoc *pc){
+double Value::ValFP(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->FP();
 }
+void Value::setValFP(Picoc *pc,double newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	 Val1->FP()=newVal;
+}
 #endif
-PointerType &Value::ValPointer(Picoc *pc)						/* unsafe native pointers */
+PointerType &Value::ValPointer(Picoc *pc)						
 {
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->Pointer();
 }
-char * &Value::ValPointerChar(Picoc *pc)				  /* unsafe native pointers */
+void Value::setValPointer(Picoc *pc,PointerType newVal)						
+{
+	UnionAnyValuePointer Val1 = getVal();
+	Val1->Pointer()=newVal;
+}
+
+char * &Value::ValPointerChar(Picoc *pc)				  
 {
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->PointerChar();
@@ -122,7 +132,7 @@ unsigned char &Value::ValUnsignedCharacter(Picoc *pc){
 	return Val1->UnsignedCharacter();
 }
 
-char &Value::ValCharacter(Picoc *pc){
+char Value::ValCharacter(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->Character();
 }

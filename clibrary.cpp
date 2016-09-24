@@ -374,92 +374,92 @@ void LibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Value 
 #ifdef PICOC_LIBRARY
 void LibSin(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = sin(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  sin(Param[0]->ValFP(pc));
 }
 
 void LibCos(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = cos(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  cos(Param[0]->ValFP(pc));
 }
 
 void LibTan(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = tan(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  tan(Param[0]->ValFP(pc));
 }
 
 void LibAsin(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = asin(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  asin(Param[0]->ValFP(pc));
 }
 
 void LibAcos(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = acos(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  acos(Param[0]->ValFP(pc));
 }
 
 void LibAtan(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = atan(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  atan(Param[0]->ValFP(pc));
 }
 
 void LibSinh(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = sinh(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  sinh(Param[0]->ValFP(pc));
 }
 
 void LibCosh(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = cosh(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  cosh(Param[0]->ValFP(pc));
 }
 
 void LibTanh(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = tanh(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  tanh(Param[0]->ValFP(pc));
 }
 
 void LibExp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = exp(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  exp(Param[0]->ValFP(pc));
 }
 
 void LibFabs(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = fabs(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  fabs(Param[0]->ValFP(pc));
 }
 
 void LibLog(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = log(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  log(Param[0]->ValFP(pc));
 }
 
 void LibLog10(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = log10(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  log10(Param[0]->ValFP(pc));
 }
 
 void LibPow(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = pow(Param[0]->ValFP(pc), Param[1]->ValFP(pc));
+    ReturnValue->setValFP(pc,  pow(Param[0]->ValFP(pc), Param[1]->ValFP(pc));
 }
 
 void LibSqrt(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = sqrt(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  sqrt(Param[0]->ValFP(pc));
 }
 
 void LibRound(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = floor(Param[0]->ValFP(pc) + 0.5);   /* XXX - fix for soft float */
+    ReturnValue->setValFP(pc,  floor(Param[0]->ValFP(pc) + 0.5);   /* XXX - fix for soft float */
 }
 
 void LibCeil(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = ceil(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  ceil(Param[0]->ValFP(pc));
 }
 
 void LibFloor(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValFP(pc) = floor(Param[0]->ValFP(pc));
+    ReturnValue->setValFP(pc,  floor(Param[0]->ValFP(pc));
 }
 #endif
 

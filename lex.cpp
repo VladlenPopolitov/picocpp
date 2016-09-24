@@ -228,7 +228,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
         FPResult *= pow((double)Base, (double)Result * ExponentSign);
     }
     
-    Value->ValFP(pc) = FPResult;
+    Value->setValFP(pc,  FPResult);
 
     if (*Lexer->Pos == 'f' || *Lexer->Pos == 'F')
         LEXER_INC(Lexer);

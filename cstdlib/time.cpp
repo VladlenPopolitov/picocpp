@@ -36,7 +36,7 @@ void StdCtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value
 void StdDifftime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValFP(pc) = difftime((time_t)Param[0]->ValInteger(pc), Param[1]->ValInteger(pc));
+    ReturnValue->setValFP(pc,  difftime((time_t)Param[0]->ValInteger(pc), Param[1]->ValInteger(pc)));
 }
 #endif
 

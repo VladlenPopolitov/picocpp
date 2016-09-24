@@ -281,7 +281,7 @@ double ParseState::ExpressionAssignFP(struct Value *DestValue, double FromFP)
     if (!DestValue->IsLValue) 
         Parser->ProgramFail( "can't assign to this"); 
     
-    DestValue->ValFP(pc) = FromFP;
+    DestValue->setValFP(pc,  FromFP);
     return FromFP;
 }
 #endif
@@ -361,7 +361,7 @@ void ParseState::ExpressionPushFP(struct ExpressionStack **StackTop, double FPVa
 {
 	struct ParseState *Parser = this;
 	struct Value *ValueLoc = VariableAllocValueFromType( &Parser->pc->FPType, FALSE, NULL, LocationOnStack);
-    ValueLoc->ValFP(pc) = FPValue;
+    ValueLoc->setValFP(pc,  FPValue);
     ExpressionStackPushValueNode(StackTop, ValueLoc);
 }
 #endif
@@ -434,7 +434,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
             if (!IS_NUMERIC_COERCIBLE_PLUS_POINTERS(SourceValue, AllowPointerCoercion)) 
                 Parser->AssignFail( "%t from %t", DestValue->TypeOfValue, SourceValue->TypeOfValue, 0, 0, FuncName, ParamNo); 
             
-            DestValue->ValFP(pc) = SourceValue->ExpressionCoerceFP(pc);
+            DestValue->setValFP(pc,  SourceValue->ExpressionCoerceFP(pc));
             break;
 #endif
         case TypePointer:
