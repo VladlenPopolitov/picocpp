@@ -151,10 +151,18 @@ struct Value *ParseState::VariableAllocValueAndCopy(struct Value *FromValue, Mem
 	int CopySize = FromValue->TypeSizeValue(TRUE);
 
     assert(CopySize <= MAX_TMP_COPY_BUF);
-    memcpy((void *)&TmpBuf[0], (void *)FromValue->getValVirtual(), CopySize); // obsolete value
-    NewValue = VariableAllocValueAndData(  CopySize, FromValue->IsLValue, FromValue->LValueFrom, OnHeap);
-    NewValue->TypeOfValue = DType;
-    memcpy((void *)NewValue->getValVirtual(), (void *)&TmpBuf[0], CopySize); // obsolete value
+	if (OnHeap == LocationOnHeap || OnHeap == LocationOnStack){
+		memcpy((void *)&TmpBuf[0], (void *)FromValue->getValAbsolute(), CopySize); // obsolete value
+		NewValue = VariableAllocValueAndData(CopySize, FromValue->IsLValue, FromValue->LValueFrom, OnHeap);
+		NewValue->TypeOfValue = DType;
+		memcpy((void *)NewValue->getValAbsolute(), (void *)&TmpBuf[0], CopySize); // obsolete value
+	}
+	else {
+		memcpy((void *)&TmpBuf[0], (void *)FromValue->getValVirtual(), CopySize); // obsolete value
+		NewValue = VariableAllocValueAndData(CopySize, FromValue->IsLValue, FromValue->LValueFrom, OnHeap);
+		NewValue->TypeOfValue = DType;
+		memcpy((void *)NewValue->getValVirtual(), (void *)&TmpBuf[0], CopySize); // obsolete value
+	}
     
     return NewValue;
 }

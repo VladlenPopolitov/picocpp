@@ -464,7 +464,6 @@ public:
 	void Value::setValPointer(Picoc *pc, PointerType newVal);						/* unsafe native pointers */
 	char * Value::ValPointerChar(Picoc *pc);				  /* unsafe native pointers */
 	void Value::setValPointerChar(Picoc *pc, char * newVal);				  /* unsafe native pointers */
-
 	char ** Value::ValPointerCharChar(Picoc *pc);				  /* unsafe native pointers */
 	unsigned char *Value::ValPointerUChar(Picoc *pc);      /* unsafe native pointers */
 	double * Value::ValPointerDouble(Picoc *pc);
