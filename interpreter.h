@@ -459,9 +459,9 @@ public:
 	void Value::setValPointerChar(Picoc *pc, char * newVal);				  /* unsafe native pointers */
 
 	char ** Value::ValPointerCharChar(Picoc *pc);				  /* unsafe native pointers */
-	unsigned char *&Value::ValPointerUChar(Picoc *pc);      /* unsafe native pointers */
-	double * &Value::ValPointerDouble(Picoc *pc);
-	int * &Value::ValPointerInt(Picoc *pc);
+	unsigned char *Value::ValPointerUChar(Picoc *pc);      /* unsafe native pointers */
+	double * Value::ValPointerDouble(Picoc *pc);
+	int * Value::ValPointerInt(Picoc *pc);
 	void Value::setValPointerInt(Picoc *pc, int * newval);
 	void Value::ValAssignPointerInt(Picoc *pc, int  newval);
 

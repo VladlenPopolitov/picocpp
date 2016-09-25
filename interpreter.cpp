@@ -119,16 +119,16 @@ char ** Value::ValPointerCharChar(Picoc *pc)				  /* unsafe native pointers */
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->PointerCharChar();
 }
-unsigned char *&Value::ValPointerUChar(Picoc *pc)     /* unsafe native pointers */
+unsigned char *Value::ValPointerUChar(Picoc *pc)     /* unsafe native pointers */
 {
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->PointerUChar();
 }
-double * &Value::ValPointerDouble(Picoc *pc){
+double * Value::ValPointerDouble(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->PointerDouble();
 }
-int * &Value::ValPointerInt(Picoc *pc){
+int * Value::ValPointerInt(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->PointerInt();
 }
