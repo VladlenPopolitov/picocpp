@@ -80,12 +80,37 @@ bool Table::TableSet(const char *Key, struct Value *Val, const char *DeclFileNam
 	return true;
 }
 
+bool Table::TableSet(const char *Key, struct ValueAbs *Val, const char *DeclFileName, int DeclLine, int DeclColumn){
+	struct Table *Tbl = this;
+	struct TableEntry *FoundEntry = Tbl->TableSearch(Key);
+
+	if (FoundEntry == nullptr)
+	{   /* add it to the table */
+		struct TableEntry *NewEntry = new struct TableEntry;
+		NewEntry->DeclFileName = DeclFileName;
+		NewEntry->DeclLine = DeclLine;
+		NewEntry->DeclColumn = DeclColumn;
+		NewEntry->p.va.Key = Key;
+		NewEntry->p.va.ValInValueEntry = Val;
+		// obsolete TableMapPair insertValue = std::make_pair(Key, NewEntry);
+		hashTable_.push_front(NewEntry);
+		return true;
+	}
+	return true;
+}
 /* set an identifier to a value. returns FALSE if it already exists. 
  * Key must be a shared string from TableStrRegister() */
 int Picoc::TableSet(struct Table *Tbl, const char *Key, struct Value *Val, const char *DeclFileName, int DeclLine, int DeclColumn)
 {
 	return Tbl->TableSet(Key, Val, DeclFileName, DeclLine, DeclColumn);
 }
+/* set an identifier to a value. returns FALSE if it already exists.
+* Key must be a shared string from TableStrRegister() */
+int Picoc::TableSet(struct Table *Tbl, const char *Key, struct ValueAbs *Val, const char *DeclFileName, int DeclLine, int DeclColumn)
+{
+	return Tbl->TableSet(Key, Val, DeclFileName, DeclLine, DeclColumn);
+}
+
 
 /* find a value in a table. returns FALSE if not found. 
  * Key must be a shared string from TableStrRegister() */
@@ -112,6 +137,32 @@ bool Table::TableGet(const char *Key, struct Value **Val, const char **DeclFileN
     }   
     return true;
 }
+
+
+bool Table::TableGet(const char *Key, struct ValueAbs **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn)
+{
+	struct Table *Tbl = this;
+	//obsolete auto it = hashTable_.find(Key);
+	//struct TableEntry *FoundEntry = it->second;
+	struct TableEntry *FoundEntry = Tbl->TableSearch(Key);
+	if (FoundEntry == nullptr) {
+		//obsolete assert(it == hashTable_.end());
+		return false;
+	}
+
+	*Val = FoundEntry->p.va.ValInValueEntry;
+
+	if (DeclFileName != nullptr)
+	{
+		assert(DeclLine);
+		assert(DeclColumn);
+		*DeclFileName = FoundEntry->DeclFileName;
+		*DeclLine = FoundEntry->DeclLine;
+		*DeclColumn = FoundEntry->DeclColumn;
+	}
+	return true;
+}
+
 
 /** remove an entry from the table */
 struct Value *Table::TableDelete(const char *Key)

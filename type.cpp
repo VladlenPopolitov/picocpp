@@ -189,7 +189,7 @@ void Picoc::TypeCleanup()
 void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
 {
 	struct ParseState *Parser = this;
-    struct Value *LexValue;
+    struct ValueAbs *LexValue;
     struct ValueType *MemberType;
     const char *MemberIdentifier;
     const char *StructIdentifier;
@@ -302,7 +302,7 @@ struct ValueType *ParseState::TypeCreateOpaqueStruct(const char *StructName, int
 void ParseState::TypeParseEnum(struct ValueType **Typ)
 {
 	struct ParseState *Parser = this;
-    struct Value *LexValue;
+    struct ValueAbs *LexValue;
     struct Value InitValue;
     enum LexToken Token;
     int EnumValue = 0;
@@ -368,7 +368,7 @@ int ParseState::TypeParseFront(struct ValueType **Typ, int *IsStatic)
 {
 	struct ParseState *Parser = this;
     struct ParseState Before;
-    struct Value *LexerValue;
+    struct ValueAbs *LexerValue;
     enum LexToken Token;
     int Unsigned = FALSE;
     struct Value *VarValue;
@@ -493,7 +493,7 @@ void ParseState::TypeParseIdentPart(struct ValueType *BasicTyp, struct ValueType
 	struct ParseState *Parser = this;
     struct ParseState Before;
     enum LexToken Token;
-    struct Value *LexValue;
+    struct ValueAbs *LexValue;
     int Done = FALSE;
     *Typ = BasicTyp;
     *Identifier = Parser->pc->StrEmpty;

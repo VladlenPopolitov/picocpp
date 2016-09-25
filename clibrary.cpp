@@ -35,7 +35,7 @@ void Picoc::LibraryAdd( struct Table *GlobalTable, const char *LibraryName, stru
     int Count;
     const char *Identifier;
     struct ValueType *ReturnType;
-    struct Value *NewValue;
+    struct ValueAbs *NewValue;
     void *Tokens;
     const char *IntrinsicName = TableStrRegister( "c library");
     

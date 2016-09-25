@@ -172,12 +172,12 @@ public:
 	/* lex.cpp */
 	void LexInitParser( Picoc *pc, const char *SourceText, void *TokenSource, 
 		const char *FileName, int RunIt, int SetDebugMode);
-	enum LexToken LexGetToken( struct Value **Value, int IncPos);
+	enum LexToken LexGetToken( struct ValueAbs **Value, int IncPos);
 	enum LexToken LexRawPeekToken();
 	void LexToEndOfLine();
 	/* parser.cpp*/
 	enum ParseResult ParseStatement( int CheckTrailingSemicolon);
-	struct Value *ParseFunctionDefinition( struct ValueType *ReturnType, const char *Identifier);
+	struct ValueAbs *ParseFunctionDefinition( struct ValueType *ReturnType, const char *Identifier);
 	/* expression.cpp */
 	int ExpressionParse( struct Value **Result);
 	long ExpressionParseInt();
@@ -251,7 +251,7 @@ private:
 			void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, enum LexToken Token);
 			void ParseState::ExpressionParseMacroCall(struct ExpressionStack **StackTop, const char *MacroName, StructMacroDef *MDef);
 			void ParseState::ExpressionParseFunctionCall(struct ExpressionStack **StackTop, const char *FuncName, bool RunIt);
-			enum LexToken ParseState::LexGetRawToken(struct Value **Value, int IncPos);
+			enum LexToken ParseState::LexGetRawToken(struct ValueAbs **Value, int IncPos);
 			void ParseState::LexHashIncPos(int IncPos);
 			void ParseState::LexHashIfdef(int IfNot);
 			void ParseState::LexHashIf();
@@ -263,7 +263,8 @@ public:
 			void *VariableAlloc( int Size, MemoryLocation OnHeap);
 			//void VariableStackPop(struct ParseState *Parser, struct Value *Var);
 			struct Value *VariableAllocValueAndData( int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap);
-			struct Value *VariableAllocValueAndCopy( struct Value *FromValue, MemoryLocation OnHeap);
+			struct ValueAbs *VariableAllocValueAndDataAbsolute(int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap);
+			struct Value *VariableAllocValueAndCopy(struct Value *FromValue, MemoryLocation OnHeap);
 			struct Value *VariableAllocValueFromType( struct ValueType *Typ, int IsLValue,
 			struct Value *LValueFrom, MemoryLocation OnHeap);
 			//struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
@@ -272,7 +273,8 @@ public:
 			//struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
 			//void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);
 			void VariableGet( const char *Ident, struct Value **LVal);
-			void VariableDefinePlatformVar( const char *Ident, struct ValueType *Typ,
+			void VariableGet(const char *Ident, struct ValueAbs **LVal);
+			void VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
 				UnionAnyValuePointer FromValue, int IsWritable);
 			//void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
 			//void VariableStackFramePop(struct ParseState *Parser);
@@ -473,9 +475,9 @@ public:
 
 	struct ValueType * ValTypeOfAnyValue(Picoc *pc);
 	void setValTypeOfAnyValue(Picoc *pc, struct ValueType *newVal);
-	StructFuncDef &ValFuncDef(Picoc *pc);
-	StructMacroDef &ValMacroDef(Picoc *pc);
-	const char * &ValIdentifierOfAnyValue(Picoc *pc);
+	//StructFuncDef &ValFuncDef(Picoc *pc);
+	//StructMacroDef &ValMacroDef(Picoc *pc);
+	//const char * &ValIdentifierOfAnyValue(Picoc *pc);
 	char *ValAddressOfData(Picoc *pc);
 
     struct ValueType *TypeOfValue;          /* the type of this value */
@@ -508,6 +510,82 @@ public:
 	int TypeStackSizeValue();
 };
 
+struct ValueAbs : public Value
+{
+public:
+	ValueAbs();
+	/* char ValCharacter(Picoc *pc);
+	void setValCharacter(Picoc *pc, char newVal);
+	short ValShortInteger(Picoc *pc);
+	void setValShortInteger(Picoc *pc, short newVal);
+	int ValInteger(Picoc *pc);
+	void setValInteger(Picoc *pc, int newValue);
+	long ValLongInteger(Picoc *pc);
+	void setValLongInteger(Picoc *pc, long newVal);
+	unsigned short ValUnsignedShortInteger(Picoc *pc);
+	void setValUnsignedShortInteger(Picoc *pc, unsigned short newVal);
+	unsigned int ValUnsignedInteger(Picoc *pc);
+	void setValUnsignedInteger(Picoc *pc, unsigned int newVal);
+	unsigned long ValUnsignedLongInteger(Picoc *pc);
+	void setValUnsignedLongInteger(Picoc *pc, unsigned long newVal);
+	unsigned char ValUnsignedCharacter(Picoc *pc);
+	void setValUnsignedCharacter(Picoc *pc, unsigned char newVal);
+#ifndef NO_FP
+	double Value::ValFP(Picoc *pc);
+	void Value::setValFP(Picoc *pc, double newVal);
+
+#endif
+	PointerType Value::ValPointer(Picoc *pc);						// * unsafe native pointers 
+	void Value::setValPointer(Picoc *pc, PointerType newVal);						//* unsafe native pointers 
+	char * Value::ValPointerChar(Picoc *pc);				  //* unsafe native pointers 
+	void Value::setValPointerChar(Picoc *pc, char * newVal);				  //* unsafe native pointers 
+	char ** Value::ValPointerCharChar(Picoc *pc);				  //* unsafe native pointers 
+	unsigned char *Value::ValPointerUChar(Picoc *pc);      //* unsafe native pointers 
+	double * Value::ValPointerDouble(Picoc *pc);
+	int * Value::ValPointerInt(Picoc *pc);
+	void Value::setValPointerInt(Picoc *pc, int * newval);
+	void Value::ValAssignPointerInt(Picoc *pc, int  newval);
+
+	struct ValueType * ValTypeOfAnyValue(Picoc *pc);
+	void setValTypeOfAnyValue(Picoc *pc, struct ValueType *newVal);
+	*/
+	StructFuncDef &ValFuncDef(Picoc *pc);
+	StructMacroDef &ValMacroDef(Picoc *pc);
+	const char * &ValIdentifierOfAnyValue(Picoc *pc);
+	/*
+	char *ValAddressOfData(Picoc *pc);
+
+	struct ValueType *TypeOfValue;          //* the type of this value 
+	struct Value *LValueFrom;       //* if an LValue, this is a Value our LValue is contained within (or NULL) 
+	char ValOnHeap;                 //* this Value is on the heap 
+	char ValOnStack;                //* the AnyValue is on the stack along with this Value 
+	char AnyValOnHeap;              //* the AnyValue is separately allocated from the Value on the heap 
+	char IsLValue;                  //* is modifiable and is allocated somewhere we can usefully modify it 
+	int ScopeID;                    //* to know when it goes out of scope 
+	char OutOfScope;
+	UnionAnyValuePointer getVal_();
+	void setVal_(UnionAnyValuePointer newVal);
+	UnionAnyValuePointer getValAbsolute();
+	void setValAbsolute(UnionAnyValuePointer newVal);
+	UnionAnyValuePointer getValVirtual();
+	void setValVirtual(UnionAnyValuePointer newVal);
+	//UnionAnyValuePointer &getVal();
+private:
+	UnionAnyValuePointer Val_;            //* pointer to the AnyValue which holds the actual content 
+public:
+	//* expression.c 
+	long ExpressionCoerceInteger(Picoc *pc);
+	unsigned long ExpressionCoerceUnsignedInteger(Picoc *pc);
+#ifndef NO_FP
+	double ExpressionCoerceFP(Picoc *pc);
+#endif
+
+	// type.c 
+	int TypeSizeValue(int Compact);
+	int TypeStackSizeValue();
+	*/
+};
+
 /* hash table data structure */
 struct TableEntry 
 {
@@ -525,7 +603,12 @@ public:
             const char *Key;              /* points to the shared string table */
             struct Value *ValInValueEntry;      /* the value we're storing */
         } v;                        /* used for tables of values */
-        
+		struct ValueEntryAbs
+		{
+			const char *Key;              /* points to the shared string table */
+			struct ValueAbs *ValInValueEntry;      /* the value we're storing */
+		} va;                        /* used for tables of values */
+
         char Key[1];                /* dummy size - used for the shared string table */
         
         struct BreakpointEntry      /* defines a breakpoint */
@@ -551,8 +634,10 @@ struct Table
 	//void TableInitTable(std::map<std::string,struct TableEntry*> *hashTable) ;
 	void Table::TableInitTable(std::vector<struct TableEntry> &HashTable, size_t Size, bool OnHeap);
 	bool TableGet(const char *Key, struct Value **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn);
+	bool TableGet(const char *Key, struct ValueAbs **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn);
 	struct TableEntry *TableSearch(const char *Key);
 	bool Table::TableSet(const char *Key, struct Value *Val, const char *DeclFileName, int DeclLine, int DeclColumn);
+	bool Table::TableSet(const char *Key, struct ValueAbs *Val, const char *DeclFileName, int DeclLine, int DeclColumn);
 	struct Value *Table::TableDelete(const char *Key);
 	void TableSet(const char *Key, struct TableEntry* newEntry);
 	void Table::TableFree();
@@ -694,7 +779,7 @@ public:
     struct TokenLine *InteractiveCurrentLine;
     bool LexUseStatementPrompt;
     UnionAnyValue LexAnyValue;
-    struct Value LexValue;
+    struct ValueAbs LexValue;
     struct Table ReservedWordTable;
     // obsolete struct TableEntry *ReservedWordHashTable[RESERVED_WORD_TABLE_SIZE];
 	// obsolete std::map<std::string, struct TableEntry *> ReservedWordMapTable;
@@ -810,6 +895,7 @@ public:
 	const char *TableStrRegister2(const char *Str, int Len);
 	//void TableInitTable(struct Table *Tbl, struct TableEntry **HashTable, int Size, int OnHeap);
 	int TableSet(struct Table *Tbl, const char *Key, struct Value *Val, const char *DeclFileName, int DeclLine, int DeclColumn);
+	int TableSet(struct Table *Tbl, const char *Key, struct ValueAbs *Val, const char *DeclFileName, int DeclLine, int DeclColumn);
 	//int TableGet(struct Table *Tbl, const char *Key, struct Value **Val, const char **DeclFileName, int *DeclLine, int *DeclColumn);
 	struct Value *TableDelete(struct Table *Tbl, const char *Key);
 	const char *TableSetIdentifier(struct Table *Tbl, const char *Ident, int IdentLen);
@@ -830,10 +916,10 @@ public:
 	// added
 	enum LexToken LexCheckReservedWord(const char *Word);
 	enum LexToken LexGetNumber(struct LexState *Lexer, struct Value *Value);
-	enum LexToken LexGetWord(struct LexState *Lexer, struct Value *Value);
+	enum LexToken LexGetWord(struct LexState *Lexer, struct ValueAbs *Value);
 	enum LexToken LexGetStringConstant(struct LexState *Lexer, struct Value *Value, char EndChar);
 	enum LexToken LexGetCharacterConstant(struct LexState *Lexer, struct Value *Value);
-	enum LexToken LexScanGetToken(struct LexState *Lexer, struct Value **Value);
+	enum LexToken LexScanGetToken(struct LexState *Lexer, struct ValueAbs **Value);
 	void *LexTokenise(struct LexState *Lexer, int *TokenLen);
 	/* parse.c */
 	/* the following are defined in picoc.h:

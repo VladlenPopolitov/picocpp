@@ -4,6 +4,8 @@ Value::Value() : TypeOfValue{}, Val_{}, LValueFrom{}, ValOnHeap{}, ValOnStack{},
 AnyValOnHeap{}, IsLValue{}, ScopeID{}, OutOfScope{}
 {}
 
+ValueAbs::ValueAbs() : Value(){}
+
 UnionAnyValuePointer Value::getVal_(){
 	return Val_;
 }
@@ -237,16 +239,16 @@ void Value::setValTypeOfAnyValue(Picoc *pc, struct ValueType *newVal){
 	 Val1->TypeOfAnyValue() = newVal;
 }
 
-StructFuncDef &Value::ValFuncDef(Picoc *pc){
+StructFuncDef &ValueAbs::ValFuncDef(Picoc *pc){
 	UnionAnyValuePointer Val1 = getValAbsolute();
 	return Val1->FuncDef();
 }
-StructMacroDef &Value::ValMacroDef(Picoc *pc){
+StructMacroDef &ValueAbs::ValMacroDef(Picoc *pc){
 	UnionAnyValuePointer Val1 = getValAbsolute();
 	return Val1->MacroDef();
 }
 
-const char * &Value::ValIdentifierOfAnyValue(Picoc *pc){
+const char * &ValueAbs::ValIdentifierOfAnyValue(Picoc *pc){
 	UnionAnyValuePointer Val1 = getValAbsolute();
 	return Val1->IdentifierOfAnyValue();
 }

@@ -125,6 +125,26 @@ struct Value *ParseState::VariableAllocValueAndData(int DataSize, int IsLValue, 
     
     return NewValue;
 }
+/* allocate a value either on the heap or the stack using space dependent on what type we want */
+struct ValueAbs *ParseState::VariableAllocValueAndDataAbsolute(int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap)
+{
+	struct ParseState *Parser = this;
+	/*obsolete Picoc *pc = Parser->pc; */
+	struct ValueAbs *NewValue = static_cast<struct ValueAbs*>(VariableAlloc(MEM_ALIGN(sizeof(struct ValueAbs)) + DataSize, OnHeap));
+	NewValue->setValVirtual((UnionAnyValuePointer)((char *)NewValue + MEM_ALIGN(sizeof(struct ValueAbs)))); // obsolete here - must be changed to virtual memory
+	//	NewValue->setVal((UnionAnyValuePointer)(static_cast<char *>(VariableAlloc(Parser,  DataSize, LocationVirtual)))); // obsolete here - must be changed to virtual memory
+	NewValue->ValOnHeap = OnHeap;
+	NewValue->AnyValOnHeap = FALSE;
+	NewValue->ValOnStack = !OnHeap;
+	NewValue->IsLValue = IsLValue;
+	NewValue->LValueFrom = LValueFrom;
+	if (Parser)
+		NewValue->ScopeID = Parser->getScopeID();
+
+	NewValue->OutOfScope = 0;
+
+	return NewValue;
+}
 
 /* allocate a value given its type */
 struct Value *ParseState::VariableAllocValueFromType(struct ValueType *Typ, int IsLValue,
@@ -420,6 +440,22 @@ void ParseState::VariableGet(const char *Ident, struct Value **LVal)
 				Parser->ProgramFail( "'%s' is undefined", Ident);
         }
     }
+}
+/* get the value of a variable. must be defined. Ident must be registered */
+void ParseState::VariableGet(const char *Ident, struct ValueAbs **LVal)
+{
+	struct ParseState *Parser = this;
+	Picoc * pc = Parser->pc;
+	if (pc->TopStackFrame() == nullptr || !pc->TopStackFrame()->LocalTable->TableGet(Ident, LVal, NULL, NULL, NULL))
+	{
+		if (!pc->GlobalTable.TableGet(Ident, LVal, NULL, NULL, NULL))
+		{
+			if (pc->VariableDefinedAndOutOfScope(Ident))
+				Parser->ProgramFail("'%s' is out of scope", Ident);
+			else
+				Parser->ProgramFail("'%s' is undefined", Ident);
+		}
+	}
 }
 
 /* define a global variable shared with a platform global. Ident will be registered */

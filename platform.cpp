@@ -58,7 +58,7 @@ void Picoc::PicocCallMain(int argc, char **argv)
 {
 	Picoc *pc = this;
     /* check if the program wants arguments */
-    struct Value *FuncValue = NULL;
+    struct ValueAbs *FuncValue = NULL;
 
     if (!VariableDefined( TableStrRegister( "main")))
         ProgramFailNoParser( "main() is not defined");

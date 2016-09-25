@@ -240,7 +240,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
 }
 
 /* get a reserved word or identifier - used while scanning */
-enum LexToken Picoc::LexGetWord( struct LexState *Lexer, struct Value *Value)
+enum LexToken Picoc::LexGetWord( struct LexState *Lexer, struct ValueAbs *Value)
 {
 	Picoc *pc = this;
     const char *StartPos = Lexer->Pos;
@@ -437,7 +437,7 @@ void LexSkipComment(struct LexState *Lexer, char NextChar, enum LexToken *Return
 }
 
 /* get a single token from the source - used while scanning */
-enum LexToken Picoc::LexScanGetToken( struct LexState *Lexer, struct Value **Value)
+enum LexToken Picoc::LexScanGetToken( struct LexState *Lexer, struct ValueAbs **Value)
 {
 	Picoc *pc = this;
     char ThisChar;
@@ -541,7 +541,7 @@ void *Picoc::LexTokenise( struct LexState *Lexer, int *TokenLen)
 	Picoc *pc = this;
     enum LexToken Token;
     void *HeapMem;
-    struct Value *GotValue;
+    struct ValueAbs *GotValue;
     int MemUsed = 0;
     int ValueSize;
     int ReserveSpace = (Lexer->End - Lexer->Pos) * 4 + 16; 
@@ -639,7 +639,7 @@ void  ParseState::LexInitParser(Picoc *pc, const char *SourceText, void *TokenSo
 }
 
 /* get the next token, without pre-processing */
-enum LexToken ParseState::LexGetRawToken(struct Value **Value, int IncPos)
+enum LexToken ParseState::LexGetRawToken(struct ValueAbs **Value, int IncPos)
 {
 	struct ParseState *Parser = this;
     enum LexToken Token = TokenNone;
@@ -780,7 +780,7 @@ void ParseState::LexHashIfdef(int IfNot)
 {
 	struct ParseState *Parser = this;
     /* get symbol to check */
-    struct Value *IdentValue;
+    struct ValueAbs *IdentValue;
     struct Value *SavedValue;
     int IsDefined;
     enum LexToken Token = LexGetRawToken(/*Parser,*/ &IdentValue, TRUE);
@@ -804,8 +804,8 @@ void ParseState::LexHashIf()
 {
 	struct ParseState *Parser = this;
     /* get symbol to check */
-    struct Value *IdentValue;
-    struct Value *SavedValue = NULL;
+    struct ValueAbs *IdentValue;
+    struct ValueAbs *SavedValue = nullptr;
     struct ParseState MacroParser;
     enum LexToken Token = LexGetRawToken(/*Parser,*/ &IdentValue, TRUE);
 
@@ -902,7 +902,7 @@ void LexPrintToken(enum LexToken Token)
 #endif
 
 /* get the next token given a parser state, pre-processing as we go */
-enum LexToken ParseState::LexGetToken(struct Value **Value, int IncPos)
+enum LexToken ParseState::LexGetToken(struct ValueAbs **Value, int IncPos)
 {
     enum LexToken Token;
     int TryNextToken;

@@ -1089,7 +1089,7 @@ void ParseState::ExpressionStackPushOperator(struct ExpressionStack **StackTop, 
 void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, enum LexToken Token)
 {
 	struct ParseState *Parser = this;
-    struct Value *Ident;
+    struct ValueAbs *Ident;
     
     /* get the identifier following the '.' or '->' */
     if (Parser->LexGetToken( &Ident, TRUE) != TokenIdentifier)
@@ -1131,7 +1131,7 @@ void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, e
 int ParseState::ExpressionParse(struct Value **Result)
 {
 	struct ParseState *Parser = this;
-    struct Value *LexValue;
+    struct ValueAbs *LexValue;
     int PrefixState = TRUE;
     int Done = FALSE;
     int BracketPrecedence = 0;
@@ -1309,7 +1309,7 @@ int ParseState::ExpressionParse(struct Value **Result)
             {
                 if (Parser->Mode == RunModeRun /* && Precedence < IgnorePrecedence */)
                 {
-                    struct Value *VariableValue = NULL;
+                    struct ValueAbs *VariableValue = NULL;
                     
 					VariableGet(LexValue->ValIdentifierOfAnyValue(pc), &VariableValue);
                     if (VariableValue->TypeOfValue->Base == TypeMacro)
@@ -1498,7 +1498,7 @@ void ParseState::ExpressionParseFunctionCall(struct ExpressionStack **StackTop, 
 {
 	struct ParseState *Parser = this;
     struct Value *ReturnValue = NULL;
-    struct Value *FuncValue = NULL;
+    struct ValueAbs *FuncValue = NULL;
     struct Value *Param;
     struct Value **ParamArray = NULL;
     int ArgCount;

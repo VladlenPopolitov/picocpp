@@ -59,15 +59,15 @@ int ParseState::ParseCountParams()
 }
 
 /* parse a function definition and store it for later */
-struct Value *ParseState::ParseFunctionDefinition(struct ValueType *ReturnType, const char *Identifier)
+struct ValueAbs *ParseState::ParseFunctionDefinition(struct ValueType *ReturnType, const char *Identifier)
 {
 	struct ParseState *Parser = this;
     struct ValueType *ParamType;
     const char *ParamIdentifier;
     enum LexToken Token = TokenNone;
     struct ParseState ParamParser;
-    struct Value *FuncValue;
-    struct Value *OldFuncValue;
+    struct ValueAbs *FuncValue;
+    struct ValueAbs *OldFuncValue;
     struct ParseState FuncBody;
     int ParamCount = 0;
     /*obsolete Picoc *pc = Parser->pc; */
@@ -81,7 +81,7 @@ struct Value *ParseState::ParseFunctionDefinition(struct ValueType *ReturnType, 
     if (ParamCount > PARAMETER_MAX)
         Parser->ProgramFail( "too many parameters (%d allowed)", PARAMETER_MAX);
     
-    FuncValue = VariableAllocValueAndData( sizeof(StructFuncDef) + 
+    FuncValue = VariableAllocValueAndDataAbsolute( sizeof(StructFuncDef) + 
 		sizeof(struct ValueType *) * ParamCount + sizeof(const char *) * ParamCount, FALSE, NULL, LocationOnHeap);
     FuncValue->TypeOfValue = &pc->FunctionType;
     FuncValue->ValFuncDef(pc).ReturnType = ReturnType;
@@ -378,10 +378,10 @@ int ParseState::ParseDeclaration(enum LexToken Token)
 void ParseState::ParseMacroDefinition()
 {
 	struct ParseState *Parser = this;
-    struct Value *MacroName;
+    struct ValueAbs *MacroName;
     const char *MacroNameStr;
-    struct Value *ParamName;
-    struct Value *MacroValue;
+    struct ValueAbs *ParamName;
+    struct ValueAbs *MacroValue;
 
     if (Parser->LexGetToken( &MacroName, TRUE) != TokenIdentifier)
         Parser->ProgramFail( "identifier expected");
@@ -398,7 +398,7 @@ void ParseState::ParseMacroDefinition()
         
         ParserCopy(&ParamParser, Parser);
 		NumParams = ParamParser.ParseCountParams();
-		MacroValue = VariableAllocValueAndData(sizeof(StructMacroDef) + sizeof(const char *) * NumParams, 
+		MacroValue = VariableAllocValueAndDataAbsolute(sizeof(StructMacroDef) + sizeof(const char *) * NumParams, 
 			FALSE, NULL, LocationOnHeap);
         MacroValue->ValMacroDef(pc).NumParams = NumParams;
         MacroValue->ValMacroDef(pc).ParamName = (const char **)((char *)MacroValue->getValAbsolute() + sizeof(StructMacroDef));
@@ -425,7 +425,7 @@ void ParseState::ParseMacroDefinition()
     else
     {
         /* allocate a simple unparameterised macro */
-		MacroValue = VariableAllocValueAndData( sizeof(StructMacroDef), FALSE, NULL, LocationOnHeap);
+		MacroValue = VariableAllocValueAndDataAbsolute( sizeof(StructMacroDef), FALSE, NULL, LocationOnHeap);
         MacroValue->ValMacroDef(pc).NumParams = 0;
     }
     
@@ -585,7 +585,7 @@ enum ParseResult ParseState::ParseStatement(int CheckTrailingSemicolon)
 {
 	struct ParseState *Parser = this;
     struct Value *CValue;
-    struct Value *LexerValue;
+    struct ValueAbs *LexerValue;
     struct Value *VarValue;
     int Condition;
     struct ParseState PreState;
