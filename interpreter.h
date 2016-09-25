@@ -445,11 +445,16 @@ public:
 	void setValShortInteger(Picoc *pc,short newVal);
 	int ValInteger(Picoc *pc);
 	void setValInteger(Picoc *pc, int newValue);
-	long &ValLongInteger(Picoc *pc);
-	unsigned short &ValUnsignedShortInteger(Picoc *pc);
-	unsigned int &ValUnsignedInteger(Picoc *pc);
-	unsigned long &ValUnsignedLongInteger(Picoc *pc);
-	unsigned char &ValUnsignedCharacter(Picoc *pc);
+	long ValLongInteger(Picoc *pc);
+	void setValLongInteger(Picoc *pc, long newVal);
+	unsigned short ValUnsignedShortInteger(Picoc *pc);
+	void setValUnsignedShortInteger(Picoc *pc, unsigned short newVal);
+	unsigned int ValUnsignedInteger(Picoc *pc);
+	void setValUnsignedInteger(Picoc *pc,unsigned int newVal);
+	unsigned long ValUnsignedLongInteger(Picoc *pc);
+	void setValUnsignedLongInteger(Picoc *pc, unsigned long newVal);
+	unsigned char ValUnsignedCharacter(Picoc *pc);
+	void setValUnsignedCharacter(Picoc *pc, unsigned char newVal);
 #ifndef NO_FP
 	double Value::ValFP(Picoc *pc);
 	void Value::setValFP(Picoc *pc, double newVal);

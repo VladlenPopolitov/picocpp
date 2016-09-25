@@ -177,7 +177,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
     }
     
     Value->TypeOfValue = &pc->LongType; /* ignored? */
-    Value->ValLongInteger(pc) = Result;
+    Value->setValLongInteger(pc, Result);
 
     ResultToken = TokenIntegerConstant;
     

@@ -263,11 +263,11 @@ long ParseState::ExpressionAssignInt(struct Value *DestValue, long FromInt, int 
         case TypeInt:           DestValue->setValInteger(pc, FromInt); break;
         case TypeShort:         DestValue->setValShortInteger(pc, (short)FromInt); break;
         case TypeChar:          DestValue->setValCharacter(pc, (char)FromInt); break;
-        case TypeLong:          DestValue->ValLongInteger(pc) = (long)FromInt; break;
-        case TypeUnsignedInt:   DestValue->ValUnsignedInteger(pc) = (unsigned int)FromInt; break;
-        case TypeUnsignedShort: DestValue->ValUnsignedShortInteger(pc) = (unsigned short)FromInt; break;
-        case TypeUnsignedLong:  DestValue->ValUnsignedLongInteger(pc) = (unsigned long)FromInt; break;
-        case TypeUnsignedChar:  DestValue->ValUnsignedCharacter(pc) = (unsigned char)FromInt; break;
+        case TypeLong:          DestValue->setValLongInteger(pc, (long)FromInt); break;
+        case TypeUnsignedInt:   DestValue->setValUnsignedInteger(pc, (unsigned int)FromInt); break;
+        case TypeUnsignedShort: DestValue->setValUnsignedShortInteger(pc , (unsigned short)FromInt); break;
+        case TypeUnsignedLong:  DestValue->setValUnsignedLongInteger(pc, (unsigned long)FromInt); break;
+        case TypeUnsignedChar:  DestValue->setValUnsignedCharacter(pc, (unsigned char)FromInt); break;
         default: break;
     }
     return Result;
@@ -423,11 +423,11 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
         case TypeInt:           DestValue->setValInteger(pc, SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeShort:         DestValue->setValShortInteger(pc, (short)SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeChar:          DestValue->setValCharacter(pc, (char)SourceValue->ExpressionCoerceInteger(pc)); break;
-        case TypeLong:          DestValue->ValLongInteger(pc) = SourceValue->ExpressionCoerceInteger(pc); break;
-        case TypeUnsignedInt:   DestValue->ValUnsignedInteger(pc) = SourceValue->ExpressionCoerceUnsignedInteger(pc); break;
-        case TypeUnsignedShort: DestValue->ValUnsignedShortInteger(pc) = (unsigned short)SourceValue->ExpressionCoerceUnsignedInteger(pc); break;
-        case TypeUnsignedLong:  DestValue->ValUnsignedLongInteger(pc) = SourceValue->ExpressionCoerceUnsignedInteger(pc); break;
-        case TypeUnsignedChar:  DestValue->ValUnsignedCharacter(pc) = (unsigned char)SourceValue->ExpressionCoerceUnsignedInteger(pc); break;
+        case TypeLong:          DestValue->setValLongInteger(pc, SourceValue->ExpressionCoerceInteger(pc)); break;
+        case TypeUnsignedInt:   DestValue->setValUnsignedInteger(pc, SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
+        case TypeUnsignedShort: DestValue->setValUnsignedShortInteger(pc, (unsigned short)SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
+        case TypeUnsignedLong:  DestValue->setValUnsignedLongInteger(pc, SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
+        case TypeUnsignedChar:  DestValue->setValUnsignedCharacter(pc, (unsigned char)SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
 
 #ifndef NO_FP
         case TypeFP:

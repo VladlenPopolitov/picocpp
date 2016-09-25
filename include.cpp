@@ -89,7 +89,7 @@ void Picoc::PicocIncludeAllSystemHeaders()
 void Picoc::IncludeFile( const char *FileName)
 {
 	Picoc *pc = this;
-    struct IncludeLibrary *LInclude;
+    // obsolete struct IncludeLibrary *LInclude;
     
     /* scan for the include file name to see if it's in our list of predefined includes */
     // obsolete for (LInclude = pc->IncludeLibList; LInclude != NULL; LInclude = LInclude->NextLib)

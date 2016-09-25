@@ -143,10 +143,7 @@ void Value::ValAssignPointerInt(Picoc *pc, int newVal){
 }
 
 
-unsigned char &Value::ValUnsignedCharacter(Picoc *pc){
-	UnionAnyValuePointer Val1 = getVal();
-	return Val1->UnsignedCharacter();
-}
+
 
 char Value::ValCharacter(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
@@ -174,21 +171,48 @@ void Value::setValInteger(Picoc *pc, int newVal){
 	Val1->Integer()=newVal;
 }
 
-long &Value::ValLongInteger(Picoc *pc){
+long Value::ValLongInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->LongInteger();
 }
-unsigned short &Value::ValUnsignedShortInteger(Picoc *pc){
+void Value::setValLongInteger(Picoc *pc, long newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	Val1->LongInteger()=newVal;
+}
+
+unsigned short Value::ValUnsignedShortInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->UnsignedShortInteger();
 }
-unsigned int &Value::ValUnsignedInteger(Picoc *pc){
+
+void Value::setValUnsignedShortInteger(Picoc *pc, unsigned short newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	Val1->UnsignedShortInteger()=newVal;
+}
+unsigned int Value::ValUnsignedInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->UnsignedInteger();
 }
-unsigned long &Value::ValUnsignedLongInteger(Picoc *pc){
+void Value::setValUnsignedInteger(Picoc *pc, unsigned int newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	Val1->UnsignedInteger()=newVal;
+}
+unsigned long Value::ValUnsignedLongInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->UnsignedLongInteger();
+}
+void Value::setValUnsignedLongInteger(Picoc *pc, unsigned long newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	 Val1->UnsignedLongInteger()=newVal;
+}
+
+unsigned char Value::ValUnsignedCharacter(Picoc *pc){
+	UnionAnyValuePointer Val1 = getVal();
+	return Val1->UnsignedCharacter();
+}
+void Value::setValUnsignedCharacter(Picoc *pc, unsigned char newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	Val1->UnsignedCharacter()=newVal;
 }
 
 struct ValueType * &Value::ValTypeOfAnyValue(Picoc *pc){
