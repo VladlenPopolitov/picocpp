@@ -156,10 +156,15 @@ void Value::setValCharacter(Picoc *pc,char newVal){
 	UnionAnyValuePointer Val1 = getVal();
 	Val1->Character()=newVal;
 }
-short &Value::ValShortInteger(Picoc *pc){
+short Value::ValShortInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->ShortInteger();
 }
+void Value::setValShortInteger(Picoc *pc, short newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	Val1->ShortInteger()=newVal;
+}
+
 int &Value::ValInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->Integer();

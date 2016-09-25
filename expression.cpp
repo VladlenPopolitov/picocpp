@@ -261,7 +261,7 @@ long ParseState::ExpressionAssignInt(struct Value *DestValue, long FromInt, int 
     switch (DestValue->TypeOfValue->Base)
     {
         case TypeInt:           DestValue->ValInteger(pc) = FromInt; break;
-        case TypeShort:         DestValue->ValShortInteger(pc) = (short)FromInt; break;
+        case TypeShort:         DestValue->setValShortInteger(pc, (short)FromInt); break;
         case TypeChar:          DestValue->setValCharacter(pc, (char)FromInt); break;
         case TypeLong:          DestValue->ValLongInteger(pc) = (long)FromInt; break;
         case TypeUnsignedInt:   DestValue->ValUnsignedInteger(pc) = (unsigned int)FromInt; break;
@@ -421,7 +421,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
     switch (DestValue->TypeOfValue->Base)
     {
         case TypeInt:           DestValue->ValInteger(pc) = SourceValue->ExpressionCoerceInteger(pc); break;
-        case TypeShort:         DestValue->ValShortInteger(pc) = (short)SourceValue->ExpressionCoerceInteger(pc); break;
+        case TypeShort:         DestValue->setValShortInteger(pc, (short)SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeChar:          DestValue->setValCharacter(pc, (char)SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeLong:          DestValue->ValLongInteger(pc) = SourceValue->ExpressionCoerceInteger(pc); break;
         case TypeUnsignedInt:   DestValue->ValUnsignedInteger(pc) = SourceValue->ExpressionCoerceUnsignedInteger(pc); break;

@@ -441,7 +441,8 @@ public:
 	Value();
 	char ValCharacter(Picoc *pc);
 	void setValCharacter(Picoc *pc, char newVal);
-	short &ValShortInteger(Picoc *pc);
+	short ValShortInteger(Picoc *pc);
+	void setValShortInteger(Picoc *pc,short newVal);
 	int &ValInteger(Picoc *pc);
 	long &ValLongInteger(Picoc *pc);
 	unsigned short &ValUnsignedShortInteger(Picoc *pc);
