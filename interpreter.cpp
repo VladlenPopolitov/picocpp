@@ -92,7 +92,7 @@ void Value::setValFP(Picoc *pc,double newVal){
 	 Val1->FP()=newVal;
 }
 #endif
-PointerType &Value::ValPointer(Picoc *pc)						
+PointerType Value::ValPointer(Picoc *pc)						
 {
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->Pointer();
@@ -103,12 +103,18 @@ void Value::setValPointer(Picoc *pc,PointerType newVal)
 	Val1->Pointer()=newVal;
 }
 
-char * &Value::ValPointerChar(Picoc *pc)				  
+char * Value::ValPointerChar(Picoc *pc)				  
 {
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->PointerChar();
 }
-char ** &Value::ValPointerCharChar(Picoc *pc)				  /* unsafe native pointers */
+void Value::setValPointerChar(Picoc *pc, char * newVal)
+{
+	// it is not used
+	UnionAnyValuePointer Val1 = getVal();
+	Val1->PointerChar()=newVal;
+}
+char ** Value::ValPointerCharChar(Picoc *pc)				  /* unsafe native pointers */
 {
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->PointerCharChar();
@@ -126,6 +132,16 @@ int * &Value::ValPointerInt(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->PointerInt();
 }
+
+void Value::setValPointerInt(Picoc *pc, int *newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	Val1->PointerInt()=newVal;
+}
+void Value::ValAssignPointerInt(Picoc *pc, int newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	*(Val1->PointerInt()) = newVal;
+}
+
 
 unsigned char &Value::ValUnsignedCharacter(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();

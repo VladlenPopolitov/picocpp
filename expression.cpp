@@ -108,7 +108,7 @@ void ExpressionStackShow(Picoc *pc, struct ExpressionStack *StackTop)
                 case TypeFunction:  printf("%s:function", StackTop->ExprVal->ValIdentifierOfAnyValue(pc)); break;
                 case TypeMacro:     printf("%s:macro", StackTop->ExprVal->ValIdentifierOfAnyValue(pc)); break;
                 case TypePointer:
-                    if (StackTop->ExprVal->ValPointer(pc) == NULL)
+                    if (StackTop->ExprVal->setValPointer(pc, = NULL)
                         printf("ptr(NULL)");
 					else if (StackTop->ExprVal->TypeOfValue->FromType->Base == TypeChar)
                         printf("\"%s\":string", (char *)StackTop->ExprVal->ValPointer(pc));
@@ -375,34 +375,34 @@ void ParseState::ExpressionAssignToPointer(struct Value *ToValue, struct Value *
     
     if (FromValue->TypeOfValue == ToValue->TypeOfValue || FromValue->TypeOfValue == Parser->pc->VoidPtrType || 
 		(ToValue->TypeOfValue == Parser->pc->VoidPtrType && FromValue->TypeOfValue->Base == TypePointer))
-        ToValue->ValPointer(pc) = FromValue->ValPointer(pc);      /* plain old pointer assignment */
+        ToValue->setValPointer(pc,  FromValue->ValPointer(pc));      /* plain old pointer assignment */
         
     else if (FromValue->TypeOfValue->Base == TypeArray && (PointedToType == FromValue->TypeOfValue->FromType || 
 		ToValue->TypeOfValue == Parser->pc->VoidPtrType))
     {
         /* the form is: blah *x = array of blah */
-        ToValue->ValPointer(pc) = (void *)FromValue->ValAddressOfData(pc);
+        ToValue->setValPointer(pc,  (void *)FromValue->ValAddressOfData(pc));
     }
     else if (FromValue->TypeOfValue->Base == TypePointer && FromValue->TypeOfValue->FromType->Base == TypeArray && 
                (PointedToType == FromValue->TypeOfValue->FromType->FromType || ToValue->TypeOfValue == Parser->pc->VoidPtrType) )
     {
         /* the form is: blah *x = pointer to array of blah */
-        ToValue->ValPointer(pc) = VariableDereferencePointer( FromValue, NULL, NULL, NULL, NULL);
+        ToValue->setValPointer(pc,  VariableDereferencePointer( FromValue, NULL, NULL, NULL, NULL));
     }
 	else if (IS_NUMERIC_COERCIBLE(FromValue) && FromValue->ExpressionCoerceInteger(pc) == 0)
     {
         /* null pointer assignment */
-        ToValue->ValPointer(pc) = NULL;
+        ToValue->setValPointer(pc,  nullptr);
     }
     else if (AllowPointerCoercion && IS_NUMERIC_COERCIBLE(FromValue))
     {
         /* assign integer to native pointer */
-		ToValue->ValPointer(pc) = (void *)(unsigned long)FromValue->ExpressionCoerceUnsignedInteger(pc);
+		ToValue->setValPointer(pc,  (void *)(unsigned long)FromValue->ExpressionCoerceUnsignedInteger(pc));
     }
     else if (AllowPointerCoercion && FromValue->TypeOfValue->Base == TypePointer)
     {
         /* assign a pointer to a pointer to a different type */
-        ToValue->ValPointer(pc) = FromValue->ValPointer(pc);
+        ToValue->setValPointer(pc,  FromValue->ValPointer(pc));
     }
     else
         Parser->AssignFail( "%t from %t", ToValue->TypeOfValue, FromValue->TypeOfValue, 0, 0, FuncName, ParamNo); 
@@ -555,7 +555,7 @@ void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enu
 	    ValPtr = TopValue->getVal();
 		Result = VariableAllocValueFromType(TypeGetMatching( TopValue->TypeOfValue, TypePointer,
 			0, Parser->pc->StrEmpty, TRUE), FALSE, NULL, LocationOnStack);
-            Result->ValPointer(pc) = (void *)ValPtr;
+            Result->setValPointer(pc,  (void *)ValPtr);
             ExpressionStackPushValueNode(/*Parser,*/ StackTop, Result);
             break;
 
@@ -626,14 +626,14 @@ void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enu
                     
                 switch (Op)
                 {
-                    case TokenIncrement:    TopValue->ValPointer(pc) = (void *)((char *)TopValue->ValPointer(pc) + Size); break;
-                    case TokenDecrement:    TopValue->ValPointer(pc) = (void *)((char *)TopValue->ValPointer(pc) - Size); break;
+                    case TokenIncrement:    TopValue->setValPointer(pc,  (void *)((char *)TopValue->ValPointer(pc) + Size)); break;
+                    case TokenDecrement:    TopValue->setValPointer(pc,  (void *)((char *)TopValue->ValPointer(pc) - Size)); break;
                     default:                Parser->ProgramFail( "invalid operation"); break;
                 }
 
                 ResultPtr = TopValue->ValPointer(pc);
                 StackValue = ExpressionStackPushValueByType(/*Parser,*/ StackTop, TopValue->TypeOfValue);
-                StackValue->ValPointer(pc) = ResultPtr;
+                StackValue->setValPointer(pc,  ResultPtr);
             }
             else
                 Parser->ProgramFail( "invalid operation");
@@ -693,13 +693,13 @@ void ParseState::ExpressionPostfixOperator(struct ExpressionStack **StackTop, en
         
         switch (Op)
         {
-            case TokenIncrement:    TopValue->ValPointer(pc) = (void *)((char *)TopValue->ValPointer(pc) + Size); break;
-            case TokenDecrement:    TopValue->ValPointer(pc) = (void *)((char *)TopValue->ValPointer(pc) - Size); break;
+            case TokenIncrement:    TopValue->setValPointer(pc,  (void *)((char *)TopValue->ValPointer(pc) + Size)); break;
+            case TokenDecrement:    TopValue->setValPointer(pc,  (void *)((char *)TopValue->ValPointer(pc) - Size)); break;
             default:                Parser->ProgramFail( "invalid operation"); break;
         }
         
         StackValue = ExpressionStackPushValueByType(/*Parser,*/ StackTop, TopValue->TypeOfValue);
-        StackValue->ValPointer(pc) = OrigPointer;
+        StackValue->setValPointer(pc,  OrigPointer);
     }
     else
         Parser->ProgramFail( "invalid operation");
@@ -867,7 +867,7 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
                 PointerLoc = (void *)((char *)PointerLoc - TopInt * Size);
             
             StackValue = ExpressionStackPushValueByType(/*Parser,*/ StackTop, BottomValue->TypeOfValue);
-            StackValue->ValPointer(pc) = PointerLoc;
+            StackValue->setValPointer(pc,  PointerLoc);
         }
         else if (Op == TokenAssign && TopInt == 0)
         {
@@ -891,7 +891,7 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
                 PointerLoc = (void *)((char *)PointerLoc - TopInt * Size);
 
 			Parser->pc->HeapUnpopStack(sizeof(struct Value));
-            BottomValue->ValPointer(pc) = PointerLoc;
+            BottomValue->setValPointer(pc,  PointerLoc);
             ExpressionStackPushValueNode(/*Parser,*/ StackTop, BottomValue);
         }
         else

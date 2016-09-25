@@ -17,7 +17,7 @@ static int CLK_TCKValue = CLK_TCK;
 void StdAsctime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = asctime(static_cast<tm*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValPointer(pc,  asctime(static_cast<tm*>(Param[0]->ValPointer(pc))));
 }
 
 void StdClock(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -29,7 +29,7 @@ void StdClock(struct ParseState *Parser, struct Value *ReturnValue, struct Value
 void StdCtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = ctime(static_cast<time_t*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValPointer(pc,  ctime(static_cast<time_t*>(Param[0]->ValPointer(pc))));
 }
 
 #ifndef NO_FP
@@ -43,13 +43,13 @@ void StdDifftime(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 void StdGmtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = gmtime(static_cast<time_t*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValPointer(pc,  gmtime(static_cast<time_t*>(Param[0]->ValPointer(pc))));
 }
 
 void StdLocaltime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = localtime(static_cast<time_t*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValPointer(pc,  localtime(static_cast<time_t*>(Param[0]->ValPointer(pc))));
 }
 
 void StdMktime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -76,12 +76,12 @@ void StdStrptime(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 {
 	  extern char *strptime(const char *s, const char *format, struct tm *tm);
 	  
-    ReturnValue->ValPointer(pc) = strptime(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValPointer(pc));
+    ReturnValue->setValPointer(pc,  strptime(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValPointer(pc));
 }
 
 void StdGmtime_r(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValPointer(pc) = gmtime_r(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc));
+    ReturnValue->setValPointer(pc,  gmtime_r(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc));
 }
 
 void StdTimegm(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)

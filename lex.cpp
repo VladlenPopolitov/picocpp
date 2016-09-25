@@ -389,7 +389,7 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
 
     /* create the the pointer for this char* */
     Value->TypeOfValue = pc->CharPtrType;
-    Value->ValPointer(pc) = const_cast<void*>(static_cast<const void*>(RegString)); // unsafe assignment and unsafe cast @todo \todo 
+    Value->setValPointer(pc,  const_cast<void*>(static_cast<const void*>(RegString))); // unsafe assignment and unsafe cast @todo \todo 
     if (*Lexer->Pos == EndChar)
         LEXER_INC(Lexer);
     

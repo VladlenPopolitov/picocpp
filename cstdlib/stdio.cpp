@@ -245,7 +245,7 @@ int StdioBasePrintf(struct ParseState *Parser, FILE *Stream, char *StrOut, int S
                         case 'n':   
 							ThisArg = (struct Value *)((char *)ThisArg + MEM_ALIGN(sizeof(struct Value) + ThisArg->TypeStackSizeValue()));
                             if (ThisArg->TypeOfValue->Base == TypeArray && ThisArg->TypeOfValue->FromType->Base == TypeInt)
-                                *(int *)ThisArg->ValPointer(pc) = SOStream.CharCount;
+                                 ThisArg->ValAssignPointerInt(pc,  SOStream.CharCount);
                             break;
                     }
                 }
@@ -360,13 +360,14 @@ int StdioBaseScanf(struct ParseState *Parser, FILE *Stream, char *StrIn, char *F
 void StdioFopen(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = fopen(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc));
+    ReturnValue->setValPointer(pc,  fopen(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
 }
 
 void StdioFreopen(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = freopen(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc), static_cast<FILE*>(Param[2]->ValPointer(pc)));
+	ReturnValue->setValPointer(pc,  freopen(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc), 
+		static_cast<FILE*>(Param[2]->ValPointer(pc))));
 }
 
 void StdioFclose(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -398,8 +399,8 @@ void StdioFgetc(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 void StdioFgets(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = fgets(Param[0]->ValPointerChar(pc), Param[1]->ValInteger(pc),
-		static_cast<FILE*>(Param[2]->ValPointer(pc)));
+	ReturnValue->setValPointer(pc,  fgets(Param[0]->ValPointerChar(pc), Param[1]->ValInteger(pc),
+		static_cast<FILE*>(Param[2]->ValPointer(pc))));
 }
 
 void StdioRemove(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -423,7 +424,7 @@ void StdioRewind(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 void StdioTmpfile(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = tmpfile();
+    ReturnValue->setValPointer(pc,  tmpfile());
 }
 
 void StdioClearerr(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -541,7 +542,7 @@ void StdioPuts(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
 void StdioGets(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = fgets(Param[0]->ValPointerChar(pc), GETS_MAXValue, stdin);
+    ReturnValue->setValPointer(pc,  fgets(Param[0]->ValPointerChar(pc), GETS_MAXValue, stdin));
     if (ReturnValue->ValPointer(pc) != NULL)
     {
         char *EOLPos = strchr(Param[0]->ValPointerChar(pc), '\n');

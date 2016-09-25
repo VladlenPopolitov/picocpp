@@ -48,19 +48,19 @@ void StdlibStrtoul(struct ParseState *Parser, struct Value *ReturnValue, struct 
 void StdlibMalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = malloc(Param[0]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  malloc(Param[0]->ValInteger(pc)));
 }
 
 void StdlibCalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = calloc(Param[0]->ValInteger(pc), Param[1]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  calloc(Param[0]->ValInteger(pc), Param[1]->ValInteger(pc)));
 }
 
 void StdlibRealloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = realloc(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  realloc(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc)));
 }
 
 void StdlibFree(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -96,7 +96,7 @@ void StdlibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 void StdlibGetenv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = getenv(Param[0]->ValPointerChar(pc));
+    ReturnValue->setValPointer(pc,  getenv(Param[0]->ValPointerChar(pc)));
 }
 
 void StdlibSystem(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -109,7 +109,7 @@ void StdlibSystem(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StdlibBsearch(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = bsearch(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValInteger(pc), Param[3]->ValInteger(pc), (int (*)())Param[4]->ValPointer(pc));
+    ReturnValue->setValPointer(pc,  bsearch(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValInteger(pc), Param[3]->ValInteger(pc), (int (*)())Param[4]->ValPointer(pc));
 }
 #endif
 

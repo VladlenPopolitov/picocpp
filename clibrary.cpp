@@ -346,13 +346,13 @@ void LibSPrintf(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 
     GenericPrintf(Parser, ReturnValue, Param+1, NumArgs-1, &StrStream);
     PrintCh(0, &StrStream);
-    ReturnValue->ValPointer(pc) = *Param;
+    ReturnValue->setValPointer(pc,  *Param;
 }
 
 /* get a line of input. protected from buffer overrun */
 void LibGets(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValPointer(pc) = PlatformGetLine(Param[0]->ValPointer(pc), GETS_BUF_MAX, NULL);
+    ReturnValue->setValPointer(pc,  PlatformGetLine(Param[0]->ValPointer(pc), GETS_BUF_MAX, NULL);
     if (ReturnValue->ValPointer(pc) != NULL)
     {
         char *EOLPos = strchr(Param[0]->ValPointer(pc), '\n');
@@ -466,20 +466,20 @@ void LibFloor(struct ParseState *Parser, struct Value *ReturnValue, struct Value
 #ifndef NO_STRING_FUNCTIONS
 void LibMalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValPointer(pc) = malloc(Param[0]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  malloc(Param[0]->ValInteger(pc));
 }
 
 #ifndef NO_CALLOC
 void LibCalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValPointer(pc) = calloc(Param[0]->ValInteger(pc), Param[1]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  calloc(Param[0]->ValInteger(pc), Param[1]->ValInteger(pc));
 }
 #endif
 
 #ifndef NO_REALLOC
 void LibRealloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValPointer(pc) = realloc(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  realloc(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
 }
 #endif
 
@@ -566,9 +566,9 @@ void LibIndex(struct ParseState *Parser, struct Value *ReturnValue, struct Value
         Pos++;
     
     if (*Pos != SearchChar)
-        ReturnValue->ValPointer(pc) = NULL;
+        ReturnValue->setValPointer(pc,  NULL;
     else
-        ReturnValue->ValPointer(pc) = Pos;
+        ReturnValue->setValPointer(pc,  Pos;
 }
 
 void LibRindex(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -576,11 +576,11 @@ void LibRindex(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
     char *Pos = (char *)Param[0]->ValPointer(pc);
     int SearchChar = Param[1]->ValInteger(pc);
 
-    ReturnValue->ValPointer(pc) = NULL;
+    ReturnValue->setValPointer(pc,  NULL;
     for (; *Pos != '\0'; Pos++)
     {
         if (*Pos == SearchChar)
-            ReturnValue->ValPointer(pc) = Pos;
+            ReturnValue->setValPointer(pc,  Pos;
     }
 }
 

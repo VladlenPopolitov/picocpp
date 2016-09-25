@@ -8,13 +8,14 @@ static int String_ZeroValue = 0;
 void StringStrcpy(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = strcpy(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValPointer(pc,  strcpy(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc))));
 }
 
 void StringStrncpy(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = strncpy(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc)), Param[2]->ValInteger(pc));
+	ReturnValue->setValPointer(pc,  strncpy(static_cast<char*>(Param[0]->ValPointer(pc)), 
+		static_cast<char*>(Param[1]->ValPointer(pc)), Param[2]->ValInteger(pc)));
 }
 
 void StringStrcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -26,20 +27,21 @@ void StringStrcmp(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StringStrncmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = strncmp(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc)), Param[2]->ValInteger(pc));
+	ReturnValue->ValInteger(pc) = strncmp(static_cast<char*>(Param[0]->ValPointer(pc)), 
+		static_cast<char*>(Param[1]->ValPointer(pc)), Param[2]->ValInteger(pc));
 }
 
 void StringStrcat(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = strcat(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValPointer(pc,  strcat(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc))));
 }
 
 void StringStrncat(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = strncat(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc)),
-		Param[2]->ValInteger(pc));
+	ReturnValue->setValPointer(pc,  strncat(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc)),
+		Param[2]->ValInteger(pc)));
 }
 
 #ifndef WIN32_2
@@ -52,11 +54,11 @@ while (*Pos != '\0' && *Pos != SearchChar)
 Pos++;
 
 if (*Pos != SearchChar)
-ReturnValue->ValPointer(pc) = NULL;
+ReturnValue->setValPointer(pc,  nullptr);
 else
-ReturnValue->ValPointer(pc) = Pos;
+ReturnValue->setValPointer(pc,  Pos);
 
-    //ReturnValue->ValPointer(pc) = index(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
+    //ReturnValue->setValPointer(pc,  index(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
 }
 
 void StringRindex(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -64,14 +66,14 @@ void StringRindex(struct ParseState *Parser, struct Value *ReturnValue, struct V
 char *Pos = (char *)Param[0]->ValPointer(pc);
 int SearchChar = Param[1]->ValInteger(pc);
 
-ReturnValue->ValPointer(pc) = NULL;
+ReturnValue->setValPointer(pc,  nullptr);
 for (; *Pos != '\0'; Pos++)
 {
 	if (*Pos == SearchChar)
-		ReturnValue->ValPointer(pc) = Pos;
+		ReturnValue->setValPointer(pc,  Pos);
 }
 
-//ReturnValue->ValPointer(pc) = rindex(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
+//ReturnValue->setValPointer(pc,  rindex(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc));
 }
 #endif
 
@@ -84,13 +86,13 @@ void StringStrlen(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StringMemset(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = memset(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  memset(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc)));
 }
 
 void StringMemcpy(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = memcpy(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  memcpy(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValInteger(pc)));
 }
 
 void StringMemcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -102,25 +104,25 @@ void StringMemcmp(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StringMemmove(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = memmove(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  memmove(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValInteger(pc)));
 }
 
 void StringMemchr(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = memchr(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  memchr(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc)));
 }
 
 void StringStrchr(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = strchr(static_cast<char*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc));
+	ReturnValue->setValPointer(pc,  strchr(static_cast<char*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc)));
 }
 
 void StringStrrchr(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValPointer(pc) = strrchr(static_cast<char*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc));
+	ReturnValue->setValPointer(pc,  strrchr(static_cast<char*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc)));
 }
 
 void StringStrcoll(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -132,7 +134,7 @@ void StringStrcoll(struct ParseState *Parser, struct Value *ReturnValue, struct 
 void StringStrerror(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = strerror(Param[0]->ValInteger(pc));
+    ReturnValue->setValPointer(pc,  strerror(Param[0]->ValInteger(pc)));
 }
 
 void StringStrspn(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -150,19 +152,19 @@ void StringStrcspn(struct ParseState *Parser, struct Value *ReturnValue, struct 
 void StringStrpbrk(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = strpbrk(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc));
+    ReturnValue->setValPointer(pc,  strpbrk(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
 }
 
 void StringStrstr(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = strstr(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc));
+    ReturnValue->setValPointer(pc,  strstr(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
 }
 
 void StringStrtok(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = strtok(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc));
+    ReturnValue->setValPointer(pc,  strtok(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
 }
 
 void StringStrxfrm(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -174,13 +176,13 @@ void StringStrxfrm(struct ParseState *Parser, struct Value *ReturnValue, struct 
 #ifndef WIN32
 void StringStrdup(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = strdup(Param[0]->ValPointer(pc));
+    ReturnValue->setValPointer(pc,  strdup(Param[0]->ValPointer(pc));
 }
 
 void StringStrtok_r(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValPointer(pc) = strtok_r(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValPointer(pc));
+    ReturnValue->setValPointer(pc,  strtok_r(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValPointer(pc));
 }
 #endif
 
