@@ -6,7 +6,7 @@
 /* deallocate any memory */
 void Picoc::ParseCleanup()
 {
-	Picoc *pc = this;
+	Picoc *pc = this;/*
     while (pc->CleanupTokenList != NULL)
     {
         struct CleanupTokenNode *Next = pc->CleanupTokenList->Next;
@@ -18,6 +18,20 @@ void Picoc::ParseCleanup()
         HeapFreeMem( pc->CleanupTokenList);
         pc->CleanupTokenList = Next;
     }
+	*/
+	while (!pc->CleanupTokenList.empty())
+	{
+		struct CleanupTokenNode First = pc->CleanupTokenList.front();
+
+		HeapFreeMem(First.Tokens);
+		if (First.SourceText != NULL)
+			HeapFreeMem((void *)First.SourceText);
+
+		//HeapFreeMem(pc->CleanupTokenList);
+		//pc->CleanupTokenList = Next;
+		pc->CleanupTokenList.pop_front();
+	}
+
 }
 
 /* parse a statement, but only run it if Condition is TRUE */
@@ -575,7 +589,7 @@ void ParseState::ParseTypedef()
     {
         TypPtr = &Typ;
         InitValue.TypeOfValue = &Parser->pc->TypeType;
-        InitValue.setValAbsolute(  (UnionAnyValuePointer )TypPtr);
+        InitValue.setValAbsolute( pc, (UnionAnyValuePointer )TypPtr);
 		VariableDefine( TypeName, &InitValue, NULL, FALSE);
     }
 }
@@ -955,7 +969,7 @@ void Picoc::PicocParse( const char *FileName, const char *Source, int SourceLen,
 	Picoc *pc = this;
     struct ParseState Parser;
     enum ParseResult Ok;
-    struct CleanupTokenNode *NewCleanupNode;
+    struct CleanupTokenNode NewCleanupNode;
     const char *RegFileName = TableStrRegister(FileName);
     
     void *Tokens = LexAnalyse( RegFileName, Source, SourceLen, NULL);
@@ -963,18 +977,18 @@ void Picoc::PicocParse( const char *FileName, const char *Source, int SourceLen,
     /* allocate a cleanup node so we can clean up the tokens later */
     if (!CleanupNow)
     {
-		NewCleanupNode = static_cast<CleanupTokenNode*>(HeapAllocMem( sizeof(struct CleanupTokenNode)));
-        if (NewCleanupNode == NULL)
-            ProgramFailNoParser("out of memory");
+		// obsolete NewCleanupNode = static_cast<CleanupTokenNode*>(HeapAllocMem( sizeof(struct CleanupTokenNode)));
+        // obsolete if (NewCleanupNode == NULL)
+        // obsolete     ProgramFailNoParser("out of memory");
         
-        NewCleanupNode->Tokens = Tokens;
+        NewCleanupNode.Tokens = Tokens;
         if (CleanupSource)
-            NewCleanupNode->SourceText = Source;
+            NewCleanupNode.SourceText = Source;
         else
-            NewCleanupNode->SourceText = NULL;
+            NewCleanupNode.SourceText = NULL;
             
-        NewCleanupNode->Next = pc->CleanupTokenList;
-        pc->CleanupTokenList = NewCleanupNode;
+        // obsolete NewCleanupNode->Next = pc->CleanupTokenList;
+        pc->CleanupTokenList.push_front( NewCleanupNode );
     }
     
     /* do the parsing */

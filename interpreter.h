@@ -491,10 +491,12 @@ public:
 	UnionAnyValuePointer getVal_();
 	void setVal_(UnionAnyValuePointer newVal);
 	UnionAnyValuePointer getValAbsolute();
-	void setValAbsolute(UnionAnyValuePointer newVal);
+	void setValAbsolute(Picoc *pc, UnionAnyValuePointer newVal);
 	UnionAnyValuePointer getValVirtual();
-	void setValVirtual(UnionAnyValuePointer newVal);
+	void setValVirtual(Picoc *pc, UnionAnyValuePointer newVal);
 	//UnionAnyValuePointer &getVal();
+	bool isAbsolute;
+	bool isAnyValueAllocated;
 private:
 	UnionAnyValuePointer Val_;            /* pointer to the AnyValue which holds the actual content */
 public:
@@ -734,7 +736,7 @@ struct CleanupTokenNode
 {
     void *Tokens;
     const char *SourceText;
-    struct CleanupTokenNode *Next;
+    //  obsolete struct CleanupTokenNode *Next;
 };
 
 /* linked list of lexical tokens used in interactive mode */
@@ -769,7 +771,9 @@ public:
 	~Picoc_Struct();
     /* parser global data */
     struct Table GlobalTable;
-    struct CleanupTokenNode *CleanupTokenList;
+    //obsolete struct CleanupTokenNode *CleanupTokenList;
+	std::list<struct CleanupTokenNode> CleanupTokenList;
+
     // obsolete struct TableEntry *GlobalHashTable[GLOBAL_TABLE_SIZE];
 	// obsolete std::map<std::string, struct TableEntry *> GlobalMapTable;
     

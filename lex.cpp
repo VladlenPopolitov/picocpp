@@ -97,7 +97,7 @@ void Picoc::LexInit()
     }
     
     pc->LexValue.TypeOfValue = nullptr;
-    pc->LexValue.setValAbsolute(  &pc->LexAnyValue );
+    pc->LexValue.setValAbsolute(pc,  &pc->LexAnyValue );
     pc->LexValue.LValueFrom = FALSE;
     pc->LexValue.ValOnHeap = FALSE;
     pc->LexValue.ValOnStack = FALSE;
@@ -383,7 +383,7 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
 		/* create and store this string literal */
        ArrayValue = temp.VariableAllocValueAndData( 0, FALSE, NULL, LocationOnHeap);
         ArrayValue->TypeOfValue = pc->CharArrayType;
-        ArrayValue->setValAbsolute(  (UnionAnyValuePointer )RegString );
+        ArrayValue->setValAbsolute(pc,  (UnionAnyValuePointer )RegString );
         VariableStringLiteralDefine( RegString, ArrayValue);
     }
 

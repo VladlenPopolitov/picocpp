@@ -340,7 +340,7 @@ void ParseState::TypeParseEnum(struct ValueType **Typ)
     (*Typ)->Members = &pc->GlobalTable;
     // obsolete memset((void *)&InitValue, '\0', sizeof(struct Value));
     InitValue.TypeOfValue = &pc->IntType;
-    InitValue.setValAbsolute(  (UnionAnyValuePointer )&EnumValue);
+    InitValue.setValAbsolute(pc,  (UnionAnyValuePointer )&EnumValue);
     do {
         if (Parser->LexGetToken( &LexValue, TRUE) != TokenIdentifier)
             Parser->ProgramFail( "identifier expected");

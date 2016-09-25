@@ -1,10 +1,10 @@
 #include "interpreter.h"
 
 Value::Value() : TypeOfValue{}, Val_{}, LValueFrom{}, ValOnHeap{}, ValOnStack{},
-AnyValOnHeap{}, IsLValue{}, ScopeID{}, OutOfScope{}
+AnyValOnHeap{}, IsLValue{}, ScopeID{}, OutOfScope{}, isAbsolute{ false }, isAnyValueAllocated{}
 {}
 
-ValueAbs::ValueAbs() : Value(){}
+ValueAbs::ValueAbs() : Value(){ isAbsolute = true; }
 
 UnionAnyValuePointer Value::getVal_(){
 	return Val_;
@@ -15,13 +15,18 @@ void Value::setVal_(UnionAnyValuePointer newVal){
 UnionAnyValuePointer Value::getValAbsolute(){
 	return Val_;
 }
-void Value::setValAbsolute(UnionAnyValuePointer newVal){
+void Value::setValAbsolute(Picoc *pc, UnionAnyValuePointer newVal){
+	if (isAnyValueAllocated) pc->HeapFreeMem(Val_);
+	isAnyValueAllocated = false;
 	Val_ = newVal;
 }
 UnionAnyValuePointer Value::getValVirtual(){
 	return Val_;
 }
-void Value::setValVirtual(UnionAnyValuePointer newVal){
+void Value::setValVirtual(Picoc *pc,UnionAnyValuePointer newVal){
+	if (isAnyValueAllocated) 
+		pc->HeapFreeMem(Val_);
+	isAnyValueAllocated = false;
 	Val_ = newVal;
 }
 
@@ -366,7 +371,7 @@ LocalTable { in.LocalTable}
 
 Picoc_Struct::Picoc_Struct(size_t StackSize) :
 GlobalTable{},
-CleanupTokenList{ nullptr },
+CleanupTokenList{  },
 // obsolete GlobalHashTable{},
 // obsolete GlobalMapTable{},
 

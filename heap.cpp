@@ -152,15 +152,25 @@ bool Picoc::HeapPopStackFrame()
 void *Picoc::HeapAllocVirtualMem(int Size)
 {
 	Picoc *pc = this;
-	return calloc(Size, 1);
+	void *ret;
+	ret = calloc(Size, 1);
+#ifdef DEBUG_ALLOCATIONS
+	fprintf(stderr, "HeapAllocate value %08x\n", ret);
+#endif
+	return ret;
 }
 
 /* allocate some dynamically allocated memory. memory is cleared. can return NULL if out of memory */
 void *Picoc::HeapAllocMem( int Size)
 {
 	Picoc *pc = this;
+	void *ret;
 #ifdef USE_MALLOC_HEAP
-    return calloc(Size, 1);
+	 ret=calloc(Size, 1);
+#ifdef DEBUG_ALLOCATIONS
+	fprintf(stderr,"HeapAllocate value %08x\n",ret);
+#endif
+	return ret;
 #else
     struct AllocNode *NewMem = NULL;
     struct AllocNode **FreeNode;
@@ -251,6 +261,9 @@ void *Picoc::HeapAllocMem( int Size)
 void Picoc::HeapFreeMem( void *Mem)
 {
 	Picoc *pc = this;
+#ifdef DEBUG_ALLOCATIONS
+	fprintf(stderr, "HeapFree value %08x\n", Mem);
+#endif
 #ifdef USE_MALLOC_HEAP
     free(Mem);
 #else
@@ -306,6 +319,9 @@ void Picoc::HeapFreeMem( void *Mem)
 void Picoc::HeapFreeMem(UnionAnyValuePointer Mem)
 {
 	Picoc *pc = this;
+#ifdef DEBUG_ALLOCATIONS
+	fprintf(stderr, "HeapFree value %08x\n", Mem);
+#endif
 #ifdef USE_MALLOC_HEAP
 	free(Mem);
 #else

@@ -325,7 +325,7 @@ void ParseState::ExpressionStackPushLValue(struct ExpressionStack **StackTop, st
 {
 	struct ParseState *Parser = this;
     struct Value *ValueLoc = VariableAllocValueShared( PushValue);
-	ValueLoc->setValVirtual(  
+	ValueLoc->setValVirtual(pc,  
 		static_cast< UnionAnyValuePointer >(
 		static_cast<void*>((
 		static_cast<char *>(static_cast<void*>(ValueLoc->getValVirtual())) + Offset))));
@@ -453,7 +453,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
                 if (DestValue->LValueFrom != NULL)
                 {
                     /* copy the resized value back to the LValue */
-                    DestValue->LValueFrom->setValVirtual(  DestValue->getValVirtual());
+                    DestValue->LValueFrom->setValVirtual(pc,  DestValue->getValVirtual());
                     DestValue->LValueFrom->AnyValOnHeap = DestValue->AnyValOnHeap;
                 }
             }
