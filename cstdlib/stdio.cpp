@@ -373,27 +373,27 @@ void StdioFreopen(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StdioFclose(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = fclose(static_cast<FILE*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, fclose(static_cast<FILE*>(Param[0]->ValPointer(pc))));
 }
 
 void StdioFread(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = fread(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc), 
-		static_cast<FILE*>(Param[3]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, fread(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc), 
+		static_cast<FILE*>(Param[3]->ValPointer(pc))));
 }
 
 void StdioFwrite(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = fwrite(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc), 
-		static_cast<FILE*>(Param[3]->ValPointer(pc)));
+    ReturnValue->setValInteger(pc, fwrite(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc), 
+		static_cast<FILE*>(Param[3]->ValPointer(pc))));
 }
 
 void StdioFgetc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = fgetc(static_cast<FILE*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, fgetc(static_cast<FILE*>(Param[0]->ValPointer(pc))));
 }
 
 void StdioFgets(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -406,13 +406,13 @@ void StdioFgets(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 void StdioRemove(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = remove(Param[0]->ValPointerChar(pc));
+	ReturnValue->setValInteger(pc, remove(Param[0]->ValPointerChar(pc)));
 }
 
 void StdioRename(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = rename(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc));
+	ReturnValue->setValInteger(pc, rename(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
 }
 
 void StdioRewind(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -436,65 +436,65 @@ void StdioClearerr(struct ParseState *Parser, struct Value *ReturnValue, struct 
 void StdioFeof(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = feof((FILE *)Param[0]->ValPointer(pc));
+    ReturnValue->setValInteger(pc, feof((FILE *)Param[0]->ValPointer(pc)));
 }
 
 void StdioFerror(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = ferror((FILE *)Param[0]->ValPointer(pc));
+    ReturnValue->setValInteger(pc, ferror((FILE *)Param[0]->ValPointer(pc)));
 }
 
 void StdioFileno(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
 #ifndef WIN32
-    ReturnValue->ValInteger(pc) = fileno(Param[0]->ValPointer(pc));
+    ReturnValue->setValInteger(pc, fileno(Param[0]->ValPointer(pc)));
 #else
-	ReturnValue->ValInteger(pc) = _fileno(static_cast<FILE*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, _fileno(static_cast<FILE*>(Param[0]->ValPointer(pc))));
 #endif
 }
 
 void StdioFflush(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = fflush(static_cast<FILE*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, fflush(static_cast<FILE*>(Param[0]->ValPointer(pc))));
 }
 
 void StdioFgetpos(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = fgetpos(static_cast<FILE*>(Param[0]->ValPointer(pc)), static_cast<fpos_t*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, fgetpos(static_cast<FILE*>(Param[0]->ValPointer(pc)), static_cast<fpos_t*>(Param[1]->ValPointer(pc))));
 }
 
 void StdioFsetpos(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = fsetpos(static_cast<FILE*>(Param[0]->ValPointer(pc)), static_cast<fpos_t*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, fsetpos(static_cast<FILE*>(Param[0]->ValPointer(pc)), static_cast<fpos_t*>(Param[1]->ValPointer(pc))));
 }
 
 void StdioFputc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = fputc(Param[0]->ValInteger(pc), static_cast<FILE*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, fputc(Param[0]->ValInteger(pc), static_cast<FILE*>(Param[1]->ValPointer(pc))));
 }
 
 void StdioFputs(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = fputs(Param[0]->ValPointerChar(pc), static_cast<FILE*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, fputs(Param[0]->ValPointerChar(pc), static_cast<FILE*>(Param[1]->ValPointer(pc))));
 }
 
 void StdioFtell(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = ftell(static_cast<FILE*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, ftell(static_cast<FILE*>(Param[0]->ValPointer(pc))));
 }
 
 void StdioFseek(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = fseek(static_cast<FILE*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc));
+	ReturnValue->setValInteger(pc, fseek(static_cast<FILE*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc), Param[2]->ValInteger(pc)));
 }
 
 void StdioPerror(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -506,13 +506,13 @@ void StdioPerror(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 void StdioPutc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = putc(Param[0]->ValInteger(pc), static_cast<FILE*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, putc(Param[0]->ValInteger(pc), static_cast<FILE*>(Param[1]->ValPointer(pc))));
 }
 
 void StdioPutchar(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = putchar(Param[0]->ValInteger(pc));
+    ReturnValue->setValInteger(pc, putchar(Param[0]->ValInteger(pc)));
 }
 
 void StdioSetbuf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -530,13 +530,13 @@ void StdioSetvbuf(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StdioUngetc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = ungetc(Param[0]->ValInteger(pc), static_cast<FILE*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, ungetc(Param[0]->ValInteger(pc), static_cast<FILE*>(Param[1]->ValPointer(pc))));
 }
 
 void StdioPuts(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = puts(Param[0]->ValPointerChar(pc));
+    ReturnValue->setValInteger(pc, puts(Param[0]->ValPointerChar(pc)));
 }
 
 void StdioGets(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -554,7 +554,7 @@ void StdioGets(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
 void StdioGetchar(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = getchar();
+    ReturnValue->setValInteger(pc, getchar());
 }
 
 void StdioPrintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -564,14 +564,14 @@ void StdioPrintf(struct ParseState *Parser, struct Value *ReturnValue, struct Va
     
     PrintfArgs.Param = Param;
     PrintfArgs.NumArgs = NumArgs-1;
-    ReturnValue->ValInteger(pc) = StdioBasePrintf(Parser, stdout, NULL, 0, Param[0]->ValPointerChar(pc), &PrintfArgs);
+    ReturnValue->setValInteger(pc, StdioBasePrintf(Parser, stdout, NULL, 0, Param[0]->ValPointerChar(pc), &PrintfArgs));
 }
 
 void StdioVprintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = StdioBasePrintf(Parser, stdout, NULL, 0, Param[0]->ValPointerChar(pc), 
-		static_cast<StdVararg*>(Param[1]->ValPointer(pc)));
+    ReturnValue->setValInteger(pc, StdioBasePrintf(Parser, stdout, NULL, 0, Param[0]->ValPointerChar(pc), 
+		static_cast<StdVararg*>(Param[1]->ValPointer(pc))));
 }
 
 void StdioFprintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -581,15 +581,15 @@ void StdioFprintf(struct ParseState *Parser, struct Value *ReturnValue, struct V
     
     PrintfArgs.Param = Param + 1;
     PrintfArgs.NumArgs = NumArgs-2;
-	ReturnValue->ValInteger(pc) = StdioBasePrintf(Parser, static_cast<FILE*>(Param[0]->ValPointer(pc)), nullptr, 0, 
-		Param[1]->ValPointerChar(pc), &PrintfArgs);
+	ReturnValue->setValInteger(pc, StdioBasePrintf(Parser, static_cast<FILE*>(Param[0]->ValPointer(pc)), nullptr, 0, 
+		Param[1]->ValPointerChar(pc), &PrintfArgs));
 }
 
 void StdioVfprintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = StdioBasePrintf(Parser, static_cast<FILE*>(Param[0]->ValPointer(pc)), nullptr, 0, 
-		Param[1]->ValPointerChar(pc), static_cast<StdVararg*>(Param[2]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, StdioBasePrintf(Parser, static_cast<FILE*>(Param[0]->ValPointer(pc)), nullptr, 0, 
+		Param[1]->ValPointerChar(pc), static_cast<StdVararg*>(Param[2]->ValPointer(pc))));
 }
 
 void StdioSprintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -599,8 +599,8 @@ void StdioSprintf(struct ParseState *Parser, struct Value *ReturnValue, struct V
     
     PrintfArgs.Param = Param + 1;
     PrintfArgs.NumArgs = NumArgs-2;
-	ReturnValue->ValInteger(pc) = StdioBasePrintf(Parser, nullptr, Param[0]->ValPointerChar(pc), -1, 
-		Param[1]->ValPointerChar(pc), &PrintfArgs);
+	ReturnValue->setValInteger(pc, StdioBasePrintf(Parser, nullptr, Param[0]->ValPointerChar(pc), -1, 
+		Param[1]->ValPointerChar(pc), &PrintfArgs));
 }
 
 void StdioSnprintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs) 
@@ -610,8 +610,8 @@ void StdioSnprintf(struct ParseState *Parser, struct Value *ReturnValue, struct 
     
     PrintfArgs.Param = Param+2;
     PrintfArgs.NumArgs = NumArgs-3;
-	ReturnValue->ValInteger(pc) = StdioBasePrintf(Parser, nullptr, Param[0]->ValPointerChar(pc), Param[1]->ValInteger(pc), 
-		Param[2]->ValPointerChar(pc), &PrintfArgs);
+	ReturnValue->setValInteger(pc, StdioBasePrintf(Parser, nullptr, Param[0]->ValPointerChar(pc), Param[1]->ValInteger(pc), 
+		Param[2]->ValPointerChar(pc), &PrintfArgs));
 }
 
 void StdioScanf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -621,7 +621,7 @@ void StdioScanf(struct ParseState *Parser, struct Value *ReturnValue, struct Val
     
     ScanfArgs.Param = Param;
     ScanfArgs.NumArgs = NumArgs-1;
-    ReturnValue->ValInteger(pc) = StdioBaseScanf(Parser, stdin, NULL, Param[0]->ValPointerChar(pc), &ScanfArgs);
+    ReturnValue->setValInteger(pc, StdioBaseScanf(Parser, stdin, NULL, Param[0]->ValPointerChar(pc), &ScanfArgs));
 }
 
 void StdioFscanf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -631,7 +631,8 @@ void StdioFscanf(struct ParseState *Parser, struct Value *ReturnValue, struct Va
     
     ScanfArgs.Param = Param+1;
     ScanfArgs.NumArgs = NumArgs-2;
-	ReturnValue->ValInteger(pc) = StdioBaseScanf(Parser, static_cast<FILE*>(Param[0]->ValPointer(pc)), nullptr, Param[1]->ValPointerChar(pc), &ScanfArgs);
+	ReturnValue->setValInteger(pc, StdioBaseScanf(Parser, static_cast<FILE*>(Param[0]->ValPointer(pc)), 
+		nullptr, Param[1]->ValPointerChar(pc), &ScanfArgs));
 }
 
 void StdioSscanf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -641,41 +642,43 @@ void StdioSscanf(struct ParseState *Parser, struct Value *ReturnValue, struct Va
     
     ScanfArgs.Param = Param+1;
     ScanfArgs.NumArgs = NumArgs-2;
-    ReturnValue->ValInteger(pc) = StdioBaseScanf(Parser, nullptr, Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc), &ScanfArgs);
+    ReturnValue->setValInteger(pc, StdioBaseScanf(Parser, nullptr, 
+		Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc), &ScanfArgs));
 }
 
 void StdioVsprintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = StdioBasePrintf(Parser, nullptr, Param[0]->ValPointerChar(pc), -1, Param[1]->ValPointerChar(pc), 
-		static_cast<StdVararg*>(Param[2]->ValPointer(pc)));
+    ReturnValue->setValInteger(pc, StdioBasePrintf(Parser, nullptr, Param[0]->ValPointerChar(pc), -1, Param[1]->ValPointerChar(pc), 
+		static_cast<StdVararg*>(Param[2]->ValPointer(pc))));
 }
 
 void StdioVsnprintf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = StdioBasePrintf(Parser, nullptr, Param[0]->ValPointerChar(pc), Param[1]->ValInteger(pc), 
-		Param[2]->ValPointerChar(pc), static_cast<StdVararg*>(Param[3]->ValPointer(pc)));
+    ReturnValue->setValInteger(pc, StdioBasePrintf(Parser, nullptr, Param[0]->ValPointerChar(pc), Param[1]->ValInteger(pc), 
+		Param[2]->ValPointerChar(pc), static_cast<StdVararg*>(Param[3]->ValPointer(pc))));
 }
 
 void StdioVscanf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = StdioBaseScanf(Parser, stdin, nullptr, Param[0]->ValPointerChar(pc), static_cast<StdVararg*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, StdioBaseScanf(Parser, stdin, nullptr, Param[0]->ValPointerChar(pc), 
+		static_cast<StdVararg*>(Param[1]->ValPointer(pc))));
 }
 
 void StdioVfscanf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = StdioBaseScanf(Parser, static_cast<FILE*>(Param[0]->ValPointer(pc)), nullptr, 
-		Param[1]->ValPointerChar(pc), static_cast<StdVararg*>(Param[2]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, StdioBaseScanf(Parser, static_cast<FILE*>(Param[0]->ValPointer(pc)), nullptr, 
+		Param[1]->ValPointerChar(pc), static_cast<StdVararg*>(Param[2]->ValPointer(pc))));
 }
 
 void StdioVsscanf(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = StdioBaseScanf(Parser, nullptr, Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc), 
-		static_cast<StdVararg*>(Param[2]->ValPointer(pc)));
+    ReturnValue->setValInteger(pc, StdioBaseScanf(Parser, nullptr, Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc), 
+		static_cast<StdVararg*>(Param[2]->ValPointer(pc))));
 }
 
 /* handy structure definitions */

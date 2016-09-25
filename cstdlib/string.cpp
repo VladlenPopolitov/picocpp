@@ -21,14 +21,14 @@ void StringStrncpy(struct ParseState *Parser, struct Value *ReturnValue, struct 
 void StringStrcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = strcmp(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, strcmp(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc))));
 }
 
 void StringStrncmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = strncmp(static_cast<char*>(Param[0]->ValPointer(pc)), 
-		static_cast<char*>(Param[1]->ValPointer(pc)), Param[2]->ValInteger(pc));
+	ReturnValue->setValInteger(pc, strncmp(static_cast<char*>(Param[0]->ValPointer(pc)), 
+		static_cast<char*>(Param[1]->ValPointer(pc)), Param[2]->ValInteger(pc)));
 }
 
 void StringStrcat(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -80,7 +80,7 @@ for (; *Pos != '\0'; Pos++)
 void StringStrlen(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = strlen(static_cast<char*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, strlen(static_cast<char*>(Param[0]->ValPointer(pc))));
 }
 
 void StringMemset(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -98,7 +98,7 @@ void StringMemcpy(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StringMemcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = memcmp(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValInteger(pc));
+    ReturnValue->setValInteger(pc, memcmp(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValInteger(pc)));
 }
 
 void StringMemmove(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -128,7 +128,7 @@ void StringStrrchr(struct ParseState *Parser, struct Value *ReturnValue, struct 
 void StringStrcoll(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = strcoll(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, strcoll(static_cast<char*>(Param[0]->ValPointer(pc)), static_cast<char*>(Param[1]->ValPointer(pc))));
 }
 
 void StringStrerror(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -140,13 +140,13 @@ void StringStrerror(struct ParseState *Parser, struct Value *ReturnValue, struct
 void StringStrspn(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = strspn(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc));
+	ReturnValue->setValInteger(pc, strspn(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
 }
 
 void StringStrcspn(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = strcspn(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc));
+	ReturnValue->setValInteger(pc, strcspn(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
 }
 
 void StringStrpbrk(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -170,7 +170,7 @@ void StringStrtok(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StringStrxfrm(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = strxfrm(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc), Param[2]->ValInteger(pc));
+    ReturnValue->setValInteger(pc, strxfrm(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc), Param[2]->ValInteger(pc)));
 }
 
 #ifndef WIN32

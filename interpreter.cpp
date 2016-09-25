@@ -165,10 +165,15 @@ void Value::setValShortInteger(Picoc *pc, short newVal){
 	Val1->ShortInteger()=newVal;
 }
 
-int &Value::ValInteger(Picoc *pc){
+int Value::ValInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->Integer();
 }
+void Value::setValInteger(Picoc *pc, int newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	Val1->Integer()=newVal;
+}
+
 long &Value::ValLongInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->LongInteger();

@@ -23,7 +23,7 @@ void StdAsctime(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 void StdClock(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->ValInteger(pc) = clock();
+    ReturnValue->setValInteger(pc, clock());
 }
 
 void StdCtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -55,20 +55,20 @@ void StdLocaltime(struct ParseState *Parser, struct Value *ReturnValue, struct V
 void StdMktime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = (int)mktime(static_cast<tm*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, (int)mktime(static_cast<tm*>(Param[0]->ValPointer(pc))));
 }
 
 void StdTime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = (int)time(static_cast<time_t*>(Param[0]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, (int)time(static_cast<time_t*>(Param[0]->ValPointer(pc))));
 }
 
 void StdStrftime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->ValInteger(pc) = strftime(static_cast<char*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc), Param[2]->ValPointerChar(pc), 
-		static_cast<tm*>(Param[3]->ValPointer(pc)));
+	ReturnValue->setValInteger(pc, strftime(static_cast<char*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc), Param[2]->ValPointerChar(pc), 
+		static_cast<tm*>(Param[3]->ValPointer(pc))));
 }
 
 #ifndef WIN32
@@ -86,7 +86,7 @@ void StdGmtime_r(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 
 void StdTimegm(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValInteger(pc) = timegm(Param[0]->ValPointer(pc));
+    ReturnValue->setValInteger(pc, timegm(Param[0]->ValPointer(pc)));
 }
 #endif
 

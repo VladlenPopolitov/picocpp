@@ -363,7 +363,7 @@ void LibGets(struct ParseState *Parser, struct Value *ReturnValue, struct Value 
 
 void LibGetc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->ValInteger(pc) = PlatformGetCharacter();
+    ReturnValue->setValInteger(pc, PlatformGetCharacter());
 }
 
 void LibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -520,11 +520,11 @@ void LibStrcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
     
     for (StrEnded = FALSE; !StrEnded; StrEnded = (*Str1 == '\0' || *Str2 == '\0'), Str1++, Str2++)
     {
-         if (*Str1 < *Str2) { ReturnValue->ValInteger(pc) = -1; return; } 
-         else if (*Str1 > *Str2) { ReturnValue->ValInteger(pc) = 1; return; }
+         if (*Str1 < *Str2) { ReturnValue->setValInteger(pc, -1); return; } 
+         else if (*Str1 > *Str2) { ReturnValue->setValInteger(pc, 1); return; }
     }
     
-    ReturnValue->ValInteger(pc) = 0;
+    ReturnValue->setValInteger(pc, 0);
 }
 
 void LibStrncmp(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -536,11 +536,11 @@ void LibStrncmp(struct ParseState *Parser, struct Value *ReturnValue, struct Val
     
     for (StrEnded = FALSE; !StrEnded && Len > 0; StrEnded = (*Str1 == '\0' || *Str2 == '\0'), Str1++, Str2++, Len--)
     {
-         if (*Str1 < *Str2) { ReturnValue->ValInteger(pc) = -1; return; } 
-         else if (*Str1 > *Str2) { ReturnValue->ValInteger(pc) = 1; return; }
+         if (*Str1 < *Str2) { ReturnValue->setValInteger(pc, -1); return; } 
+         else if (*Str1 > *Str2) { ReturnValue->setValInteger(pc, 1); return; }
     }
     
-    ReturnValue->ValInteger(pc) = 0;
+    ReturnValue->setValInteger(pc, 0);
 }
 
 void LibStrcat(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -592,7 +592,7 @@ void LibStrlen(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
     for (Len = 0; *Pos != '\0'; Pos++)
         Len++;
     
-    ReturnValue->ValInteger(pc) = Len;
+    ReturnValue->setValInteger(pc, Len);
 }
 
 void LibMemset(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -615,11 +615,11 @@ void LibMemcmp(struct ParseState *Parser, struct Value *ReturnValue, struct Valu
     
     for (; Len > 0; Mem1++, Mem2++, Len--)
     {
-         if (*Mem1 < *Mem2) { ReturnValue->ValInteger(pc) = -1; return; } 
-         else if (*Mem1 > *Mem2) { ReturnValue->ValInteger(pc) = 1; return; }
+         if (*Mem1 < *Mem2) { ReturnValue->setValInteger(pc, -1); return; } 
+         else if (*Mem1 > *Mem2) { ReturnValue->setValInteger(pc, 1); return; }
     }
     
-    ReturnValue->ValInteger(pc) = 0;
+    ReturnValue->setValInteger(pc, 0);
 }
 #endif
 

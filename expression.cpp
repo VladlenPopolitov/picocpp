@@ -260,7 +260,7 @@ long ParseState::ExpressionAssignInt(struct Value *DestValue, long FromInt, int 
 
     switch (DestValue->TypeOfValue->Base)
     {
-        case TypeInt:           DestValue->ValInteger(pc) = FromInt; break;
+        case TypeInt:           DestValue->setValInteger(pc, FromInt); break;
         case TypeShort:         DestValue->setValShortInteger(pc, (short)FromInt); break;
         case TypeChar:          DestValue->setValCharacter(pc, (char)FromInt); break;
         case TypeLong:          DestValue->ValLongInteger(pc) = (long)FromInt; break;
@@ -352,7 +352,7 @@ void ParseState::ExpressionPushInt(struct ExpressionStack **StackTop, long IntVa
 {
 	struct ParseState *Parser = this;
 	struct Value *ValueLoc = VariableAllocValueFromType( &Parser->pc->IntType, FALSE, NULL, LocationOnStack);
-    ValueLoc->ValInteger(pc) = IntValue;
+    ValueLoc->setValInteger(pc, IntValue);
     ExpressionStackPushValueNode( StackTop, ValueLoc);
 }
 
@@ -420,7 +420,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
 
     switch (DestValue->TypeOfValue->Base)
     {
-        case TypeInt:           DestValue->ValInteger(pc) = SourceValue->ExpressionCoerceInteger(pc); break;
+        case TypeInt:           DestValue->setValInteger(pc, SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeShort:         DestValue->setValShortInteger(pc, (short)SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeChar:          DestValue->setValCharacter(pc, (char)SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeLong:          DestValue->ValLongInteger(pc) = SourceValue->ExpressionCoerceInteger(pc); break;
@@ -771,7 +771,9 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
             case TokenAddAssign:            ASSIGN_FP_OR_INT(BottomFP + TopFP); break;
             case TokenSubtractAssign:       ASSIGN_FP_OR_INT(BottomFP - TopFP); break;
             case TokenMultiplyAssign:       ASSIGN_FP_OR_INT(BottomFP * TopFP); break;
-            case TokenDivideAssign:         ASSIGN_FP_OR_INT(BottomFP / TopFP); break;
+            case TokenDivideAssign:         
+				if (TopFP == 0.0) { Parser->ProgramFail("Division by zero"); }
+				ASSIGN_FP_OR_INT(BottomFP / TopFP); break;
             case TokenEqual:                ResultInt = BottomFP == TopFP; ResultIsInt = TRUE; break;
             case TokenNotEqual:             ResultInt = BottomFP != TopFP; ResultIsInt = TRUE; break;
             case TokenLessThan:             ResultInt = BottomFP < TopFP; ResultIsInt = TRUE; break;
@@ -781,7 +783,9 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
             case TokenPlus:                 ResultFP = BottomFP + TopFP; break;
             case TokenMinus:                ResultFP = BottomFP - TopFP; break;
             case TokenAsterisk:             ResultFP = BottomFP * TopFP; break;
-            case TokenSlash:                ResultFP = BottomFP / TopFP; break;
+            case TokenSlash:    
+				if (TopFP == 0.0) { Parser->ProgramFail("Division by zero"); }
+				ResultFP = BottomFP / TopFP; break;
             default:                        Parser->ProgramFail( "invalid operation"); break;
         }
 
@@ -802,7 +806,9 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
             case TokenAddAssign:            ResultInt = ExpressionAssignInt(/*Parser,*/ BottomValue, BottomInt + TopInt, FALSE); break;
             case TokenSubtractAssign:       ResultInt = ExpressionAssignInt(/*Parser,*/ BottomValue, BottomInt - TopInt, FALSE); break;
             case TokenMultiplyAssign:       ResultInt = ExpressionAssignInt(/*Parser,*/ BottomValue, BottomInt * TopInt, FALSE); break;
-            case TokenDivideAssign:         ResultInt = ExpressionAssignInt(/*Parser,*/ BottomValue, BottomInt / TopInt, FALSE); break;
+            case TokenDivideAssign: 
+				if (TopInt == 0) { Parser->ProgramFail("Division by zero"); }
+				ResultInt = ExpressionAssignInt(/*Parser,*/ BottomValue, BottomInt / TopInt, FALSE); break;
 #ifndef NO_MODULUS
             case TokenModulusAssign:        ResultInt = ExpressionAssignInt(/*Parser,*/ BottomValue, BottomInt % TopInt, FALSE); break;
 #endif
@@ -827,7 +833,9 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
             case TokenPlus:                 ResultInt = BottomInt + TopInt; break;
             case TokenMinus:                ResultInt = BottomInt - TopInt; break;
             case TokenAsterisk:             ResultInt = BottomInt * TopInt; break;
-            case TokenSlash:                ResultInt = BottomInt / TopInt; break;
+			case TokenSlash:                
+				if (TopInt == 0){ Parser->ProgramFail("Division by zero"); }
+				ResultInt = BottomInt / TopInt; break;
 #ifndef NO_MODULUS
             case TokenModulus:              ResultInt = BottomInt % TopInt; break;
 #endif

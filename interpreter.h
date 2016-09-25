@@ -443,7 +443,8 @@ public:
 	void setValCharacter(Picoc *pc, char newVal);
 	short ValShortInteger(Picoc *pc);
 	void setValShortInteger(Picoc *pc,short newVal);
-	int &ValInteger(Picoc *pc);
+	int ValInteger(Picoc *pc);
+	void setValInteger(Picoc *pc, int newValue);
 	long &ValLongInteger(Picoc *pc);
 	unsigned short &ValUnsignedShortInteger(Picoc *pc);
 	unsigned int &ValUnsignedInteger(Picoc *pc);
