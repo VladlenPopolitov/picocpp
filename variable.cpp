@@ -27,17 +27,17 @@ void Picoc::VariableFree(struct Value *ValueIn)
 	if (ValueIn->ValOnHeap || ValueIn->AnyValOnHeap)
     {
         /* free function bodies */
-		if (ValueIn->TypeOfValue == &pc->FunctionType && ValueIn->getVal()->FuncDef().Intrinsic == nullptr &&
-			ValueIn->getVal()->FuncDef().Body.getPos() != nullptr)
-			HeapFreeMem((void *)ValueIn->getVal()->FuncDef().Body.getPos());
+		if (ValueIn->TypeOfValue == &pc->FunctionType && ValueIn->getValAbsolute()->FuncDef().Intrinsic == nullptr &&
+			ValueIn->getValAbsolute()->FuncDef().Body.getPos() != nullptr)
+			HeapFreeMem((void *)ValueIn->getValAbsolute()->FuncDef().Body.getPos());
 
         /* free macro bodies */
 		if (ValueIn->TypeOfValue == &pc->MacroType)
-            HeapFreeMem( (void *)ValueIn->getVal()->MacroDef().Body.getPos());
+            HeapFreeMem( (void *)ValueIn->getValAbsolute()->MacroDef().Body.getPos());
 
         /* free the AnyValue */
 		if (ValueIn->AnyValOnHeap)
-            HeapFreeMem( ValueIn->getVal());
+            HeapFreeMem( ValueIn->getValVirtual());
     }
 
     /* free the value */
@@ -111,7 +111,7 @@ struct Value *ParseState::VariableAllocValueAndData(int DataSize, int IsLValue, 
 	struct ParseState *Parser = this;
 	/*obsolete Picoc *pc = Parser->pc; */
     struct Value *NewValue = static_cast<struct Value*>(VariableAlloc(  MEM_ALIGN(sizeof(struct Value)) + DataSize, OnHeap));
-    NewValue->setVal ((UnionAnyValuePointer )((char *)NewValue + MEM_ALIGN(sizeof(struct Value)))); // obsolete here - must be changed to virtual memory
+    NewValue->setValVirtual ((UnionAnyValuePointer )((char *)NewValue + MEM_ALIGN(sizeof(struct Value)))); // obsolete here - must be changed to virtual memory
 //	NewValue->setVal((UnionAnyValuePointer)(static_cast<char *>(VariableAlloc(Parser,  DataSize, LocationVirtual)))); // obsolete here - must be changed to virtual memory
 	NewValue->ValOnHeap = OnHeap;
     NewValue->AnyValOnHeap = FALSE;
@@ -151,10 +151,10 @@ struct Value *ParseState::VariableAllocValueAndCopy(struct Value *FromValue, Mem
 	int CopySize = FromValue->TypeSizeValue(TRUE);
 
     assert(CopySize <= MAX_TMP_COPY_BUF);
-    memcpy((void *)&TmpBuf[0], (void *)FromValue->getVal(), CopySize); // obsolete value
+    memcpy((void *)&TmpBuf[0], (void *)FromValue->getValVirtual(), CopySize); // obsolete value
     NewValue = VariableAllocValueAndData(  CopySize, FromValue->IsLValue, FromValue->LValueFrom, OnHeap);
     NewValue->TypeOfValue = DType;
-    memcpy((void *)NewValue->getVal(), (void *)&TmpBuf[0], CopySize); // obsolete value
+    memcpy((void *)NewValue->getValVirtual(), (void *)&TmpBuf[0], CopySize); // obsolete value
     
     return NewValue;
 }
@@ -166,7 +166,7 @@ struct Value *ParseState::VariableAllocValueFromExistingData(struct ValueType *T
 	struct ParseState *Parser = this;
 	struct Value *NewValue = static_cast<struct Value*>(VariableAlloc( sizeof(struct Value), LocationOnStack));
     NewValue->TypeOfValue = Typ;
-    NewValue->setVal( FromValue );
+    NewValue->setValVirtual( FromValue );
     NewValue->ValOnHeap = FALSE;
     NewValue->AnyValOnHeap = FALSE;
     NewValue->ValOnStack = FALSE;
@@ -179,7 +179,7 @@ struct Value *ParseState::VariableAllocValueFromExistingData(struct ValueType *T
 /* allocate a value either on the heap or the stack from an existing Value, sharing the value */
 struct Value *ParseState::VariableAllocValueShared(struct Value *FromValue)
 {
-	return VariableAllocValueFromExistingData( FromValue->TypeOfValue, FromValue->getVal(), FromValue->IsLValue, FromValue->IsLValue ? FromValue : NULL);
+	return VariableAllocValueFromExistingData( FromValue->TypeOfValue, FromValue->getValVirtual(), FromValue->IsLValue, FromValue->IsLValue ? FromValue : NULL);
 }
 
 /* reallocate a variable so its data has a new size */
@@ -187,9 +187,9 @@ void ParseState::VariableRealloc(struct Value *FromValue, int NewSize)
 {
 	struct ParseState *Parser = this;
     if (FromValue->AnyValOnHeap)
-		Parser->pc->HeapFreeMem(FromValue->getVal());
+		Parser->pc->HeapFreeMem(FromValue->getValVirtual());
         
-	FromValue->setVal(  static_cast<UnionAnyValuePointer >(VariableAlloc( NewSize, LocationVirtual)));
+	FromValue->setValVirtual(  static_cast<UnionAnyValuePointer >(VariableAlloc( NewSize, LocationVirtual)));
     FromValue->AnyValOnHeap = TRUE; 
 }
 
@@ -368,7 +368,7 @@ struct Value *ParseState::VariableDefineButIgnoreIdentical( const char *Ident, s
         }
 
         /* static variable exists in the global scope - now make a mirroring variable in our own scope with the short name */
-		VariableDefinePlatformVar( Ident, ExistingValue->TypeOfValue, ExistingValue->getVal(), TRUE);
+		VariableDefinePlatformVar( Ident, ExistingValue->TypeOfValue, ExistingValue->getValVirtual(), TRUE);
         return ExistingValue;
     }
     else
@@ -425,7 +425,7 @@ void ParseState::VariableDefinePlatformVar(const char *Ident, struct ValueType *
 	tempParserForPlatformVar.pc = pc;
     struct Value *SomeValue = tempParserForPlatformVar.VariableAllocValueAndData( 0, IsWritable, nullptr, LocationOnHeap);
     SomeValue->TypeOfValue = Typ;
-    SomeValue->setVal(  FromValue );
+    SomeValue->setValVirtual(  FromValue );
     
     if (!pc->TableSet( (pc->TopStackFrame() == nullptr) ? &pc->GlobalTable : pc->TopStackFrame()->LocalTable.get(), 
 		pc->TableStrRegister( Ident), SomeValue, 
@@ -447,8 +447,8 @@ void ParseState::VariableStackPop(struct Value *Var)
         
     if (Var->ValOnHeap)
     { 
-        if (Var->getVal() != NULL)
-			Parser->pc->HeapFreeMem(Var->getVal());
+        if (Var->getValVirtual() != NULL)
+			Parser->pc->HeapFreeMem(Var->getValVirtual());
             
 		Success = Parser->pc->HeapPopStack( Var, sizeof(struct Value));                       /* free from heap */
     }

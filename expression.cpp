@@ -325,10 +325,10 @@ void ParseState::ExpressionStackPushLValue(struct ExpressionStack **StackTop, st
 {
 	struct ParseState *Parser = this;
     struct Value *ValueLoc = VariableAllocValueShared( PushValue);
-	ValueLoc->setVal(  
+	ValueLoc->setValVirtual(  
 		static_cast< UnionAnyValuePointer >(
 		static_cast<void*>((
-		static_cast<char *>(static_cast<void*>(ValueLoc->getVal())) + Offset))));
+		static_cast<char *>(static_cast<void*>(ValueLoc->getValVirtual())) + Offset))));
     ExpressionStackPushValueNode( StackTop, ValueLoc);
 }
 
@@ -453,7 +453,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
                 if (DestValue->LValueFrom != NULL)
                 {
                     /* copy the resized value back to the LValue */
-                    DestValue->LValueFrom->setVal(  DestValue->getVal());
+                    DestValue->LValueFrom->setValVirtual(  DestValue->getValVirtual());
                     DestValue->LValueFrom->AnyValOnHeap = DestValue->AnyValOnHeap;
                 }
             }
@@ -478,7 +478,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
                 PRINT_SOURCE_POS;
                 fprintf(stderr, "char[%d] from char* (len=%d)\n", DestValue->TypeOfValue->ArraySize, strlen(SourceValue->ValPointer(pc)));
                 #endif
-                memcpy((void *)DestValue->getVal(), SourceValue->ValPointer(pc), DestValue->TypeSizeValue( FALSE));
+                memcpy((void *)DestValue->getValVirtual(), SourceValue->ValPointer(pc), DestValue->TypeSizeValue( FALSE));
                 break;
             }
 
@@ -488,7 +488,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
             if (DestValue->TypeOfValue->ArraySize != SourceValue->TypeOfValue->ArraySize)
                 Parser->AssignFail( "from an array of size %d to one of size %d", NULL, NULL, DestValue->TypeOfValue->ArraySize, SourceValue->TypeOfValue->ArraySize, FuncName, ParamNo);
             
-            memcpy((void *)DestValue->getVal(), (void *)SourceValue->getVal(), DestValue->TypeSizeValue( FALSE));
+            memcpy(/* (void *) */DestValue->getValVirtual(), /* (void *) */SourceValue->getValVirtual(), DestValue->TypeSizeValue( FALSE));
             break;
         
         case TypeStruct:
@@ -496,7 +496,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
             if (DestValue->TypeOfValue != SourceValue->TypeOfValue)
                 Parser->AssignFail( "%t from %t", DestValue->TypeOfValue, SourceValue->TypeOfValue, 0, 0, FuncName, ParamNo); 
             
-            memcpy((void *)DestValue->getVal(), (void *)SourceValue->getVal(), SourceValue->TypeSizeValue( FALSE));
+            memcpy(/* (void *) */ DestValue->getValVirtual(), /* (void *) */SourceValue->getValVirtual(), SourceValue->TypeSizeValue( FALSE));
             break;
         
         default:
@@ -554,7 +554,7 @@ void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enu
             if (!TopValue->IsLValue)
                 Parser->ProgramFail( "can't get the address of this");
 
-	    ValPtr = TopValue->getVal();
+	    ValPtr = TopValue->getValVirtual();
 		Result = VariableAllocValueFromType(TypeGetMatching( TopValue->TypeOfValue, TypePointer,
 			0, Parser->pc->StrEmpty, TRUE), FALSE, NULL, LocationOnStack);
             Result->setValPointer(pc,  (void *)ValPtr);
@@ -1101,7 +1101,7 @@ void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, e
         struct Value *ParamVal = (*StackTop)->ExprVal;
         struct Value *StructVal = ParamVal;
         struct ValueType *StructType = ParamVal->TypeOfValue;
-        char *DerefDataLoc = (char *)ParamVal->getVal();
+        char *DerefDataLoc = (char *)ParamVal->getValVirtual();
         struct Value *MemberValue = NULL;
         struct Value *Result;
 
@@ -1121,7 +1121,8 @@ void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, e
         
         /* make the result value for this member only */
         Result = Parser->VariableAllocValueFromExistingData( MemberValue->TypeOfValue, 
-			static_cast<UnionAnyValuePointer >(static_cast<void*>(DerefDataLoc + MemberValue->ValInteger(pc))), TRUE, (StructVal != NULL) ? StructVal->LValueFrom : NULL);
+			static_cast<UnionAnyValuePointer >(static_cast<void*>(DerefDataLoc + MemberValue->ValInteger(pc))), 
+			TRUE, (StructVal != NULL) ? StructVal->LValueFrom : NULL);
         ExpressionStackPushValueNode(/*Parser,*/ StackTop, Result);
     }
 }

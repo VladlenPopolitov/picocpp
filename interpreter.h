@@ -487,8 +487,12 @@ public:
     char IsLValue;                  /* is modifiable and is allocated somewhere we can usefully modify it */
     int ScopeID;                    /* to know when it goes out of scope */
     char OutOfScope;
-	UnionAnyValuePointer getVal();
-	void setVal(UnionAnyValuePointer newVal);
+	UnionAnyValuePointer getVal_();
+	void setVal_(UnionAnyValuePointer newVal);
+	UnionAnyValuePointer getValAbsolute();
+	void setValAbsolute(UnionAnyValuePointer newVal);
+	UnionAnyValuePointer getValVirtual();
+	void setValVirtual(UnionAnyValuePointer newVal);
 	//UnionAnyValuePointer &getVal();
 private:
 	UnionAnyValuePointer Val_;            /* pointer to the AnyValue which holds the actual content */

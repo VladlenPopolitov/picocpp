@@ -87,7 +87,7 @@ struct Value *ParseState::ParseFunctionDefinition(struct ValueType *ReturnType, 
     FuncValue->ValFuncDef(pc).ReturnType = ReturnType;
     FuncValue->ValFuncDef(pc).NumParams = ParamCount;
     FuncValue->ValFuncDef(pc).VarArgs = FALSE;
-    FuncValue->ValFuncDef(pc).ParamType = (struct ValueType **)((char *)FuncValue->getVal() + sizeof(StructFuncDef));
+    FuncValue->ValFuncDef(pc).ParamType = (struct ValueType **)((char *)FuncValue->getValAbsolute() + sizeof(StructFuncDef));
     FuncValue->ValFuncDef(pc).ParamName = (const char **)((char *)FuncValue->ValFuncDef(pc).ParamType + sizeof(struct ValueType *) * ParamCount);
    
     for (ParamCount = 0; ParamCount < FuncValue->ValFuncDef(pc).NumParams; ParamCount++)
@@ -401,7 +401,7 @@ void ParseState::ParseMacroDefinition()
 		MacroValue = VariableAllocValueAndData(sizeof(StructMacroDef) + sizeof(const char *) * NumParams, 
 			FALSE, NULL, LocationOnHeap);
         MacroValue->ValMacroDef(pc).NumParams = NumParams;
-        MacroValue->ValMacroDef(pc).ParamName = (const char **)((char *)MacroValue->getVal() + sizeof(StructMacroDef));
+        MacroValue->ValMacroDef(pc).ParamName = (const char **)((char *)MacroValue->getValAbsolute() + sizeof(StructMacroDef));
 
         Token = Parser->LexGetToken( &ParamName, TRUE);
         
@@ -575,7 +575,7 @@ void ParseState::ParseTypedef()
     {
         TypPtr = &Typ;
         InitValue.TypeOfValue = &Parser->pc->TypeType;
-        InitValue.setVal(  (UnionAnyValuePointer )TypPtr);
+        InitValue.setValAbsolute(  (UnionAnyValuePointer )TypPtr);
 		VariableDefine( TypeName, &InitValue, NULL, FALSE);
     }
 }
