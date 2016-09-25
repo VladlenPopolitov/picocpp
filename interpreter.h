@@ -398,7 +398,6 @@ public:
     unsigned char &UnsignedCharacter();
     const char * &IdentifierOfAnyValue();
 	char *AddressOfData();
-	struct ValueType * &TypeOfAnyValue();
     StructFuncDef &FuncDef();
     StructMacroDef &MacroDef();
 #ifndef NO_FP
@@ -410,6 +409,7 @@ public:
 	unsigned char *&PointerUChar();      /* unsafe native pointers */
 	double * &PointerDouble();
 	int * &PointerInt();
+	struct ValueType * &TypeOfAnyValue();
 private:
 	union AnyValueOld value_;
 	char character_;
@@ -472,7 +472,8 @@ public:
 	void Value::setValPointerInt(Picoc *pc, int * newval);
 	void Value::ValAssignPointerInt(Picoc *pc, int  newval);
 
-	struct ValueType * &ValTypeOfAnyValue(Picoc *pc);
+	struct ValueType * ValTypeOfAnyValue(Picoc *pc);
+	void setValTypeOfAnyValue(Picoc *pc, struct ValueType *newVal);
 	StructFuncDef &ValFuncDef(Picoc *pc);
 	StructMacroDef &ValMacroDef(Picoc *pc);
 	const char * &ValIdentifierOfAnyValue(Picoc *pc);

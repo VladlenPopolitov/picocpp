@@ -442,7 +442,9 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
             break;
         
         case TypeArray:
-            if (SourceValue->TypeOfValue->Base == TypeArray && DestValue->TypeOfValue->FromType == DestValue->TypeOfValue->FromType && DestValue->TypeOfValue->ArraySize == 0)
+            if (SourceValue->TypeOfValue->Base == TypeArray && 
+				DestValue->TypeOfValue->FromType == DestValue->TypeOfValue->FromType && 
+				DestValue->TypeOfValue->ArraySize == 0)
             {
                 /* destination array is unsized - need to resize the destination array to the same size as the source array */
                 DestValue->TypeOfValue = SourceValue->TypeOfValue;
@@ -1180,7 +1182,7 @@ int ParseState::ExpressionParse(struct Value **Result)
 
                         ExpressionStackCollapse(/*Parser,*/ &StackTop, Precedence+1, &IgnorePrecedence);
 						CastTypeValue = VariableAllocValueFromType(&Parser->pc->TypeType, FALSE, NULL, LocationOnStack);
-                        CastTypeValue->ValTypeOfAnyValue(pc) = CastType;
+                        CastTypeValue->setValTypeOfAnyValue(pc, CastType);
                         ExpressionStackPushValueNode(/*Parser,*/ &StackTop, CastTypeValue);
                         ExpressionStackPushOperator(/*Parser,*/ &StackTop, OrderInfix, TokenCast, Precedence);
                     }
@@ -1364,7 +1366,7 @@ int ParseState::ExpressionParse(struct Value **Result)
             ParserCopy(Parser, &PreState);
             Parser->TypeParse( &Typ, &Identifier, NULL);
 			TypeValue = VariableAllocValueFromType( &Parser->pc->TypeType, FALSE, NULL, LocationOnStack);
-            TypeValue->ValTypeOfAnyValue(pc) = Typ;
+            TypeValue->setValTypeOfAnyValue(pc, Typ);
             ExpressionStackPushValueNode(/*Parser,*/ &StackTop, TypeValue);
         }
         else

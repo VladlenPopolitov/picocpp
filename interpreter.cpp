@@ -215,11 +215,16 @@ void Value::setValUnsignedCharacter(Picoc *pc, unsigned char newVal){
 	Val1->UnsignedCharacter()=newVal;
 }
 
-struct ValueType * &Value::ValTypeOfAnyValue(Picoc *pc){
+struct ValueType * Value::ValTypeOfAnyValue(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->TypeOfAnyValue();
 
 }
+void Value::setValTypeOfAnyValue(Picoc *pc, struct ValueType *newVal){
+	UnionAnyValuePointer Val1 = getVal();
+	 Val1->TypeOfAnyValue() = newVal;
+}
+
 StructFuncDef &Value::ValFuncDef(Picoc *pc){
 	UnionAnyValuePointer Val1 = getVal();
 	return Val1->FuncDef();
