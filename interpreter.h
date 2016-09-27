@@ -5,6 +5,8 @@
 #ifndef INTERPRETER_H
 #define INTERPRETER_H
 
+//#define DEBUG_ALLOCATIONS 1 
+
 #include "platform.h"
 
 #include <string>
@@ -81,7 +83,7 @@ using StructMacroDef = struct MacroDef__;
 
 /* data type */
 enum MemoryLocation {
-	LocationOnStack, LocationOnHeap, LocationVirtual
+	LocationOnStack, LocationOnHeap, LocationOnHeapVirtual,LocationOnStackVirtual
 };
 
 /* lexical tokens */
@@ -196,7 +198,8 @@ public:
 	struct Value *VariableAllocValueShared( struct Value *FromValue);
 	struct Value *VariableDefineButIgnoreIdentical( const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
 	void VariableRealloc( struct Value *FromValue, int NewSize);
-	void VariableStackFrameAdd( const char *FuncName, int NumParams);
+	void VariableRealloc(struct ValueAbs *FromValue, int NewSize,int i);
+	void VariableStackFrameAdd(const char *FuncName, int NumParams);
 	void VariableStackFramePop();
 	PointerType VariableDereferencePointer( struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, 
 	struct ValueType **DerefType, int *DerefIsLValue);
@@ -953,10 +956,12 @@ public:
 	void HeapInit( int StackSize);
 	void HeapCleanup();
 	void *HeapAllocStack( int Size);
+	void *HeapAllocStackVirtual(int Size);
 	bool HeapPopStack( void *Addr, int Size);
 	void HeapUnpopStack( int Size);
 	void HeapPushStackFrame();
-	bool HeapPopStackFrame();
+	/*obsolete bool  */
+	void HeapPopStackFrame();
 	void *HeapAllocMem( int Size);
 	void *HeapAllocVirtualMem(int Size);
 	void HeapFreeMem(UnionAnyValuePointer  Mem);

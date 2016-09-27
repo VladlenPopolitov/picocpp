@@ -23,17 +23,14 @@ void Picoc::ShowBigList()
 void Picoc::HeapInit( int StackOrHeapSize)
 {
 	Picoc *pc = this;
-    // obsolete int Count;
     int AlignOffset = 0;
 	int AlignOffsetVirtual = 0;
 #ifdef USE_MALLOC_STACK
 	pc->HeapMemory = new unsigned char[StackOrHeapSize]; // obsolete  static_cast<unsigned char*>(malloc(StackOrHeapSize));
     pc->HeapBottom = nullptr;                     /* the bottom of the (downward-growing) heap */
-    // obsolete pc->CurrentStackFrame = nullptr;                     /* the current stack frame */
     pc->HeapStackTop = nullptr;                          /* the top of the stack */
 	pc->HeapMemoryVirtual = new unsigned char[StackOrHeapSize]; // obsolete  static_cast<unsigned char*>(malloc(StackOrHeapSize));
 	pc->HeapBottomVirtual = nullptr;                     /* the bottom of the (downward-growing) heap */
-	// obsolete pc->CurrentStackFrame = nullptr;                     /* the current stack frame */
 	pc->HeapStackTopVirtual = nullptr;                          /* the top of the stack */
 
 #else
@@ -91,6 +88,24 @@ void *Picoc::HeapAllocStack( int Size)
     return NewMem;
 }
 
+/* allocate some space on the stack, in the current stack frame
+* clears memory. can return NULL if out of stack space */
+void *Picoc::HeapAllocStackVirtual(int Size)
+{
+	Picoc *pc = this;
+	char *NewMem = static_cast<char*>(pc->HeapStackTopVirtual);
+	char *NewTop = (char *)pc->HeapStackTopVirtual + MEM_ALIGN(Size);
+#ifdef DEBUG_HEAP
+	printf("HeapAllocStack(%ld) at 0x%lx\n", (unsigned long)MEM_ALIGN(Size), (unsigned long)pc->HeapStackTop);
+#endif
+	if (NewTop > (char *)pc->HeapBottomVirtual)
+		return NULL;
+
+	pc->HeapStackTopVirtual = (void *)NewTop;
+	memset((void *)NewMem, '\0', Size);
+	return NewMem;
+}
+
 /* allocate some space on the stack, in the current stack frame */
 void Picoc::HeapUnpopStack( int Size)
 {
@@ -128,25 +143,39 @@ void Picoc::HeapPushStackFrame()
     // obsolete *(void **)pc->HeapStackTop = pc->CurrentStackFrame;
     pc->CurrentStackFrame.push_back( pc->HeapStackTop );
     pc->HeapStackTop = (void *)((char *)pc->HeapStackTop + MEM_ALIGN(sizeof(ALIGN_TYPE)));
+	pc->CurrentStackFrameVirtual.push_back(pc->HeapStackTopVirtual);
+	pc->HeapStackTopVirtual = (void *)((char *)pc->HeapStackTopVirtual + MEM_ALIGN(sizeof(ALIGN_TYPE)));
+
 }
 
 /* pop the current stack frame, freeing all memory in the frame. can return NULL */
-bool Picoc::HeapPopStackFrame()
+/* obsolete bool */ 
+void Picoc::HeapPopStackFrame()
 {
 	Picoc *pc = this;
     //obsolete if (  *(void **)pc->CurrentStackFrame != nullptr)
-		if( !pc->CurrentStackFrame.empty())
-		{
-			pc->HeapStackTop = pc->CurrentStackFrame.back();
-			pc->CurrentStackFrame.pop_back();
+	if( !pc->CurrentStackFrame.empty())
+	{
+		pc->HeapStackTop = pc->CurrentStackFrame.back();
+		pc->CurrentStackFrame.pop_back();
         // obsolete pc->CurrentStackFrame = *(void **)pc->CurrentStackFrame;
 #ifdef DEBUG_HEAP
         printf("Popping stack frame back to 0x%lx\n", (unsigned long)pc->HeapStackTop);
 #endif
-        return true;
+		/* return obsolete true */;
     }
-    else
-        return false;
+	if (!pc->CurrentStackFrameVirtual.empty())
+	{
+		pc->HeapStackTopVirtual = pc->CurrentStackFrameVirtual.back();
+		pc->CurrentStackFrameVirtual.pop_back();
+		// obsolete pc->CurrentStackFrame = *(void **)pc->CurrentStackFrame;
+#ifdef DEBUG_HEAP
+		printf("Popping stack frame back to 0x%lx\n", (unsigned long)pc->HeapStackTop);
+#endif
+		/* return obsolete true */;
+	}
+	/*else
+        return  obsolete false */;
 }
 
 void *Picoc::HeapAllocVirtualMem(int Size)
