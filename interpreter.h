@@ -198,7 +198,9 @@ public:
 	struct Value *VariableAllocValueShared( struct Value *FromValue);
 	struct Value *VariableDefineButIgnoreIdentical( const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
 	void VariableRealloc( struct Value *FromValue, int NewSize);
-	void VariableRealloc(struct ValueAbs *FromValue, int NewSize,int i);
+	void VariableReallocVirtual(struct Value *FromValue, int NewSize);
+	void VariableReallocAbsolute(struct Value *FromValue, int NewSize);
+	void VariableRealloc(struct ValueAbs *FromValue, int NewSize);
 	void VariableStackFrameAdd(const char *FuncName, int NumParams);
 	void VariableStackFramePop();
 	PointerType VariableDereferencePointer( struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, 
@@ -264,6 +266,7 @@ private:
 			struct ValueType *ParseState::TypeParseBack(struct ValueType *FromType);
 public:
 			void *VariableAlloc( int Size, MemoryLocation OnHeap);
+			UnionAnyValuePointer VariableAllocVirtual(int Size, MemoryLocation OnHeap);
 			//void VariableStackPop(struct ParseState *Parser, struct Value *Var);
 			struct Value *VariableAllocValueAndData( int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap);
 			struct ValueAbs *VariableAllocValueAndDataAbsolute(int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap);
@@ -1028,6 +1031,11 @@ public:
 private:
 	void PicocCleanup();
 	void PicocInitialise(int StackSize);
+	/* some basic types */
+	public:
+	int PointerAlignBytes;
+	int IntAlignBytes;
+
 };
 
 

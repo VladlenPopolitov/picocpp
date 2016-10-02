@@ -243,7 +243,8 @@ int StdioBasePrintf(struct ParseState *Parser, FILE *Stream, char *StrOut, int S
                         case '%':   StdioOutPutc(*FPos, &SOStream); break;
                         case '\0':  OneFormatBuf[OneFormatCount] = '\0'; StdioOutPutc(*FPos, &SOStream); break;
                         case 'n':   
-							ThisArg = (struct Value *)((char *)ThisArg + MEM_ALIGN(sizeof(struct Value) + ThisArg->TypeStackSizeValue()));
+							ThisArg = (struct Value *)((char *)ThisArg + 
+								MEM_ALIGN(sizeof(struct Value) + ThisArg->TypeStackSizeValue()));
                             if (ThisArg->TypeOfValue->Base == TypeArray && ThisArg->TypeOfValue->FromType->Base == TypeInt)
                                  ThisArg->ValAssignPointerInt(pc,  SOStream.CharCount);
                             break;

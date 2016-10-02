@@ -3,9 +3,6 @@
  
 #include "interpreter.h"
 
-/* some basic types */
-static int PointerAlignBytes;
-static int IntAlignBytes;
 
 
 /* add a new type to the set of types we know about */
@@ -49,9 +46,9 @@ struct ValueType *ParseState::TypeGetMatching(struct ValueType *ParentType, enum
         
     switch (Base)
     {
-        case TypePointer:   Sizeof = sizeof(void *); AlignBytes = PointerAlignBytes; break;
+        case TypePointer:   Sizeof = sizeof(void *); AlignBytes = Parser->pc->PointerAlignBytes; break;
         case TypeArray:     Sizeof = ArraySize * ParentType->Sizeof; AlignBytes = ParentType->AlignBytes; break;
-        case TypeEnum:      Sizeof = sizeof(int); AlignBytes = IntAlignBytes; break;
+		case TypeEnum:      Sizeof = sizeof(int); AlignBytes = Parser->pc->IntAlignBytes; break;
         default:            Sizeof = 0; AlignBytes = 0; break;      /* structs and unions will get bigger when we add members to them */
     }
 

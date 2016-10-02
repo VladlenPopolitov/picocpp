@@ -974,7 +974,8 @@ void ParseState::ExpressionStackCollapse(struct ExpressionStack **StackTop, int 
                     TopValue = TopStackNode->ExprVal;
                     
                     /* pop the value and then the prefix operator - assume they'll still be there until we're done */
-					Parser->pc->HeapPopStack(NULL, sizeof(struct ExpressionStack) + sizeof(struct Value) + TopValue->TypeStackSizeValue());
+					Parser->pc->HeapPopStack(NULL, sizeof(struct ExpressionStack) + 
+						sizeof(struct Value) + TopValue->TypeStackSizeValue());
 					Parser->pc->HeapPopStack( TopOperatorNode, sizeof(struct ExpressionStack));
                     *StackTop = TopOperatorNode->Next;
                     
@@ -998,7 +999,8 @@ void ParseState::ExpressionStackCollapse(struct ExpressionStack **StackTop, int 
                     
                     /* pop the postfix operator and then the value - assume they'll still be there until we're done */
 					Parser->pc->HeapPopStack( nullptr, sizeof(struct ExpressionStack));
-					Parser->pc->HeapPopStack(TopValue, sizeof(struct ExpressionStack) + sizeof(struct Value) + TopValue->TypeStackSizeValue());
+					Parser->pc->HeapPopStack(TopValue, sizeof(struct ExpressionStack) + 
+						sizeof(struct Value) + TopValue->TypeStackSizeValue());
                     *StackTop = TopStackNode->Next->Next;
 
                     /* do the postfix operation */
@@ -1023,9 +1025,11 @@ void ParseState::ExpressionStackCollapse(struct ExpressionStack **StackTop, int 
                         BottomValue = TopOperatorNode->Next->ExprVal;
                         
                         /* pop a value, the operator and another value - assume they'll still be there until we're done */
-						Parser->pc->HeapPopStack(NULL, sizeof(struct ExpressionStack) + sizeof(struct Value) + TopValue->TypeStackSizeValue());
+						Parser->pc->HeapPopStack(NULL, sizeof(struct ExpressionStack) + sizeof(struct Value) + 
+							TopValue->TypeStackSizeValue());
 						Parser->pc->HeapPopStack( NULL, sizeof(struct ExpressionStack));
-						Parser->pc->HeapPopStack(BottomValue, sizeof(struct ExpressionStack) + sizeof(struct Value) + BottomValue->TypeStackSizeValue());
+						Parser->pc->HeapPopStack(BottomValue, sizeof(struct ExpressionStack) + sizeof(struct Value) + 
+							BottomValue->TypeStackSizeValue());
                         *StackTop = TopOperatorNode->Next->Next;
                         
                         /* do the infix operation */
@@ -1116,7 +1120,8 @@ void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, e
 			Parser->ProgramFail("doesn't have a member called '%s'", Ident->ValIdentifierOfAnyValue(pc));
         
         /* pop the value - assume it'll still be there until we're done */
-		Parser->pc->HeapPopStack(ParamVal, sizeof(struct ExpressionStack) + sizeof(struct Value) + StructVal->TypeStackSizeValue());
+		Parser->pc->HeapPopStack(ParamVal, sizeof(struct ExpressionStack) + sizeof(struct Value) + 
+			StructVal->TypeStackSizeValue());
         *StackTop = (*StackTop)->Next;
         
         /* make the result value for this member only */
@@ -1399,7 +1404,8 @@ int ParseState::ExpressionParse(struct Value **Result)
 			Parser->pc->HeapPopStack( StackTop, sizeof(struct ExpressionStack));
         }
         else
-			Parser->pc->HeapPopStack(StackTop->ExprVal, sizeof(struct ExpressionStack) + sizeof(struct Value) + StackTop->ExprVal->TypeStackSizeValue());
+			Parser->pc->HeapPopStack(StackTop->ExprVal, sizeof(struct ExpressionStack) + 
+			sizeof(struct Value) + StackTop->ExprVal->TypeStackSizeValue());
     }
     
     debugf("ExpressionParse() done\n\n");

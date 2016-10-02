@@ -465,7 +465,9 @@ CStdOut{},
 CStdOutBase{},
 
 /* the picoc version string */
-VersionString{}
+VersionString{},
+PointerAlignBytes{},
+IntAlignBytes{}
 { 
 	PicocInitialise(StackSize); 
 }
