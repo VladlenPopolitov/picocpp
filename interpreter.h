@@ -194,8 +194,12 @@ public:
 
 	/* variable.c */
 	void VariableStackPop( struct Value *Var);
-	struct Value *VariableAllocValueFromExistingData( struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
-	struct Value *VariableAllocValueShared( struct Value *FromValue);
+	//struct Value *VariableAllocValueFromExistingData( struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
+	struct Value *VariableAllocValueFromExistingData(struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, 
+	struct Value *LValueFrom, bool isAbsoluteFromValue);
+	struct Value *VariableAllocValueFromExistingDataVirtual(struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
+	struct Value *VariableAllocValueFromExistingDataAbsolute(struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
+	struct Value *VariableAllocValueShared(struct Value *FromValue);
 	struct Value *VariableDefineButIgnoreIdentical( const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
 	void VariableRealloc( struct Value *FromValue, int NewSize);
 	void VariableReallocVirtual(struct Value *FromValue, int NewSize);
@@ -505,6 +509,7 @@ public:
 	bool isAnyValueAllocated;
 private:
 	UnionAnyValuePointer Val_;            /* pointer to the AnyValue which holds the actual content */
+	UnionAnyValuePointer ValAbsolute_;            /* pointer to the AnyValue which holds the actual content */
 public:
 	/* expression.c */
 	long ExpressionCoerceInteger(Picoc *pc);
@@ -516,6 +521,7 @@ public:
 	/* type.c */
 	int TypeSizeValue(int Compact);
 	int TypeStackSizeValue();
+	int valueCreationSource;
 };
 
 struct ValueAbs : public Value

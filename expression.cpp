@@ -317,6 +317,7 @@ struct Value *ParseState::ExpressionStackPushValueByType(struct ExpressionStack 
 void ParseState::ExpressionStackPushValue(struct ExpressionStack **StackTop, struct Value *PushValue)
 {
 	struct ParseState *Parser = this;
+	// obsolete assert(PushValue->isAbsolute);
 	struct Value *ValueLoc = VariableAllocValueAndCopy( PushValue, LocationOnStack);
     ExpressionStackPushValueNode( StackTop, ValueLoc);
 }
@@ -324,11 +325,17 @@ void ParseState::ExpressionStackPushValue(struct ExpressionStack **StackTop, str
 void ParseState::ExpressionStackPushLValue(struct ExpressionStack **StackTop, struct Value *PushValue, int Offset)
 {
 	struct ParseState *Parser = this;
+	UnionAnyValuePointer data;
     struct Value *ValueLoc = VariableAllocValueShared( PushValue);
-	ValueLoc->setValVirtual(pc,  
-		static_cast< UnionAnyValuePointer >(
+	data = static_cast<UnionAnyValuePointer>(
 		static_cast<void*>((
-		static_cast<char *>(static_cast<void*>(ValueLoc->getValVirtual())) + Offset))));
+		static_cast<char *>(static_cast<void*>(ValueLoc->isAbsolute ? ValueLoc->getValAbsolute() : ValueLoc->getValVirtual())) + Offset)));
+	if (ValueLoc->isAbsolute){
+		ValueLoc->setValAbsolute(pc, data);
+	}
+	else {
+		ValueLoc->setValVirtual(pc, data);
+	}
     ExpressionStackPushValueNode( StackTop, ValueLoc);
 }
 
@@ -344,7 +351,8 @@ void ParseState::ExpressionStackPushDereference(struct ExpressionStack **StackTo
     if (DerefDataLoc == NULL)
         Parser->ProgramFail( "NULL pointer dereference");
 
-    ValueLoc = Parser->VariableAllocValueFromExistingData( DerefType, (UnionAnyValuePointer )DerefDataLoc, DerefIsLValue, DerefVal);
+    ValueLoc = Parser->VariableAllocValueFromExistingData( DerefType, (UnionAnyValuePointer )DerefDataLoc, 
+		DerefIsLValue, DerefVal, DereferenceValue->isAbsolute);
     ExpressionStackPushValueNode( StackTop, ValueLoc);
 }
 
@@ -453,13 +461,21 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
                 if (DestValue->LValueFrom != NULL)
                 {
                     /* copy the resized value back to the LValue */
-                    DestValue->LValueFrom->setValVirtual(pc,  DestValue->getValVirtual());
+					assert(DestValue->LValueFrom->isAbsolute == DestValue->isAbsolute);
+					if (DestValue->LValueFrom->isAbsolute){
+						DestValue->LValueFrom->setValAbsolute(pc, DestValue->getValAbsolute()); /*VP bug? is pointer copied?  */
+					}
+					else {
+						DestValue->LValueFrom->setValVirtual(pc, DestValue->getValVirtual()); /*VP bug? is pointer copied?  */
+					}
                     DestValue->LValueFrom->AnyValOnHeap = DestValue->AnyValOnHeap;
+					//DestValue->LValueFrom->isAbsolute = DestValue->isAbsolute;
                 }
             }
 
             /* char array = "abcd" */
-            if (DestValue->TypeOfValue->FromType->Base == TypeChar && SourceValue->TypeOfValue->Base == TypePointer && SourceValue->TypeOfValue->FromType->Base == TypeChar)
+            if (DestValue->TypeOfValue->FromType->Base == TypeChar && SourceValue->TypeOfValue->Base == TypePointer 
+				&& SourceValue->TypeOfValue->FromType->Base == TypeChar)
             {
                 if (DestValue->TypeOfValue->ArraySize == 0) /* char x[] = "abcd", x is unsized */
                 {
@@ -478,7 +494,8 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
                 PRINT_SOURCE_POS;
                 fprintf(stderr, "char[%d] from char* (len=%d)\n", DestValue->TypeOfValue->ArraySize, strlen(SourceValue->ValPointer(pc)));
                 #endif
-                memcpy((void *)DestValue->getValVirtual(), SourceValue->ValPointer(pc), DestValue->TypeSizeValue( FALSE));
+				memcpy(/* (void *) */DestValue->isAbsolute ? DestValue->getValAbsolute() : DestValue->getValVirtual() ,
+					SourceValue->ValPointer(pc), DestValue->TypeSizeValue(FALSE));
                 break;
             }
 
@@ -488,15 +505,18 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
             if (DestValue->TypeOfValue->ArraySize != SourceValue->TypeOfValue->ArraySize)
                 Parser->AssignFail( "from an array of size %d to one of size %d", NULL, NULL, DestValue->TypeOfValue->ArraySize, SourceValue->TypeOfValue->ArraySize, FuncName, ParamNo);
             
-            memcpy(/* (void *) */DestValue->getValVirtual(), /* (void *) */SourceValue->getValVirtual(), DestValue->TypeSizeValue( FALSE));
+			memcpy(/* (void *) */DestValue->isAbsolute ?DestValue->getValAbsolute() :  DestValue->getValVirtual(), 
+				/* (void *) */SourceValue->isAbsolute ? SourceValue->getValAbsolute() :  SourceValue->getValVirtual(), DestValue->TypeSizeValue(FALSE));
             break;
         
         case TypeStruct:
         case TypeUnion:
             if (DestValue->TypeOfValue != SourceValue->TypeOfValue)
                 Parser->AssignFail( "%t from %t", DestValue->TypeOfValue, SourceValue->TypeOfValue, 0, 0, FuncName, ParamNo); 
-            
-            memcpy(/* (void *) */ DestValue->getValVirtual(), /* (void *) */SourceValue->getValVirtual(), SourceValue->TypeSizeValue( FALSE));
+			memcpy(/* (void *) */DestValue->isAbsolute ? DestValue->getValAbsolute() : DestValue->getValVirtual(),
+				/* (void *) */SourceValue->isAbsolute ? SourceValue->getValAbsolute() : SourceValue->getValVirtual(), DestValue->TypeSizeValue(FALSE));
+
+            // obsolete memcpy(/* (void *) */ DestValue->getValVirtual(), /* (void *) */SourceValue->getValVirtual(), SourceValue->TypeSizeValue( FALSE));
             break;
         
         default:
@@ -553,8 +573,12 @@ void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enu
         case TokenAmpersand:
             if (!TopValue->IsLValue)
                 Parser->ProgramFail( "can't get the address of this");
-
-	    ValPtr = TopValue->getValVirtual();
+			if (TopValue->isAbsolute){
+				ValPtr = TopValue->getValAbsolute();
+			}
+			else {
+				ValPtr = TopValue->getValVirtual();
+			}
 		Result = VariableAllocValueFromType(TypeGetMatching( TopValue->TypeOfValue, TypePointer,
 			0, Parser->pc->StrEmpty, TRUE), FALSE, NULL, LocationOnStack);
             Result->setValPointer(pc,  (void *)ValPtr);
@@ -735,14 +759,15 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
         {
             case TypeArray:   
 				Result = Parser->VariableAllocValueFromExistingData( BottomValue->TypeOfValue->FromType, 
-								(UnionAnyValuePointer )(BottomValue->ValAddressOfData(pc) + TypeSize(BottomValue->TypeOfValue, ArrayIndex, TRUE)),
-								BottomValue->IsLValue, BottomValue->LValueFrom); 
+								(UnionAnyValuePointer )(BottomValue->ValAddressOfData(pc) + 
+								TypeSize(BottomValue->TypeOfValue, ArrayIndex, TRUE)),
+								BottomValue->IsLValue, BottomValue->LValueFrom, BottomValue->isAbsolute);
 				break;
             case TypePointer: 
 				Result = Parser->VariableAllocValueFromExistingData( BottomValue->TypeOfValue->FromType, 
 								(UnionAnyValuePointer )((char *)BottomValue->ValPointer(pc) + 
 								  TypeSize(BottomValue->TypeOfValue->FromType, 0, TRUE) * ArrayIndex), 
-								BottomValue->IsLValue, BottomValue->LValueFrom); 
+								  BottomValue->IsLValue, BottomValue->LValueFrom, BottomValue->isAbsolute);
 				break;
             default:          
 				Parser->ProgramFail( "this %t is not an array", BottomValue->TypeOfValue);
@@ -1028,8 +1053,14 @@ void ParseState::ExpressionStackCollapse(struct ExpressionStack **StackTop, int 
 						Parser->pc->HeapPopStack(NULL, sizeof(struct ExpressionStack) + sizeof(struct Value) + 
 							TopValue->TypeStackSizeValue());
 						Parser->pc->HeapPopStack( NULL, sizeof(struct ExpressionStack));
-						Parser->pc->HeapPopStack(BottomValue, sizeof(struct ExpressionStack) + sizeof(struct Value) + 
-							BottomValue->TypeStackSizeValue());
+						//assert(BottomValue->isAbsolute);
+						if (BottomValue->isAbsolute){
+							Parser->pc->HeapPopStack(BottomValue, sizeof(struct ExpressionStack) + sizeof(struct Value) +
+								BottomValue->TypeStackSizeValue());
+						}
+						else {
+							Parser->pc->HeapPopStack(BottomValue, sizeof(struct ExpressionStack) + sizeof(struct Value) ); // ?bug here is injected
+						}
                         *StackTop = TopOperatorNode->Next->Next;
                         
                         /* do the infix operation */
@@ -1105,16 +1136,17 @@ void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, e
         struct Value *ParamVal = (*StackTop)->ExprVal;
         struct Value *StructVal = ParamVal;
         struct ValueType *StructType = ParamVal->TypeOfValue;
-        char *DerefDataLoc = (char *)ParamVal->getValVirtual();
+		void *DerefDataLoc = static_cast<void *>(ParamVal->isAbsolute ? ParamVal->getValAbsolute() : ParamVal->getValVirtual());
         struct Value *MemberValue = NULL;
         struct Value *Result;
 
         /* if we're doing '->' dereference the struct pointer first */
         if (Token == TokenArrow)
-			DerefDataLoc = static_cast<char*>(VariableDereferencePointer( ParamVal, &StructVal, NULL, &StructType, nullptr));
+			DerefDataLoc = static_cast<void*>(VariableDereferencePointer( ParamVal, &StructVal, NULL, &StructType, nullptr));
         
         if (StructType->Base != TypeStruct && StructType->Base != TypeUnion)
-            Parser->ProgramFail( "can't use '%s' on something that's not a struct or union %s : it's a %t", (Token == TokenDot) ? "." : "->", (Token == TokenArrow) ? "pointer" : "", ParamVal->TypeOfValue);
+            Parser->ProgramFail( "can't use '%s' on something that's not a struct or union %s : it's a %t", 
+			(Token == TokenDot) ? "." : "->", (Token == TokenArrow) ? "pointer" : "", ParamVal->TypeOfValue);
             
 		if (!StructType->Members->TableGet(Ident->ValIdentifierOfAnyValue(pc), &MemberValue, NULL, NULL, NULL))
 			Parser->ProgramFail("doesn't have a member called '%s'", Ident->ValIdentifierOfAnyValue(pc));
@@ -1126,8 +1158,8 @@ void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, e
         
         /* make the result value for this member only */
         Result = Parser->VariableAllocValueFromExistingData( MemberValue->TypeOfValue, 
-			static_cast<UnionAnyValuePointer >(static_cast<void*>(DerefDataLoc + MemberValue->ValInteger(pc))), 
-			TRUE, (StructVal != NULL) ? StructVal->LValueFrom : NULL);
+			static_cast<UnionAnyValuePointer >(static_cast<void*>(static_cast<char*>(DerefDataLoc) + MemberValue->ValInteger(pc))), 
+			TRUE, (StructVal != NULL) ? StructVal->LValueFrom : NULL,MemberValue->isAbsolute);
         ExpressionStackPushValueNode(/*Parser,*/ StackTop, Result);
     }
 }
@@ -1551,6 +1583,10 @@ void ParseState::ExpressionParseFunctionCall(struct ExpressionStack **StackTop, 
             { 
                 if (ArgCount < FuncValue->ValFuncDef(pc).NumParams)
                 {
+					if (!(Param->getValAbsolute() || Param->getValVirtual())){
+						Param;
+					}
+					assert(Param->getValAbsolute() || Param->getValVirtual());
                     Parser->ExpressionAssign( ParamArray[ArgCount], Param, TRUE, FuncName, ArgCount+1, FALSE);
                     Parser->VariableStackPop( Param);
                 }

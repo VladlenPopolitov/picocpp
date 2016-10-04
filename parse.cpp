@@ -232,7 +232,8 @@ int ParseState::ParseArrayInitialiser(struct Value *NewVariable, int DoAssignmen
             {
                 SubArraySize = TypeSize(NewVariable->TypeOfValue->FromType, NewVariable->TypeOfValue->FromType->ArraySize, TRUE);
                 SubArray = Parser->VariableAllocValueFromExistingData( NewVariable->TypeOfValue->FromType, 
-					(UnionAnyValuePointer )(NewVariable->ValAddressOfData(pc) + SubArraySize * ArrayIndex), TRUE, NewVariable);
+					(UnionAnyValuePointer)(NewVariable->ValAddressOfData(pc) + SubArraySize * ArrayIndex), TRUE, NewVariable, 
+					NewVariable->isAbsolute);
                 #ifdef DEBUG_ARRAY_INITIALIZER
                 int FullArraySize = TypeSize(NewVariable->TypeOfValue, NewVariable->TypeOfValue->ArraySize, TRUE);
                 PRINT_SOURCE_POS;
@@ -274,7 +275,7 @@ int ParseState::ParseArrayInitialiser(struct Value *NewVariable, int DoAssignmen
                     Parser->ProgramFail( "too many array elements");
                 ArrayElement = Parser->VariableAllocValueFromExistingData( ElementType, 
 					(UnionAnyValuePointer )(NewVariable->ValAddressOfData(pc) + ElementSize * ArrayIndex), 
-					TRUE, NewVariable);
+					TRUE, NewVariable, NewVariable->isAbsolute);
             }
 
             /* this is a normal expression initialiser */

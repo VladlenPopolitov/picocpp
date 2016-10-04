@@ -1,1 +1,1 @@
-for %%a in (*.c) do ..\msvc\picoc\Debug\picoc.exe %%a - arg1 arg2 arg3 arg4 >output\%%~na.expect 
+for %%a in (*.c) do ..\msvc\picoc\Release\picoc.exe %%a - arg1 arg2 arg3 arg4 >output\%%~na.expect 
