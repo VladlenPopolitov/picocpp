@@ -99,7 +99,7 @@ void ExpressionStackShow(Picoc *pc, struct ExpressionStack *StackTop)
                 case TypeVoid:      printf("void"); break;
                 case TypeInt:       printf("%d:int", StackTop->ExprVal->ValInteger(pc)); break;
                 case TypeShort:     printf("%d:short", StackTop->ExprVal->ValShortInteger(pc)); break;
-                case TypeChar:      printf("%d:char", StackTop->ExprVal->ValCharacter(pc)); break;
+                case TypeChar:      printf("%d:char", StackTop->ExprVal->getVal<char>(pc)); break;
                 case TypeLong:      printf("%ld:long", StackTop->ExprVal->ValLongInteger(pc)); break;
                 case TypeUnsignedShort: printf("%d:unsigned short", StackTop->ExprVal->ValUnsignedShortInteger(pc)); break;
                 case TypeUnsignedInt: printf("%d:unsigned int", StackTop->ExprVal->ValUnsignedInteger(pc)); break;
@@ -169,7 +169,7 @@ long Value::ExpressionCoerceInteger(Picoc *pc)
     switch (Val->TypeOfValue->Base)
     {
         case TypeInt:             return (long)Val->ValInteger(pc);
-        case TypeChar:            return (long)Val->ValCharacter(pc);
+        case TypeChar:            return (long)Val->getVal<char>(pc);
         case TypeShort:           return (long)Val->ValShortInteger(pc);
         case TypeLong:            return (long)Val->ValLongInteger(pc);
         case TypeUnsignedInt:     return (long)Val->ValUnsignedInteger(pc);
@@ -190,7 +190,7 @@ unsigned long Value::ExpressionCoerceUnsignedInteger(Picoc *pc)
     switch (Val->TypeOfValue->Base)
     {
         case TypeInt:             return (unsigned long)Val->ValInteger(pc);
-        case TypeChar:            return (unsigned long)Val->ValCharacter(pc);
+        case TypeChar:            return (unsigned long)Val->getVal<char>(pc);
         case TypeShort:           return (unsigned long)Val->ValShortInteger(pc);
         case TypeLong:            return (unsigned long)Val->ValLongInteger(pc);
         case TypeUnsignedInt:     return (unsigned long)Val->ValUnsignedInteger(pc);
@@ -216,7 +216,7 @@ double Value::ExpressionCoerceFP(Picoc *pc)
     switch (Val->TypeOfValue->Base)
     {
         case TypeInt:             IntVal = Val->ValInteger(pc); return (double)IntVal;
-        case TypeChar:            IntVal = Val->ValCharacter(pc); return (double)IntVal;
+        case TypeChar:            IntVal = Val->getVal<char>(pc); return (double)IntVal;
         case TypeShort:           IntVal = Val->ValShortInteger(pc); return (double)IntVal;
         case TypeLong:            IntVal = Val->ValLongInteger(pc); return (double)IntVal;
         case TypeUnsignedInt:     UnsignedVal = Val->ValUnsignedInteger(pc); return (double)UnsignedVal;
@@ -230,7 +230,7 @@ double Value::ExpressionCoerceFP(Picoc *pc)
     switch (Val->TypeOfValue->Base)
     {
         case TypeInt:             return (double)Val->ValInteger(pc);
-        case TypeChar:            return (double)Val->ValCharacter(pc);
+        case TypeChar:            return (double)Val->getVal<char>(pc);
         case TypeShort:           return (double)Val->ValShortInteger(pc);
         case TypeLong:            return (double)Val->ValLongInteger(pc);
         case TypeUnsignedInt:     return (double)Val->ValUnsignedInteger(pc);
@@ -262,7 +262,7 @@ long ParseState::ExpressionAssignInt(struct Value *DestValue, long FromInt, int 
     {
         case TypeInt:           DestValue->setValInteger(pc, FromInt); break;
         case TypeShort:         DestValue->setValShortInteger(pc, (short)FromInt); break;
-        case TypeChar:          DestValue->setValCharacter(pc, (char)FromInt); break;
+        case TypeChar:          DestValue->setVal<char>(pc, (char)FromInt); break;
         case TypeLong:          DestValue->setValLongInteger(pc, (long)FromInt); break;
         case TypeUnsignedInt:   DestValue->setValUnsignedInteger(pc, (unsigned int)FromInt); break;
         case TypeUnsignedShort: DestValue->setValUnsignedShortInteger(pc , (unsigned short)FromInt); break;
@@ -430,7 +430,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
     {
         case TypeInt:           DestValue->setValInteger(pc, SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeShort:         DestValue->setValShortInteger(pc, (short)SourceValue->ExpressionCoerceInteger(pc)); break;
-        case TypeChar:          DestValue->setValCharacter(pc, (char)SourceValue->ExpressionCoerceInteger(pc)); break;
+        case TypeChar:          DestValue->setVal<char>(pc, (char)SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeLong:          DestValue->setValLongInteger(pc, SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeUnsignedInt:   DestValue->setValUnsignedInteger(pc, SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
         case TypeUnsignedShort: DestValue->setValUnsignedShortInteger(pc, (unsigned short)SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;

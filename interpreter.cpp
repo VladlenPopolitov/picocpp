@@ -182,15 +182,15 @@ void Value::ValAssignPointerInt(Picoc *pc, int newVal){
 
 
 
+//char Value::getVal<char>(Picoc *pc){
+//	 if (isAbsolute) return ValFromUnionAbsolute<char>(pc, getValAbsolute()); else //  UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
+//	 return ValFromUnionAbsolute<char>(pc, getValVirtual());  // Val1->Character();
+//}
 
-char Value::ValCharacter(Picoc *pc){
-	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
-	return Val1->Character();
-}
-void Value::setValCharacter(Picoc *pc,char newVal){
+/*void Value::setVal<char>(Picoc *pc,char newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	Val1->Character()=newVal;
-}
+}*/
 short Value::ValShortInteger(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->ShortInteger();

@@ -446,13 +446,38 @@ private:
 	const char *IdentifierOfAnyValue_;
 };
 
+template<typename TN>
+TN ValFromUnionVirtual(Picoc *pc, UnionAnyValuePointer Val1){
+	return *(static_cast<TN*>(static_cast<void*>(Val1)));
+}
+
+template<typename TN>
+TN ValFromUnionAbsolute(Picoc *pc, UnionAnyValuePointer Val1){
+	return *(static_cast<TN*>(static_cast<void*>(Val1)));
+}
+
+template<typename TN>
+void ValToUnionVirtual(Picoc *pc, UnionAnyValuePointer Val1,TN newValue){
+	 *(static_cast<TN*>(static_cast<void*>(Val1)))=newValue;
+}
+
+template<typename TN>
+void ValToUnionAbsolute(Picoc *pc, UnionAnyValuePointer Val1, TN newValue){
+	*(static_cast<TN*>(static_cast<void*>(Val1))) = newValue;
+}
+
 
 struct Value 
 {
 public:
 	Value();
-	char ValCharacter(Picoc *pc);
-	void setValCharacter(Picoc *pc, char newVal);
+	template<class TN>
+	TN getVal(Picoc *pc);
+	template<class TN>
+	void setVal(Picoc *pc,TN newVal);
+
+	//char getVal<char>(Picoc *pc);
+	//void setVal<char>(Picoc *pc, char newVal);
 	short ValShortInteger(Picoc *pc);
 	void setValShortInteger(Picoc *pc,short newVal);
 	int ValInteger(Picoc *pc);
@@ -524,12 +549,22 @@ public:
 	int valueCreationSource;
 };
 
+template<typename TN>
+TN Value::getVal(Picoc *pc){
+	if (isAbsolute) return ValFromUnionAbsolute<TN>(pc, getValAbsolute()); else //  UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
+		return ValFromUnionVirtual<TN>(pc, getValVirtual());  // Val1->Character();
+};
+template<typename TN>
+void Value::setVal(Picoc *pc,TN newValue){
+	if (isAbsolute) ValToUnionAbsolute<TN>(pc, getValAbsolute(),newValue); else //  UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
+		ValToUnionVirtual<TN>(pc, getValVirtual(),newValue);  // Val1->Character();
+};
 struct ValueAbs : public Value
 {
 public:
 	ValueAbs();
-	/* char ValCharacter(Picoc *pc);
-	void setValCharacter(Picoc *pc, char newVal);
+	/* char getVal<char>(Picoc *pc);
+	void setVal<char>(Picoc *pc, char newVal);
 	short ValShortInteger(Picoc *pc);
 	void setValShortInteger(Picoc *pc, short newVal);
 	int ValInteger(Picoc *pc);

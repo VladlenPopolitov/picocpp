@@ -401,7 +401,7 @@ enum LexToken Picoc::LexGetCharacterConstant( struct LexState *Lexer, struct Val
 {
 	Picoc *pc = this;
     Value->TypeOfValue = &pc->CharType;
-    Value->setValCharacter(pc, LexUnEscapeCharacter(&Lexer->Pos, Lexer->End));
+    Value->setVal<char>(pc, LexUnEscapeCharacter(&Lexer->Pos, Lexer->End));
     if (Lexer->Pos != Lexer->End && *Lexer->Pos != '\'')
         LexFail( Lexer, "expected \"'\"");
         
@@ -826,7 +826,7 @@ void ParseState::LexHashIf()
         Parser->ProgramFail( "value expected");
     
     /* is the identifier defined? */
-    if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && IdentValue->ValCharacter(pc))
+    if (Parser->HashIfEvaluateToLevel == Parser->HashIfLevel && IdentValue->getVal<char>(pc))
     {
         /* #if is active, evaluate to this new level */
         Parser->HashIfEvaluateToLevel++;
