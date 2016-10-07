@@ -119,28 +119,30 @@ const char * &UnionAnyValue::IdentifierOfAnyValue(){
 	return IdentifierOfAnyValue_;
 }
 
-
+/*
 #ifndef NO_FP
-double Value::ValFP(Picoc *pc){
+
+double Value::getVal<double>(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->FP();
 }
-void Value::setValFP(Picoc *pc,double newVal){
+void Value::setVal<double>(Picoc *pc,double newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	 Val1->FP()=newVal;
 }
 #endif
-PointerType Value::ValPointer(Picoc *pc)						
+
+PointerType Value::getVal<PointerType>(Picoc *pc)						
 {
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->Pointer();
 }
-void Value::setValPointer(Picoc *pc,PointerType newVal)						
+void Value::setVal<PointerType>(Picoc *pc,PointerType newVal)						
 {
 	UnionAnyValuePointer Val1 = isAbsolute?getValAbsolute():getValVirtual();
 	Val1->Pointer()=newVal;
 }
-
+*/
 char * Value::ValPointerChar(Picoc *pc)				  
 {
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
@@ -190,70 +192,72 @@ void Value::ValAssignPointerInt(Picoc *pc, int newVal){
 /*void Value::setVal<char>(Picoc *pc,char newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	Val1->Character()=newVal;
-}*/
-short Value::ValShortInteger(Picoc *pc){
+}
+short Value::getVal<short>(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->ShortInteger();
 }
-void Value::setValShortInteger(Picoc *pc, short newVal){
+void Value::setVal<short>(Picoc *pc, short newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	Val1->ShortInteger()=newVal;
 }
 
-int Value::ValInteger(Picoc *pc){
+int Value::getVal<int>(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	MyAssert(Val1!=nullptr);
 	return Val1->Integer();
 }
-void Value::setValInteger(Picoc *pc, int newVal){
+void Value::setVal<int>(Picoc *pc, int newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	Val1->Integer()=newVal;
 }
 
-long Value::ValLongInteger(Picoc *pc){
+long Value::getVal<long>(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->LongInteger();
 }
-void Value::setValLongInteger(Picoc *pc, long newVal){
+void Value::setVal<long>(Picoc *pc, long newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	Val1->LongInteger()=newVal;
 }
 
-unsigned short Value::ValUnsignedShortInteger(Picoc *pc){
+unsigned short Value::getVal<unsigned short>(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->UnsignedShortInteger();
 }
 
-void Value::setValUnsignedShortInteger(Picoc *pc, unsigned short newVal){
+void Value::setVal<unsigned short>(Picoc *pc, unsigned short newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	Val1->UnsignedShortInteger()=newVal;
 }
-unsigned int Value::ValUnsignedInteger(Picoc *pc){
+
+unsigned int Value::getVal<unsigned int>(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->UnsignedInteger();
 }
-void Value::setValUnsignedInteger(Picoc *pc, unsigned int newVal){
+void Value::setVal<unsigned int>(Picoc *pc, unsigned int newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	Val1->UnsignedInteger()=newVal;
 }
-unsigned long Value::ValUnsignedLongInteger(Picoc *pc){
+
+unsigned long Value::getVal<unsigned long>(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->UnsignedLongInteger();
 }
-void Value::setValUnsignedLongInteger(Picoc *pc, unsigned long newVal){
+void Value::setVal<unsigned long>(Picoc *pc, unsigned long newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	 Val1->UnsignedLongInteger()=newVal;
 }
 
-unsigned char Value::ValUnsignedCharacter(Picoc *pc){
+unsigned char Value::getVal<unsigned char>(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->UnsignedCharacter();
 }
-void Value::setValUnsignedCharacter(Picoc *pc, unsigned char newVal){
+void Value::setVal<unsigned char>(Picoc *pc, unsigned char newVal){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	Val1->UnsignedCharacter()=newVal;
 }
-
+*/
 struct ValueType * Value::ValTypeOfAnyValue(Picoc *pc){
 	UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
 	return Val1->TypeOfAnyValue();

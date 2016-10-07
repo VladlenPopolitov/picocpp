@@ -177,7 +177,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
     }
     
     Value->TypeOfValue = &pc->LongType; /* ignored? */
-    Value->setValLongInteger(pc, Result);
+    Value->setVal<long>(pc, Result);
 
     ResultToken = TokenIntegerConstant;
     
@@ -228,7 +228,7 @@ enum LexToken Picoc::LexGetNumber(struct LexState *Lexer, struct Value *Value)
         FPResult *= pow((double)Base, (double)Result * ExponentSign);
     }
     
-    Value->setValFP(pc,  FPResult);
+    Value->setVal<double>(pc,  FPResult);
 
     if (*Lexer->Pos == 'f' || *Lexer->Pos == 'F')
         LEXER_INC(Lexer);
@@ -389,7 +389,7 @@ enum LexToken Picoc::LexGetStringConstant( struct LexState *Lexer, struct Value 
 
     /* create the the pointer for this char* */
     Value->TypeOfValue = pc->CharPtrType;
-    Value->setValPointer(pc,  const_cast<void*>(static_cast<const void*>(RegString))); // unsafe assignment and unsafe cast @todo \todo 
+    Value->setVal<PointerType>(pc,  const_cast<void*>(static_cast<const void*>(RegString))); // unsafe assignment and unsafe cast @todo \todo 
     if (*Lexer->Pos == EndChar)
         LEXER_INC(Lexer);
     

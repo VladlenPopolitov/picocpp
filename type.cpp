@@ -246,13 +246,13 @@ void ParseState::TypeParseStruct(struct ValueType **Typ, int IsStruct)
             if (((*Typ)->Sizeof & (AlignBoundary-1)) != 0)
                 (*Typ)->Sizeof += AlignBoundary - ((*Typ)->Sizeof & (AlignBoundary-1));
                 
-            MemberValue->setValInteger(pc, (*Typ)->Sizeof);
+            MemberValue->setVal<int>(pc, (*Typ)->Sizeof);
 			(*Typ)->Sizeof += MemberValue->TypeSizeValue(TRUE);
         }
         else
         { 
             /* union members always start at 0, make sure it's big enough to hold the largest member */
-            MemberValue->setValInteger(pc, 0);
+            MemberValue->setVal<int>(pc, 0);
             if (MemberValue->TypeOfValue->Sizeof > (*Typ)->Sizeof)
 				(*Typ)->Sizeof = MemberValue->TypeSizeValue(TRUE);
         }

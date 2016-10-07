@@ -9,76 +9,76 @@ static int Stdlib_ZeroValue = 0;
 void StdlibAtof(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValFP(pc,  atof(Param[0]->ValPointerChar(pc)));
+	ReturnValue->setVal<double>(pc,  atof(Param[0]->ValPointerChar(pc)));
 }
 #endif
 
 void StdlibAtoi(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValInteger(pc, atoi(Param[0]->ValPointerChar(pc)));
+	ReturnValue->setVal<int>(pc, atoi(Param[0]->ValPointerChar(pc)));
 }
 
 void StdlibAtol(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValInteger(pc, atol(Param[0]->ValPointerChar(pc)));
+	ReturnValue->setVal<int>(pc, atol(Param[0]->ValPointerChar(pc)));
 }
 
 #ifndef NO_FP
 void StdlibStrtod(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValFP(pc,  strtod(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc)));
+	ReturnValue->setVal<double>(pc,  strtod(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc)));
 }
 #endif
 
 void StdlibStrtol(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, strtol(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc), Param[2]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, strtol(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc), Param[2]->getVal<int>(pc)));
 }
 
 void StdlibStrtoul(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, strtoul(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc), Param[2]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, strtoul(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc), Param[2]->getVal<int>(pc)));
 }
 
 void StdlibMalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValPointer(pc,  malloc(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<PointerType>(pc,  malloc(Param[0]->getVal<int>(pc)));
 }
 
 void StdlibCalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValPointer(pc,  calloc(Param[0]->ValInteger(pc), Param[1]->ValInteger(pc)));
+    ReturnValue->setVal<PointerType>(pc,  calloc(Param[0]->getVal<int>(pc), Param[1]->getVal<int>(pc)));
 }
 
 void StdlibRealloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValPointer(pc,  realloc(Param[0]->ValPointer(pc), Param[1]->ValInteger(pc)));
+    ReturnValue->setVal<PointerType>(pc,  realloc(Param[0]->getVal<PointerType>(pc), Param[1]->getVal<int>(pc)));
 }
 
 void StdlibFree(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    free(Param[0]->ValPointer(pc));
+    free(Param[0]->getVal<PointerType>(pc));
 }
 
 void StdlibRand(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, rand());
+    ReturnValue->setVal<int>(pc, rand());
 }
 
 void StdlibSrand(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    srand(Param[0]->ValInteger(pc));
+    srand(Param[0]->getVal<int>(pc));
 }
 
 void StdlibAbort(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -90,50 +90,50 @@ void StdlibAbort(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 void StdlibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	Parser->pc->PlatformExit(Param[0]->ValInteger(pc),"stdlib exit() is called");
+	Parser->pc->PlatformExit(Param[0]->getVal<int>(pc),"stdlib exit() is called");
 }
 
 void StdlibGetenv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValPointer(pc,  getenv(Param[0]->ValPointerChar(pc)));
+    ReturnValue->setVal<PointerType>(pc,  getenv(Param[0]->ValPointerChar(pc)));
 }
 
 void StdlibSystem(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, system(Param[0]->ValPointerChar(pc)));
+    ReturnValue->setVal<int>(pc, system(Param[0]->ValPointerChar(pc)));
 }
 
 #if 0
 void StdlibBsearch(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValPointer(pc,  bsearch(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValInteger(pc), Param[3]->ValInteger(pc), (int (*)())Param[4]->ValPointer(pc)));
+    ReturnValue->setVal<PointerType>(pc,  bsearch(Param[0]->getVal<PointerType>(pc), Param[1]->getVal<PointerType>(pc), Param[2]->getVal<int>(pc), Param[3]->getVal<int>(pc), (int (*)())Param[4]->getVal<PointerType>(pc)));
 }
 #endif
 
 void StdlibAbs(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, abs(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, abs(Param[0]->getVal<int>(pc)));
 }
 
 void StdlibLabs(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, labs(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, labs(Param[0]->getVal<int>(pc)));
 }
 
 #if 0
 void StdlibDiv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, div(Param[0]->ValInteger(pc), Param[1]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, div(Param[0]->getVal<int>(pc), Param[1]->getVal<int>(pc)));
 }
 
 void StdlibLdiv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, ldiv(Param[0]->ValInteger(pc), Param[1]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, ldiv(Param[0]->getVal<int>(pc), Param[1]->getVal<int>(pc)));
 }
 #endif
 

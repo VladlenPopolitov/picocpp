@@ -663,7 +663,7 @@ enum ParseResult ParseState::ParseStatement(int CheckTrailingSemicolon)
                             
                             #if 0
                             PRINT_SOURCE_POS;
-                            PlatformPrintf(Parser->pc->CStdOut, "%t %s = %d;\n", CValue->TypeOfValue, Identifier, CValue->ValInteger(pc));
+                            PlatformPrintf(Parser->pc->CStdOut, "%t %s = %d;\n", CValue->TypeOfValue, Identifier, CValue->getVal<int>(pc));
                             printf("%d\n", VariableDefined(Parser->pc, Identifier));
                             #endif
                             VariableDefine(Parser->pc, Parser, Identifier, CValue, CValue->TypeOfValue, TRUE);
@@ -814,7 +814,7 @@ enum ParseResult ParseState::ParseStatement(int CheckTrailingSemicolon)
             if (Parser->LexGetToken( &LexerValue, TRUE) != TokenStringConstant)
                 Parser->ProgramFail( "\"filename.h\" expected");
             
-			Parser->pc->IncludeFile((char *)LexerValue->ValPointer(pc));
+			Parser->pc->IncludeFile((char *)LexerValue->getVal<PointerType>(pc));
             CheckTrailingSemicolon = FALSE;
             break;
 #endif

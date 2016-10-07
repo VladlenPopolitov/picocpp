@@ -51,14 +51,14 @@ typedef FILE IOFILE;
 /* coercion of numeric types to other numeric types */
 #ifndef NO_FP
 #define IS_FP(v) ((v)->TypeOfValue->Base == TypeFP)
-#define FP_VAL(v) ((v)->ValFP(pc))
+#define FP_VAL(v) ((v)->getVal<double>(pc))
 #else
 #define IS_FP(v) 0
 #define FP_VAL(v) 0
 #endif
 
 #define IS_POINTER_COERCIBLE(v, ap) ((ap) ? ((v)->TypeOfValue->Base == TypePointer) : 0)
-#define POINTER_COERCE(v) (static_cast<int>((v)->ValPointer(pc)))
+#define POINTER_COERCE(v) (static_cast<int>((v)->getVal<PointerType>(pc)))
 
 #define IS_INTEGER_NUMERIC_TYPE(t) ((t)->Base >= TypeInt && (t)->Base <= TypeUnsignedLong)
 #define IS_INTEGER_NUMERIC(v) IS_INTEGER_NUMERIC_TYPE((v)->TypeOfValue)
@@ -478,27 +478,27 @@ public:
 
 	//char getVal<char>(Picoc *pc);
 	//void setVal<char>(Picoc *pc, char newVal);
-	short ValShortInteger(Picoc *pc);
-	void setValShortInteger(Picoc *pc,short newVal);
-	int ValInteger(Picoc *pc);
-	void setValInteger(Picoc *pc, int newValue);
-	long ValLongInteger(Picoc *pc);
-	void setValLongInteger(Picoc *pc, long newVal);
-	unsigned short ValUnsignedShortInteger(Picoc *pc);
-	void setValUnsignedShortInteger(Picoc *pc, unsigned short newVal);
-	unsigned int ValUnsignedInteger(Picoc *pc);
-	void setValUnsignedInteger(Picoc *pc,unsigned int newVal);
-	unsigned long ValUnsignedLongInteger(Picoc *pc);
-	void setValUnsignedLongInteger(Picoc *pc, unsigned long newVal);
-	unsigned char ValUnsignedCharacter(Picoc *pc);
-	void setValUnsignedCharacter(Picoc *pc, unsigned char newVal);
+	//short getVal<short>(Picoc *pc);
+	//void setVal<short>(Picoc *pc,short newVal);
+	//int getVal<int>(Picoc *pc);
+	//void setVal<int>(Picoc *pc, int newValue);
+	//long getVal<long>(Picoc *pc);
+	//void setVal<long>(Picoc *pc, long newVal);
+	//unsigned short getVal<unsigned short>(Picoc *pc);
+	//void setVal<unsigned short>(Picoc *pc, unsigned short newVal);
+	//unsigned int getVal<unsigned int>(Picoc *pc);
+	//void setVal<unsigned int>(Picoc *pc,unsigned int newVal);
+	//unsigned long getVal<unsigned long>(Picoc *pc);
+	//void setVal<unsigned long>(Picoc *pc, unsigned long newVal);
+	//unsigned char getVal<unsigned char>(Picoc *pc);
+	//void setVal<unsigned char>(Picoc *pc, unsigned char newVal);
 #ifndef NO_FP
-	double Value::ValFP(Picoc *pc);
-	void Value::setValFP(Picoc *pc, double newVal);
+	//double Value::getVal<double>(Picoc *pc);
+	//void Value::setVal<double>(Picoc *pc, double newVal);
 
 #endif
-	PointerType Value::ValPointer(Picoc *pc);						/* unsafe native pointers */
-	void Value::setValPointer(Picoc *pc, PointerType newVal);						/* unsafe native pointers */
+	//PointerType Value::getVal<PointerType>(Picoc *pc);						/* unsafe native pointers */
+	//void Value::setVal<PointerType>(Picoc *pc, PointerType newVal);						/* unsafe native pointers */
 	char * Value::ValPointerChar(Picoc *pc);				  /* unsafe native pointers */
 	void Value::setValPointerChar(Picoc *pc, char * newVal);				  /* unsafe native pointers */
 	char ** Value::ValPointerCharChar(Picoc *pc);				  /* unsafe native pointers */
@@ -565,27 +565,27 @@ public:
 	ValueAbs();
 	/* char getVal<char>(Picoc *pc);
 	void setVal<char>(Picoc *pc, char newVal);
-	short ValShortInteger(Picoc *pc);
-	void setValShortInteger(Picoc *pc, short newVal);
-	int ValInteger(Picoc *pc);
-	void setValInteger(Picoc *pc, int newValue);
-	long ValLongInteger(Picoc *pc);
-	void setValLongInteger(Picoc *pc, long newVal);
-	unsigned short ValUnsignedShortInteger(Picoc *pc);
-	void setValUnsignedShortInteger(Picoc *pc, unsigned short newVal);
-	unsigned int ValUnsignedInteger(Picoc *pc);
-	void setValUnsignedInteger(Picoc *pc, unsigned int newVal);
-	unsigned long ValUnsignedLongInteger(Picoc *pc);
-	void setValUnsignedLongInteger(Picoc *pc, unsigned long newVal);
-	unsigned char ValUnsignedCharacter(Picoc *pc);
-	void setValUnsignedCharacter(Picoc *pc, unsigned char newVal);
+	short getVal<short>(Picoc *pc);
+	void setVal<short>(Picoc *pc, short newVal);
+	int getVal<int>(Picoc *pc);
+	void setVal<int>(Picoc *pc, int newValue);
+	long getVal<long>(Picoc *pc);
+	void setVal<long>(Picoc *pc, long newVal);
+	unsigned short getVal<unsigned short>(Picoc *pc);
+	void setVal<unsigned short>(Picoc *pc, unsigned short newVal);
+	unsigned int getVal<unsigned int>(Picoc *pc);
+	void setVal<unsigned int>(Picoc *pc, unsigned int newVal);
+	unsigned long getVal<unsigned long>(Picoc *pc);
+	void setVal<unsigned long>(Picoc *pc, unsigned long newVal);
+	unsigned char getVal<unsigned char>(Picoc *pc);
+	void setVal<unsigned char>(Picoc *pc, unsigned char newVal);
 #ifndef NO_FP
-	double Value::ValFP(Picoc *pc);
-	void Value::setValFP(Picoc *pc, double newVal);
+	double Value::getVal<double>(Picoc *pc);
+	void Value::setVal<double>(Picoc *pc, double newVal);
 
 #endif
-	PointerType Value::ValPointer(Picoc *pc);						// * unsafe native pointers 
-	void Value::setValPointer(Picoc *pc, PointerType newVal);						//* unsafe native pointers 
+	PointerType Value::getVal<PointerType>(Picoc *pc);						// * unsafe native pointers 
+	void Value::setVal<PointerType>(Picoc *pc, PointerType newVal);						//* unsafe native pointers 
 	char * Value::ValPointerChar(Picoc *pc);				  //* unsafe native pointers 
 	void Value::setValPointerChar(Picoc *pc, char * newVal);				  //* unsafe native pointers 
 	char ** Value::ValPointerCharChar(Picoc *pc);				  //* unsafe native pointers 

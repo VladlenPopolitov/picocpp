@@ -7,98 +7,98 @@
 void StdIsalnum(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, isalnum(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, isalnum(Param[0]->getVal<int>(pc)));
 }
 
 void StdIsalpha(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, isalpha(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, isalpha(Param[0]->getVal<int>(pc)));
 }
 
 void StdIsblank(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    int ch = Param[0]->ValInteger(pc);
-    ReturnValue->setValInteger(pc, (ch == ' ') | (ch == '\t'));
+    int ch = Param[0]->getVal<int>(pc);
+    ReturnValue->setVal<int>(pc, (ch == ' ') | (ch == '\t'));
 }
 
 void StdIscntrl(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, iscntrl(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, iscntrl(Param[0]->getVal<int>(pc)));
 }
 
 void StdIsdigit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, isdigit(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, isdigit(Param[0]->getVal<int>(pc)));
 }
 
 void StdIsgraph(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, isgraph(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, isgraph(Param[0]->getVal<int>(pc)));
 }
 
 void StdIslower(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, islower(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, islower(Param[0]->getVal<int>(pc)));
 }
 
 void StdIsprint(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, isprint(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, isprint(Param[0]->getVal<int>(pc)));
 }
 
 void StdIspunct(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, ispunct(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, ispunct(Param[0]->getVal<int>(pc)));
 }
 
 void StdIsspace(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, isspace(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, isspace(Param[0]->getVal<int>(pc)));
 }
 
 void StdIsupper(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, isupper(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, isupper(Param[0]->getVal<int>(pc)));
 }
 
 void StdIsxdigit(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, isxdigit(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, isxdigit(Param[0]->getVal<int>(pc)));
 }
 
 void StdTolower(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, tolower(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, tolower(Param[0]->getVal<int>(pc)));
 }
 
 void StdToupper(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, toupper(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, toupper(Param[0]->getVal<int>(pc)));
 }
 
 void StdIsascii(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, isascii(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, isascii(Param[0]->getVal<int>(pc)));
 }
 
 void StdToascii(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, toascii(Param[0]->ValInteger(pc)));
+    ReturnValue->setVal<int>(pc, toascii(Param[0]->getVal<int>(pc)));
 }
 
 /* all string.h functions */

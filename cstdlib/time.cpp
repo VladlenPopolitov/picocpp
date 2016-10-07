@@ -17,58 +17,58 @@ static int CLK_TCKValue = CLK_TCK;
 void StdAsctime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValPointer(pc,  asctime(static_cast<tm*>(Param[0]->ValPointer(pc))));
+	ReturnValue->setVal<PointerType>(pc,  asctime(static_cast<tm*>(Param[0]->getVal<PointerType>(pc))));
 }
 
 void StdClock(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValInteger(pc, clock());
+    ReturnValue->setVal<int>(pc, clock());
 }
 
 void StdCtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValPointer(pc,  ctime(static_cast<time_t*>(Param[0]->ValPointer(pc))));
+	ReturnValue->setVal<PointerType>(pc,  ctime(static_cast<time_t*>(Param[0]->getVal<PointerType>(pc))));
 }
 
 #ifndef NO_FP
 void StdDifftime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setValFP(pc,  difftime((time_t)Param[0]->ValInteger(pc), Param[1]->ValInteger(pc)));
+    ReturnValue->setVal<double>(pc,  difftime((time_t)Param[0]->getVal<int>(pc), Param[1]->getVal<int>(pc)));
 }
 #endif
 
 void StdGmtime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValPointer(pc,  gmtime(static_cast<time_t*>(Param[0]->ValPointer(pc))));
+	ReturnValue->setVal<PointerType>(pc,  gmtime(static_cast<time_t*>(Param[0]->getVal<PointerType>(pc))));
 }
 
 void StdLocaltime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValPointer(pc,  localtime(static_cast<time_t*>(Param[0]->ValPointer(pc))));
+	ReturnValue->setVal<PointerType>(pc,  localtime(static_cast<time_t*>(Param[0]->getVal<PointerType>(pc))));
 }
 
 void StdMktime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValInteger(pc, (int)mktime(static_cast<tm*>(Param[0]->ValPointer(pc))));
+	ReturnValue->setVal<int>(pc, (int)mktime(static_cast<tm*>(Param[0]->getVal<PointerType>(pc))));
 }
 
 void StdTime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValInteger(pc, (int)time(static_cast<time_t*>(Param[0]->ValPointer(pc))));
+	ReturnValue->setVal<int>(pc, (int)time(static_cast<time_t*>(Param[0]->getVal<PointerType>(pc))));
 }
 
 void StdStrftime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setValInteger(pc, strftime(static_cast<char*>(Param[0]->ValPointer(pc)), Param[1]->ValInteger(pc), Param[2]->ValPointerChar(pc), 
-		static_cast<tm*>(Param[3]->ValPointer(pc))));
+	ReturnValue->setVal<int>(pc, strftime(static_cast<char*>(Param[0]->getVal<PointerType>(pc)), Param[1]->getVal<int>(pc), Param[2]->ValPointerChar(pc), 
+		static_cast<tm*>(Param[3]->getVal<PointerType>(pc))));
 }
 
 #ifndef WIN32
@@ -76,17 +76,17 @@ void StdStrptime(struct ParseState *Parser, struct Value *ReturnValue, struct Va
 {
 	  extern char *strptime(const char *s, const char *format, struct tm *tm);
 	  
-    ReturnValue->setValPointer(pc,  strptime(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc), Param[2]->ValPointer(pc));
+    ReturnValue->setVal<PointerType>(pc,  strptime(Param[0]->getVal<PointerType>(pc), Param[1]->getVal<PointerType>(pc), Param[2]->getVal<PointerType>(pc));
 }
 
 void StdGmtime_r(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->setValPointer(pc,  gmtime_r(Param[0]->ValPointer(pc), Param[1]->ValPointer(pc));
+    ReturnValue->setVal<PointerType>(pc,  gmtime_r(Param[0]->getVal<PointerType>(pc), Param[1]->getVal<PointerType>(pc));
 }
 
 void StdTimegm(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
-    ReturnValue->setValInteger(pc, timegm(Param[0]->ValPointer(pc)));
+    ReturnValue->setVal<int>(pc, timegm(Param[0]->getVal<PointerType>(pc)));
 }
 #endif
 

@@ -97,23 +97,23 @@ void ExpressionStackShow(Picoc *pc, struct ExpressionStack *StackTop)
             switch (StackTop->ExprVal->TypeOfValue->Base)
             {
                 case TypeVoid:      printf("void"); break;
-                case TypeInt:       printf("%d:int", StackTop->ExprVal->ValInteger(pc)); break;
-                case TypeShort:     printf("%d:short", StackTop->ExprVal->ValShortInteger(pc)); break;
+                case TypeInt:       printf("%d:int", StackTop->ExprVal->getVal<int>(pc)); break;
+                case TypeShort:     printf("%d:short", StackTop->ExprVal->getVal<short>(pc)); break;
                 case TypeChar:      printf("%d:char", StackTop->ExprVal->getVal<char>(pc)); break;
-                case TypeLong:      printf("%ld:long", StackTop->ExprVal->ValLongInteger(pc)); break;
-                case TypeUnsignedShort: printf("%d:unsigned short", StackTop->ExprVal->ValUnsignedShortInteger(pc)); break;
-                case TypeUnsignedInt: printf("%d:unsigned int", StackTop->ExprVal->ValUnsignedInteger(pc)); break;
-                case TypeUnsignedLong: printf("%ld:unsigned long", StackTop->ExprVal->ValUnsignedLongInteger(pc)); break;
-                case TypeFP:        printf("%f:fp", StackTop->ExprVal->ValFP(pc)); break;
+                case TypeLong:      printf("%ld:long", StackTop->ExprVal->getVal<long>(pc)); break;
+                case TypeUnsignedShort: printf("%d:unsigned short", StackTop->ExprVal->getVal<unsigned short>(pc)); break;
+                case TypeUnsignedInt: printf("%d:unsigned int", StackTop->ExprVal->getVal<unsigned int>(pc)); break;
+                case TypeUnsignedLong: printf("%ld:unsigned long", StackTop->ExprVal->getVal<unsigned long>(pc)); break;
+                case TypeFP:        printf("%f:fp", StackTop->ExprVal->getVal<double>(pc)); break;
                 case TypeFunction:  printf("%s:function", StackTop->ExprVal->ValIdentifierOfAnyValue(pc)); break;
                 case TypeMacro:     printf("%s:macro", StackTop->ExprVal->ValIdentifierOfAnyValue(pc)); break;
                 case TypePointer:
-                    if (StackTop->ExprVal->setValPointer(pc, = NULL)
+                    if (StackTop->ExprVal->setVal<PointerType>(pc, = NULL)
                         printf("ptr(NULL)");
 					else if (StackTop->ExprVal->TypeOfValue->FromType->Base == TypeChar)
-                        printf("\"%s\":string", (char *)StackTop->ExprVal->ValPointer(pc));
+                        printf("\"%s\":string", (char *)StackTop->ExprVal->getVal<PointerType>(pc));
                     else
-                        printf("ptr(0x%lx)", (long)StackTop->ExprVal->ValPointer(pc)); 
+                        printf("ptr(0x%lx)", (long)StackTop->ExprVal->getVal<PointerType>(pc)); 
                     break;
                 case TypeArray:     printf("array"); break;
                 case TypeStruct:    printf("%s:struct", StackTop->ExprVal->ValIdentifierOfAnyValue(pc)); break;
@@ -152,9 +152,9 @@ int ParseState::IsTypeToken(enum LexToken t, struct Value * LexValue)
     if (t == TokenIdentifier) /* see TypeParseFront, case TokenIdentifier and ParseTypedef */
     {
         struct Value * VarValue;
-		if (Parser->pc->VariableDefined(static_cast<char*>(LexValue->ValPointer(pc))))
+		if (Parser->pc->VariableDefined(static_cast<char*>(LexValue->getVal<PointerType>(pc))))
         {
-			VariableGet( static_cast<char*>(LexValue->ValPointer(pc)), &VarValue);
+			VariableGet( static_cast<char*>(LexValue->getVal<PointerType>(pc)), &VarValue);
             if (VarValue->TypeOfValue == &Parser->pc->TypeType)
                 return 1;
         }
@@ -168,17 +168,17 @@ long Value::ExpressionCoerceInteger(Picoc *pc)
 	struct Value *Val = this;
     switch (Val->TypeOfValue->Base)
     {
-        case TypeInt:             return (long)Val->ValInteger(pc);
+        case TypeInt:             return (long)Val->getVal<int>(pc);
         case TypeChar:            return (long)Val->getVal<char>(pc);
-        case TypeShort:           return (long)Val->ValShortInteger(pc);
-        case TypeLong:            return (long)Val->ValLongInteger(pc);
-        case TypeUnsignedInt:     return (long)Val->ValUnsignedInteger(pc);
-        case TypeUnsignedShort:   return (long)Val->ValUnsignedShortInteger(pc);
-        case TypeUnsignedLong:    return (long)Val->ValUnsignedLongInteger(pc);
-        case TypeUnsignedChar:    return (long)Val->ValUnsignedCharacter(pc);
-		case TypePointer:         return (long)Val->ValPointer(pc);
+        case TypeShort:           return (long)Val->getVal<short>(pc);
+        case TypeLong:            return (long)Val->getVal<long>(pc);
+        case TypeUnsignedInt:     return (long)Val->getVal<unsigned int>(pc);
+        case TypeUnsignedShort:   return (long)Val->getVal<unsigned short>(pc);
+        case TypeUnsignedLong:    return (long)Val->getVal<unsigned long>(pc);
+        case TypeUnsignedChar:    return (long)Val->getVal<unsigned char>(pc);
+		case TypePointer:         return (long)Val->getVal<PointerType>(pc);
 #ifndef NO_FP
-        case TypeFP:              return (long)Val->ValFP(pc);
+        case TypeFP:              return (long)Val->getVal<double>(pc);
 #endif
         default:                  return 0;
     }
@@ -189,17 +189,17 @@ unsigned long Value::ExpressionCoerceUnsignedInteger(Picoc *pc)
 	struct Value *Val = this;
     switch (Val->TypeOfValue->Base)
     {
-        case TypeInt:             return (unsigned long)Val->ValInteger(pc);
+        case TypeInt:             return (unsigned long)Val->getVal<int>(pc);
         case TypeChar:            return (unsigned long)Val->getVal<char>(pc);
-        case TypeShort:           return (unsigned long)Val->ValShortInteger(pc);
-        case TypeLong:            return (unsigned long)Val->ValLongInteger(pc);
-        case TypeUnsignedInt:     return (unsigned long)Val->ValUnsignedInteger(pc);
-        case TypeUnsignedShort:   return (unsigned long)Val->ValUnsignedShortInteger(pc);
-        case TypeUnsignedLong:    return (unsigned long)Val->ValUnsignedLongInteger(pc);
-        case TypeUnsignedChar:    return (unsigned long)Val->ValUnsignedCharacter(pc);
-		case TypePointer:         return (unsigned long)Val->ValPointer(pc);
+        case TypeShort:           return (unsigned long)Val->getVal<short>(pc);
+        case TypeLong:            return (unsigned long)Val->getVal<long>(pc);
+        case TypeUnsignedInt:     return (unsigned long)Val->getVal<unsigned int>(pc);
+        case TypeUnsignedShort:   return (unsigned long)Val->getVal<unsigned short>(pc);
+        case TypeUnsignedLong:    return (unsigned long)Val->getVal<unsigned long>(pc);
+        case TypeUnsignedChar:    return (unsigned long)Val->getVal<unsigned char>(pc);
+		case TypePointer:         return (unsigned long)Val->getVal<PointerType>(pc);
 #ifndef NO_FP
-        case TypeFP:              return (unsigned long)Val->ValFP(pc);
+        case TypeFP:              return (unsigned long)Val->getVal<double>(pc);
 #endif
         default:                  return 0;
     }
@@ -215,29 +215,29 @@ double Value::ExpressionCoerceFP(Picoc *pc)
     
     switch (Val->TypeOfValue->Base)
     {
-        case TypeInt:             IntVal = Val->ValInteger(pc); return (double)IntVal;
+        case TypeInt:             IntVal = Val->getVal<int>(pc); return (double)IntVal;
         case TypeChar:            IntVal = Val->getVal<char>(pc); return (double)IntVal;
-        case TypeShort:           IntVal = Val->ValShortInteger(pc); return (double)IntVal;
-        case TypeLong:            IntVal = Val->ValLongInteger(pc); return (double)IntVal;
-        case TypeUnsignedInt:     UnsignedVal = Val->ValUnsignedInteger(pc); return (double)UnsignedVal;
-        case TypeUnsignedShort:   UnsignedVal = Val->ValUnsignedShortInteger(pc); return (double)UnsignedVal;
-        case TypeUnsignedLong:    UnsignedVal = Val->ValUnsignedLongInteger(pc); return (double)UnsignedVal;
-        case TypeUnsignedChar:    UnsignedVal = Val->ValUnsignedCharacter(pc); return (double)UnsignedVal;
-        case TypeFP:              return Val->ValFP(pc);
+        case TypeShort:           IntVal = Val->getVal<short>(pc); return (double)IntVal;
+        case TypeLong:            IntVal = Val->getVal<long>(pc); return (double)IntVal;
+        case TypeUnsignedInt:     UnsignedVal = Val->getVal<unsigned int>(pc); return (double)UnsignedVal;
+        case TypeUnsignedShort:   UnsignedVal = Val->getVal<unsigned short>(pc); return (double)UnsignedVal;
+        case TypeUnsignedLong:    UnsignedVal = Val->getVal<unsigned long>(pc); return (double)UnsignedVal;
+        case TypeUnsignedChar:    UnsignedVal = Val->getVal<unsigned char>(pc); return (double)UnsignedVal;
+        case TypeFP:              return Val->getVal<double>(pc);
         default:                  return 0.0;
     }
 #else
     switch (Val->TypeOfValue->Base)
     {
-        case TypeInt:             return (double)Val->ValInteger(pc);
+        case TypeInt:             return (double)Val->getVal<int>(pc);
         case TypeChar:            return (double)Val->getVal<char>(pc);
-        case TypeShort:           return (double)Val->ValShortInteger(pc);
-        case TypeLong:            return (double)Val->ValLongInteger(pc);
-        case TypeUnsignedInt:     return (double)Val->ValUnsignedInteger(pc);
-        case TypeUnsignedShort:   return (double)Val->ValUnsignedShortInteger(pc);
-        case TypeUnsignedLong:    return (double)Val->ValUnsignedLongInteger(pc);
-        case TypeUnsignedChar:    return (double)Val->ValUnsignedCharacter(pc);
-        case TypeFP:              return (double)Val->ValFP(pc);
+        case TypeShort:           return (double)Val->getVal<short>(pc);
+        case TypeLong:            return (double)Val->getVal<long>(pc);
+        case TypeUnsignedInt:     return (double)Val->getVal<unsigned int>(pc);
+        case TypeUnsignedShort:   return (double)Val->getVal<unsigned short>(pc);
+        case TypeUnsignedLong:    return (double)Val->getVal<unsigned long>(pc);
+        case TypeUnsignedChar:    return (double)Val->getVal<unsigned char>(pc);
+        case TypeFP:              return (double)Val->getVal<double>(pc);
         default:                  return 0.0;
     }
 #endif
@@ -260,14 +260,14 @@ long ParseState::ExpressionAssignInt(struct Value *DestValue, long FromInt, int 
 
     switch (DestValue->TypeOfValue->Base)
     {
-        case TypeInt:           DestValue->setValInteger(pc, FromInt); break;
-        case TypeShort:         DestValue->setValShortInteger(pc, (short)FromInt); break;
+        case TypeInt:           DestValue->setVal<int>(pc, FromInt); break;
+        case TypeShort:         DestValue->setVal<short>(pc, (short)FromInt); break;
         case TypeChar:          DestValue->setVal<char>(pc, (char)FromInt); break;
-        case TypeLong:          DestValue->setValLongInteger(pc, (long)FromInt); break;
-        case TypeUnsignedInt:   DestValue->setValUnsignedInteger(pc, (unsigned int)FromInt); break;
-        case TypeUnsignedShort: DestValue->setValUnsignedShortInteger(pc , (unsigned short)FromInt); break;
-        case TypeUnsignedLong:  DestValue->setValUnsignedLongInteger(pc, (unsigned long)FromInt); break;
-        case TypeUnsignedChar:  DestValue->setValUnsignedCharacter(pc, (unsigned char)FromInt); break;
+        case TypeLong:          DestValue->setVal<long>(pc, (long)FromInt); break;
+        case TypeUnsignedInt:   DestValue->setVal<unsigned int>(pc, (unsigned int)FromInt); break;
+        case TypeUnsignedShort: DestValue->setVal<unsigned short>(pc , (unsigned short)FromInt); break;
+        case TypeUnsignedLong:  DestValue->setVal<unsigned long>(pc, (unsigned long)FromInt); break;
+        case TypeUnsignedChar:  DestValue->setVal<unsigned char>(pc, (unsigned char)FromInt); break;
         default: break;
     }
     return Result;
@@ -281,7 +281,7 @@ double ParseState::ExpressionAssignFP(struct Value *DestValue, double FromFP)
     if (!DestValue->IsLValue) 
         Parser->ProgramFail( "can't assign to this"); 
     
-    DestValue->setValFP(pc,  FromFP);
+    DestValue->setVal<double>(pc,  FromFP);
     return FromFP;
 }
 #endif
@@ -360,7 +360,7 @@ void ParseState::ExpressionPushInt(struct ExpressionStack **StackTop, long IntVa
 {
 	struct ParseState *Parser = this;
 	struct Value *ValueLoc = VariableAllocValueFromType( &Parser->pc->IntType, FALSE, NULL, LocationOnStack);
-    ValueLoc->setValInteger(pc, IntValue);
+    ValueLoc->setVal<int>(pc, IntValue);
     ExpressionStackPushValueNode( StackTop, ValueLoc);
 }
 
@@ -369,7 +369,7 @@ void ParseState::ExpressionPushFP(struct ExpressionStack **StackTop, double FPVa
 {
 	struct ParseState *Parser = this;
 	struct Value *ValueLoc = VariableAllocValueFromType( &Parser->pc->FPType, FALSE, NULL, LocationOnStack);
-    ValueLoc->setValFP(pc,  FPValue);
+    ValueLoc->setVal<double>(pc,  FPValue);
     ExpressionStackPushValueNode(StackTop, ValueLoc);
 }
 #endif
@@ -383,34 +383,34 @@ void ParseState::ExpressionAssignToPointer(struct Value *ToValue, struct Value *
     
     if (FromValue->TypeOfValue == ToValue->TypeOfValue || FromValue->TypeOfValue == Parser->pc->VoidPtrType || 
 		(ToValue->TypeOfValue == Parser->pc->VoidPtrType && FromValue->TypeOfValue->Base == TypePointer))
-        ToValue->setValPointer(pc,  FromValue->ValPointer(pc));      /* plain old pointer assignment */
+        ToValue->setVal<PointerType>(pc,  FromValue->getVal<PointerType>(pc));      /* plain old pointer assignment */
         
     else if (FromValue->TypeOfValue->Base == TypeArray && (PointedToType == FromValue->TypeOfValue->FromType || 
 		ToValue->TypeOfValue == Parser->pc->VoidPtrType))
     {
         /* the form is: blah *x = array of blah */
-        ToValue->setValPointer(pc,  (void *)FromValue->ValAddressOfData(pc));
+        ToValue->setVal<PointerType>(pc,  (void *)FromValue->ValAddressOfData(pc));
     }
     else if (FromValue->TypeOfValue->Base == TypePointer && FromValue->TypeOfValue->FromType->Base == TypeArray && 
                (PointedToType == FromValue->TypeOfValue->FromType->FromType || ToValue->TypeOfValue == Parser->pc->VoidPtrType) )
     {
         /* the form is: blah *x = pointer to array of blah */
-        ToValue->setValPointer(pc,  VariableDereferencePointer( FromValue, NULL, NULL, NULL, NULL));
+        ToValue->setVal<PointerType>(pc,  VariableDereferencePointer( FromValue, NULL, NULL, NULL, NULL));
     }
 	else if (IS_NUMERIC_COERCIBLE(FromValue) && FromValue->ExpressionCoerceInteger(pc) == 0)
     {
         /* null pointer assignment */
-        ToValue->setValPointer(pc,  nullptr);
+        ToValue->setVal<PointerType>(pc,  nullptr);
     }
     else if (AllowPointerCoercion && IS_NUMERIC_COERCIBLE(FromValue))
     {
         /* assign integer to native pointer */
-		ToValue->setValPointer(pc,  (void *)(unsigned long)FromValue->ExpressionCoerceUnsignedInteger(pc));
+		ToValue->setVal<PointerType>(pc,  (void *)(unsigned long)FromValue->ExpressionCoerceUnsignedInteger(pc));
     }
     else if (AllowPointerCoercion && FromValue->TypeOfValue->Base == TypePointer)
     {
         /* assign a pointer to a pointer to a different type */
-        ToValue->setValPointer(pc,  FromValue->ValPointer(pc));
+        ToValue->setVal<PointerType>(pc,  FromValue->getVal<PointerType>(pc));
     }
     else
         Parser->AssignFail( "%t from %t", ToValue->TypeOfValue, FromValue->TypeOfValue, 0, 0, FuncName, ParamNo); 
@@ -428,21 +428,21 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
 
     switch (DestValue->TypeOfValue->Base)
     {
-        case TypeInt:           DestValue->setValInteger(pc, SourceValue->ExpressionCoerceInteger(pc)); break;
-        case TypeShort:         DestValue->setValShortInteger(pc, (short)SourceValue->ExpressionCoerceInteger(pc)); break;
+        case TypeInt:           DestValue->setVal<int>(pc, SourceValue->ExpressionCoerceInteger(pc)); break;
+        case TypeShort:         DestValue->setVal<short>(pc, (short)SourceValue->ExpressionCoerceInteger(pc)); break;
         case TypeChar:          DestValue->setVal<char>(pc, (char)SourceValue->ExpressionCoerceInteger(pc)); break;
-        case TypeLong:          DestValue->setValLongInteger(pc, SourceValue->ExpressionCoerceInteger(pc)); break;
-        case TypeUnsignedInt:   DestValue->setValUnsignedInteger(pc, SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
-        case TypeUnsignedShort: DestValue->setValUnsignedShortInteger(pc, (unsigned short)SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
-        case TypeUnsignedLong:  DestValue->setValUnsignedLongInteger(pc, SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
-        case TypeUnsignedChar:  DestValue->setValUnsignedCharacter(pc, (unsigned char)SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
+        case TypeLong:          DestValue->setVal<long>(pc, SourceValue->ExpressionCoerceInteger(pc)); break;
+        case TypeUnsignedInt:   DestValue->setVal<unsigned int>(pc, SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
+        case TypeUnsignedShort: DestValue->setVal<unsigned short>(pc, (unsigned short)SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
+        case TypeUnsignedLong:  DestValue->setVal<unsigned long>(pc, SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
+        case TypeUnsignedChar:  DestValue->setVal<unsigned char>(pc, (unsigned char)SourceValue->ExpressionCoerceUnsignedInteger(pc)); break;
 
 #ifndef NO_FP
         case TypeFP:
             if (!IS_NUMERIC_COERCIBLE_PLUS_POINTERS(SourceValue, AllowPointerCoercion)) 
                 Parser->AssignFail( "%t from %t", DestValue->TypeOfValue, SourceValue->TypeOfValue, 0, 0, FuncName, ParamNo); 
             
-            DestValue->setValFP(pc,  SourceValue->ExpressionCoerceFP(pc));
+            DestValue->setVal<double>(pc,  SourceValue->ExpressionCoerceFP(pc));
             break;
 #endif
         case TypePointer:
@@ -479,7 +479,7 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
             {
                 if (DestValue->TypeOfValue->ArraySize == 0) /* char x[] = "abcd", x is unsized */
                 {
-					int Size = strlen(static_cast<char*>(SourceValue->ValPointer(pc))) + 1;
+					int Size = strlen(static_cast<char*>(SourceValue->getVal<PointerType>(pc))) + 1;
                     #ifdef DEBUG_ARRAY_INITIALIZER
                     PRINT_SOURCE_POS;
                     fprintf(stderr, "str size: %d\n", Size);
@@ -492,10 +492,10 @@ void ParseState::ExpressionAssign(struct Value *DestValue, struct Value *SourceV
 
                 #ifdef DEBUG_ARRAY_INITIALIZER
                 PRINT_SOURCE_POS;
-                fprintf(stderr, "char[%d] from char* (len=%d)\n", DestValue->TypeOfValue->ArraySize, strlen(SourceValue->ValPointer(pc)));
+                fprintf(stderr, "char[%d] from char* (len=%d)\n", DestValue->TypeOfValue->ArraySize, strlen(SourceValue->getVal<PointerType>(pc)));
                 #endif
 				memcpy(/* (void *) */DestValue->isAbsolute ? DestValue->getValAbsolute() : DestValue->getValVirtual() ,
-					SourceValue->ValPointer(pc), DestValue->TypeSizeValue(FALSE));
+					SourceValue->getVal<PointerType>(pc), DestValue->TypeSizeValue(FALSE));
                 break;
             }
 
@@ -581,7 +581,7 @@ void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enu
 			}
 		Result = VariableAllocValueFromType(TypeGetMatching( TopValue->TypeOfValue, TypePointer,
 			0, Parser->pc->StrEmpty, TRUE), FALSE, NULL, LocationOnStack);
-            Result->setValPointer(pc,  (void *)ValPtr);
+            Result->setVal<PointerType>(pc,  (void *)ValPtr);
             ExpressionStackPushValueNode(/*Parser,*/ StackTop, Result);
             break;
 
@@ -607,11 +607,11 @@ void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enu
                 
                 switch (Op)
                 {
-                    case TokenPlus:         ResultFP = TopValue->ValFP(pc); break;
-                    case TokenMinus:        ResultFP = -TopValue->ValFP(pc); break;
-                    case TokenIncrement:    ResultFP = ExpressionAssignFP(/*Parser,*/ TopValue, TopValue->ValFP(pc)+1); break;
-                    case TokenDecrement:    ResultFP = ExpressionAssignFP(/*Parser,*/ TopValue, TopValue->ValFP(pc)-1); break;
-                    case TokenUnaryNot:     ResultFP = !TopValue->ValFP(pc); break;
+                    case TokenPlus:         ResultFP = TopValue->getVal<double>(pc); break;
+                    case TokenMinus:        ResultFP = -TopValue->getVal<double>(pc); break;
+                    case TokenIncrement:    ResultFP = ExpressionAssignFP(/*Parser,*/ TopValue, TopValue->getVal<double>(pc)+1); break;
+                    case TokenDecrement:    ResultFP = ExpressionAssignFP(/*Parser,*/ TopValue, TopValue->getVal<double>(pc)-1); break;
+                    case TokenUnaryNot:     ResultFP = !TopValue->getVal<double>(pc); break;
                     default:                Parser->ProgramFail( "invalid operation"); break;
                 }
                 
@@ -644,7 +644,7 @@ void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enu
                 struct Value *StackValue;
                 void *ResultPtr;
 
-                if (TopValue->ValPointer(pc) == NULL)
+                if (TopValue->getVal<PointerType>(pc) == NULL)
                     Parser->ProgramFail( "invalid use of a NULL pointer");
                 
                 if (!TopValue->IsLValue) 
@@ -652,14 +652,14 @@ void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enu
                     
                 switch (Op)
                 {
-                    case TokenIncrement:    TopValue->setValPointer(pc,  (void *)((char *)TopValue->ValPointer(pc) + Size)); break;
-                    case TokenDecrement:    TopValue->setValPointer(pc,  (void *)((char *)TopValue->ValPointer(pc) - Size)); break;
+                    case TokenIncrement:    TopValue->setVal<PointerType>(pc,  (void *)((char *)TopValue->getVal<PointerType>(pc) + Size)); break;
+                    case TokenDecrement:    TopValue->setVal<PointerType>(pc,  (void *)((char *)TopValue->getVal<PointerType>(pc) - Size)); break;
                     default:                Parser->ProgramFail( "invalid operation"); break;
                 }
 
-                ResultPtr = TopValue->ValPointer(pc);
+                ResultPtr = TopValue->getVal<PointerType>(pc);
                 StackValue = ExpressionStackPushValueByType(/*Parser,*/ StackTop, TopValue->TypeOfValue);
-                StackValue->setValPointer(pc,  ResultPtr);
+                StackValue->setVal<PointerType>(pc,  ResultPtr);
             }
             else
                 Parser->ProgramFail( "invalid operation");
@@ -680,8 +680,8 @@ void ParseState::ExpressionPostfixOperator(struct ExpressionStack **StackTop, en
         
         switch (Op)
         {
-            case TokenIncrement:    ResultFP = ExpressionAssignFP(/*Parser,*/ TopValue, TopValue->ValFP(pc)+1); break;
-            case TokenDecrement:    ResultFP = ExpressionAssignFP(/*Parser,*/ TopValue, TopValue->ValFP(pc)-1); break;
+            case TokenIncrement:    ResultFP = ExpressionAssignFP(/*Parser,*/ TopValue, TopValue->getVal<double>(pc)+1); break;
+            case TokenDecrement:    ResultFP = ExpressionAssignFP(/*Parser,*/ TopValue, TopValue->getVal<double>(pc)-1); break;
             default:                Parser->ProgramFail( "invalid operation"); break;
         }
         
@@ -709,9 +709,9 @@ void ParseState::ExpressionPostfixOperator(struct ExpressionStack **StackTop, en
         /* pointer postfix arithmetic */
         int Size = TypeSize(TopValue->TypeOfValue->FromType, 0, TRUE);
         struct Value *StackValue;
-        void *OrigPointer = TopValue->ValPointer(pc);
+        void *OrigPointer = TopValue->getVal<PointerType>(pc);
         
-        if (TopValue->ValPointer(pc) == NULL)
+        if (TopValue->getVal<PointerType>(pc) == NULL)
             Parser->ProgramFail( "invalid use of a NULL pointer");
             
         if (!TopValue->IsLValue) 
@@ -719,13 +719,13 @@ void ParseState::ExpressionPostfixOperator(struct ExpressionStack **StackTop, en
         
         switch (Op)
         {
-            case TokenIncrement:    TopValue->setValPointer(pc,  (void *)((char *)TopValue->ValPointer(pc) + Size)); break;
-            case TokenDecrement:    TopValue->setValPointer(pc,  (void *)((char *)TopValue->ValPointer(pc) - Size)); break;
+            case TokenIncrement:    TopValue->setVal<PointerType>(pc,  (void *)((char *)TopValue->getVal<PointerType>(pc) + Size)); break;
+            case TokenDecrement:    TopValue->setVal<PointerType>(pc,  (void *)((char *)TopValue->getVal<PointerType>(pc) - Size)); break;
             default:                Parser->ProgramFail( "invalid operation"); break;
         }
         
         StackValue = ExpressionStackPushValueByType(/*Parser,*/ StackTop, TopValue->TypeOfValue);
-        StackValue->setValPointer(pc,  OrigPointer);
+        StackValue->setVal<PointerType>(pc,  OrigPointer);
     }
     else
         Parser->ProgramFail( "invalid operation");
@@ -765,7 +765,7 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
 				break;
             case TypePointer: 
 				Result = Parser->VariableAllocValueFromExistingData( BottomValue->TypeOfValue->FromType, 
-								(UnionAnyValuePointer )((char *)BottomValue->ValPointer(pc) + 
+								(UnionAnyValuePointer )((char *)BottomValue->getVal<PointerType>(pc) + 
 								  TypeSize(BottomValue->TypeOfValue->FromType, 0, TRUE) * ArrayIndex), 
 								  BottomValue->IsLValue, BottomValue->LValueFrom, BottomValue->isAbsolute);
 				break;
@@ -789,8 +789,8 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
         /* floating point infix arithmetic */
         int ResultIsInt = FALSE;
         double ResultFP = 0.0;
-        double TopFP = (TopValue->TypeOfValue == &Parser->pc->FPType) ? TopValue->ValFP(pc) : (double)TopValue->ExpressionCoerceInteger(pc);
-        double BottomFP = (BottomValue->TypeOfValue == &Parser->pc->FPType) ? BottomValue->ValFP(pc) : (double)BottomValue->ExpressionCoerceInteger(pc);
+        double TopFP = (TopValue->TypeOfValue == &Parser->pc->FPType) ? TopValue->getVal<double>(pc) : (double)TopValue->ExpressionCoerceInteger(pc);
+        double BottomFP = (BottomValue->TypeOfValue == &Parser->pc->FPType) ? BottomValue->getVal<double>(pc) : (double)BottomValue->ExpressionCoerceInteger(pc);
 
         switch (Op)
         {
@@ -883,16 +883,16 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
                 Parser->ProgramFail( "invalid operation");
             
             if (Op == TokenEqual)
-                ExpressionPushInt(/*Parser,*/ StackTop, BottomValue->ValPointer(pc) == NULL);
+                ExpressionPushInt(/*Parser,*/ StackTop, BottomValue->getVal<PointerType>(pc) == NULL);
             else
-                ExpressionPushInt(/*Parser,*/ StackTop, BottomValue->ValPointer(pc) != NULL);
+                ExpressionPushInt(/*Parser,*/ StackTop, BottomValue->getVal<PointerType>(pc) != NULL);
         }
         else if (Op == TokenPlus || Op == TokenMinus)
         {
             /* pointer arithmetic */
             int Size = TypeSize(BottomValue->TypeOfValue->FromType, 0, TRUE);
             
-            PointerLoc = BottomValue->ValPointer(pc);
+            PointerLoc = BottomValue->getVal<PointerType>(pc);
             if (PointerLoc == NULL)
                 Parser->ProgramFail( "invalid use of a NULL pointer");
             
@@ -902,7 +902,7 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
                 PointerLoc = (void *)((char *)PointerLoc - TopInt * Size);
             
             StackValue = ExpressionStackPushValueByType(/*Parser,*/ StackTop, BottomValue->TypeOfValue);
-            StackValue->setValPointer(pc,  PointerLoc);
+            StackValue->setVal<PointerType>(pc,  PointerLoc);
         }
         else if (Op == TokenAssign && TopInt == 0)
         {
@@ -916,7 +916,7 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
             /* pointer arithmetic */
             int Size = TypeSize(BottomValue->TypeOfValue->FromType, 0, TRUE);
 
-            PointerLoc = BottomValue->ValPointer(pc);
+            PointerLoc = BottomValue->getVal<PointerType>(pc);
             if (PointerLoc == NULL)
                 Parser->ProgramFail( "invalid use of a NULL pointer");
 
@@ -926,7 +926,7 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
                 PointerLoc = (void *)((char *)PointerLoc - TopInt * Size);
 
 			Parser->pc->HeapUnpopStack(sizeof(struct Value));
-            BottomValue->setValPointer(pc,  PointerLoc);
+            BottomValue->setVal<PointerType>(pc,  PointerLoc);
             ExpressionStackPushValueNode(/*Parser,*/ StackTop, BottomValue);
         }
         else
@@ -935,8 +935,8 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
     else if (BottomValue->TypeOfValue->Base == TypePointer && TopValue->TypeOfValue->Base == TypePointer && Op != TokenAssign)
     {
         /* pointer/pointer operations */
-        char *TopLoc = (char *)TopValue->ValPointer(pc);
-        char *BottomLoc = (char *)BottomValue->ValPointer(pc);
+        char *TopLoc = (char *)TopValue->getVal<PointerType>(pc);
+        char *BottomLoc = (char *)BottomValue->getVal<PointerType>(pc);
         
         switch (Op)
         {
@@ -1158,7 +1158,7 @@ void ParseState::ExpressionGetStructElement(struct ExpressionStack **StackTop, e
         
         /* make the result value for this member only */
         Result = Parser->VariableAllocValueFromExistingData( MemberValue->TypeOfValue, 
-			static_cast<UnionAnyValuePointer >(static_cast<void*>(static_cast<char*>(DerefDataLoc) + MemberValue->ValInteger(pc))), 
+			static_cast<UnionAnyValuePointer >(static_cast<void*>(static_cast<char*>(DerefDataLoc) + MemberValue->getVal<int>(pc))), 
 			TRUE, (StructVal != NULL) ? StructVal->LValueFrom : NULL,MemberValue->isAbsolute);
         ExpressionStackPushValueNode(/*Parser,*/ StackTop, Result);
     }
