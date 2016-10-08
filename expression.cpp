@@ -592,7 +592,7 @@ void ParseState::ExpressionPrefixOperator(struct ExpressionStack **StackTop, enu
         case TokenSizeof:
             /* return the size of the argument */
             if (TopValue->TypeOfValue == &Parser->pc->TypeType)
-                ExpressionPushInt(/*Parser,*/ StackTop, TypeSize(TopValue->ValTypeOfAnyValue(pc), TopValue->ValTypeOfAnyValue(pc)->ArraySize, TRUE));
+                ExpressionPushInt(/*Parser,*/ StackTop, TypeSize(TopValue->getVal<struct ValueType*>(pc), TopValue->getVal<struct ValueType*>(pc)->ArraySize, TRUE));
             else
                 ExpressionPushInt(/*Parser,*/ StackTop, TypeSize(TopValue->TypeOfValue, TopValue->TypeOfValue->ArraySize, TRUE));
             break;
@@ -956,7 +956,7 @@ void ParseState::ExpressionInfixOperator(struct ExpressionStack **StackTop, enum
     else if (Op == TokenCast)
     {
         /* cast a value to a different type */   /* XXX - possible bug if the destination type takes more than sizeof(struct Value) + sizeof(struct ValueType *) */
-        struct Value *ValueLoc = ExpressionStackPushValueByType(/*Parser,*/ StackTop, BottomValue->ValTypeOfAnyValue(pc));
+        struct Value *ValueLoc = ExpressionStackPushValueByType(/*Parser,*/ StackTop, BottomValue->getVal<struct ValueType*>(pc));
         Parser->ExpressionAssign( ValueLoc, TopValue, TRUE, NULL, 0, TRUE);
     }
     else
@@ -1220,7 +1220,7 @@ int ParseState::ExpressionParse(struct Value **Result)
 
                         ExpressionStackCollapse(/*Parser,*/ &StackTop, Precedence+1, &IgnorePrecedence);
 						CastTypeValue = VariableAllocValueFromType(&Parser->pc->TypeType, FALSE, NULL, LocationOnStack);
-                        CastTypeValue->setValTypeOfAnyValue(pc, CastType);
+                        CastTypeValue->setVal<struct ValueType*>(pc, CastType);
                         ExpressionStackPushValueNode(/*Parser,*/ &StackTop, CastTypeValue);
                         ExpressionStackPushOperator(/*Parser,*/ &StackTop, OrderInfix, TokenCast, Precedence);
                     }
@@ -1404,7 +1404,7 @@ int ParseState::ExpressionParse(struct Value **Result)
             ParserCopy(Parser, &PreState);
             Parser->TypeParse( &Typ, &Identifier, NULL);
 			TypeValue = VariableAllocValueFromType( &Parser->pc->TypeType, FALSE, NULL, LocationOnStack);
-            TypeValue->setValTypeOfAnyValue(pc, Typ);
+            TypeValue->setVal<struct ValueType*>(pc, Typ);
             ExpressionStackPushValueNode(/*Parser,*/ &StackTop, TypeValue);
         }
         else

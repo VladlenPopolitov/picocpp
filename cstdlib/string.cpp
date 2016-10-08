@@ -140,37 +140,37 @@ void StringStrerror(struct ParseState *Parser, struct Value *ReturnValue, struct
 void StringStrspn(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setVal<int>(pc, strspn(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
+	ReturnValue->setVal<int>(pc, strspn(Param[0]->getVal<char*>(pc), Param[1]->getVal<char*>(pc)));
 }
 
 void StringStrcspn(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setVal<int>(pc, strcspn(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
+	ReturnValue->setVal<int>(pc, strcspn(Param[0]->getVal<char*>(pc), Param[1]->getVal<char*>(pc)));
 }
 
 void StringStrpbrk(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setVal<PointerType>(pc,  strpbrk(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
+    ReturnValue->setVal<PointerType>(pc,  strpbrk(Param[0]->getVal<char*>(pc), Param[1]->getVal<char*>(pc)));
 }
 
 void StringStrstr(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setVal<PointerType>(pc,  strstr(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
+    ReturnValue->setVal<PointerType>(pc,  strstr(Param[0]->getVal<char*>(pc), Param[1]->getVal<char*>(pc)));
 }
 
 void StringStrtok(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setVal<PointerType>(pc,  strtok(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc)));
+    ReturnValue->setVal<PointerType>(pc,  strtok(Param[0]->getVal<char*>(pc), Param[1]->getVal<char*>(pc)));
 }
 
 void StringStrxfrm(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setVal<int>(pc, strxfrm(Param[0]->ValPointerChar(pc), Param[1]->ValPointerChar(pc), Param[2]->getVal<int>(pc)));
+    ReturnValue->setVal<int>(pc, strxfrm(Param[0]->getVal<char*>(pc), Param[1]->getVal<char*>(pc), Param[2]->getVal<int>(pc)));
 }
 
 #ifndef WIN32

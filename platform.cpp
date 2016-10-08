@@ -73,8 +73,8 @@ void Picoc::PicocCallMain(int argc, char **argv)
     if (FuncValue->ValFuncDef(pc).NumParams != 0)
     {
         /* define the arguments */
-        temp.VariableDefinePlatformVar( "__argc", &pc->IntType, (UnionAnyValuePointer )&argc, FALSE);
-        temp.VariableDefinePlatformVar( "__argv", pc->CharPtrPtrType, (UnionAnyValuePointer )&argv, FALSE);
+        temp.VariableDefinePlatformVar( "__argc", &pc->IntType, (UnionAnyValuePointer )&argc, FALSE,sizeof(argc));
+        temp.VariableDefinePlatformVar( "__argv", pc->CharPtrPtrType, (UnionAnyValuePointer )&argv, FALSE,sizeof(argv)*argc);
     }
 
     if (FuncValue->ValFuncDef(pc).ReturnType == &pc->VoidType)
@@ -86,7 +86,7 @@ void Picoc::PicocCallMain(int argc, char **argv)
     }
     else
     {
-        temp.VariableDefinePlatformVar( "__exit_value", &pc->IntType, (UnionAnyValuePointer )&pc->PicocExitValue, TRUE);
+		temp.VariableDefinePlatformVar("__exit_value", &pc->IntType, (UnionAnyValuePointer)&pc->PicocExitValue, TRUE, sizeof(pc->PicocExitValue));
     
         if (FuncValue->ValFuncDef(pc).NumParams == 0)
             PicocParse( "startup", CALL_MAIN_NO_ARGS_RETURN_INT, strlen(CALL_MAIN_NO_ARGS_RETURN_INT), TRUE, TRUE, FALSE, TRUE);

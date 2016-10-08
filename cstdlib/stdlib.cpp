@@ -9,40 +9,40 @@ static int Stdlib_ZeroValue = 0;
 void StdlibAtof(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setVal<double>(pc,  atof(Param[0]->ValPointerChar(pc)));
+	ReturnValue->setVal<double>(pc,  atof(Param[0]->getVal<char*>(pc)));
 }
 #endif
 
 void StdlibAtoi(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setVal<int>(pc, atoi(Param[0]->ValPointerChar(pc)));
+	ReturnValue->setVal<int>(pc, atoi(Param[0]->getVal<char*>(pc)));
 }
 
 void StdlibAtol(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setVal<int>(pc, atol(Param[0]->ValPointerChar(pc)));
+	ReturnValue->setVal<int>(pc, atol(Param[0]->getVal<char*>(pc)));
 }
 
 #ifndef NO_FP
 void StdlibStrtod(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setVal<double>(pc,  strtod(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc)));
+	ReturnValue->setVal<double>(pc,  strtod(Param[0]->getVal<char*>(pc), Param[1]->getVal<char**>(pc)));
 }
 #endif
 
 void StdlibStrtol(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setVal<int>(pc, strtol(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc), Param[2]->getVal<int>(pc)));
+    ReturnValue->setVal<int>(pc, strtol(Param[0]->getVal<char*>(pc), Param[1]->getVal<char**>(pc), Param[2]->getVal<int>(pc)));
 }
 
 void StdlibStrtoul(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setVal<int>(pc, strtoul(Param[0]->ValPointerChar(pc), Param[1]->ValPointerCharChar(pc), Param[2]->getVal<int>(pc)));
+    ReturnValue->setVal<int>(pc, strtoul(Param[0]->getVal<char*>(pc), Param[1]->getVal<char**>(pc), Param[2]->getVal<int>(pc)));
 }
 
 void StdlibMalloc(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
@@ -96,13 +96,13 @@ void StdlibExit(struct ParseState *Parser, struct Value *ReturnValue, struct Val
 void StdlibGetenv(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setVal<PointerType>(pc,  getenv(Param[0]->ValPointerChar(pc)));
+    ReturnValue->setVal<PointerType>(pc,  getenv(Param[0]->getVal<char*>(pc)));
 }
 
 void StdlibSystem(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-    ReturnValue->setVal<int>(pc, system(Param[0]->ValPointerChar(pc)));
+    ReturnValue->setVal<int>(pc, system(Param[0]->getVal<char*>(pc)));
 }
 
 #if 0

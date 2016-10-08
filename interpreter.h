@@ -73,6 +73,8 @@ using Picoc = struct Picoc_Struct;
 using AnyValue = class AnyValueClass;
 union UnionAnyValue;
 using UnionAnyValuePointer = UnionAnyValue *;
+using UnionAnyValuePointerVirtual = UnionAnyValue *;
+
 using PointerType = void*;
 //using PointerType = VirtualPointer;
 struct Value;
@@ -285,7 +287,10 @@ public:
 			void VariableGet( const char *Ident, struct Value **LVal);
 			void VariableGet(const char *Ident, struct ValueAbs **LVal);
 			void VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
-				UnionAnyValuePointer FromValue, int IsWritable);
+				UnionAnyValuePointer FromValue, int IsWritable,size_t Size);
+			void VariableDefinePlatformVarFromPointer(const char *Ident, struct ValueType *Typ,
+				UnionAnyValuePointer FromValue, int IsWritable, size_t Size);
+
 			//void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
 			//void VariableStackFramePop(struct ParseState *Parser);
 			struct ValueType *TypeAdd( struct ValueType *ParentType, enum BaseType Base, int ArraySize,
@@ -446,27 +451,9 @@ private:
 	const char *IdentifierOfAnyValue_;
 };
 
-template<typename TN>
-TN ValFromUnionVirtual(Picoc *pc, UnionAnyValuePointer Val1){
-	return *(static_cast<TN*>(static_cast<void*>(Val1)));
-}
 
-template<typename TN>
-TN ValFromUnionAbsolute(Picoc *pc, UnionAnyValuePointer Val1){
-	return *(static_cast<TN*>(static_cast<void*>(Val1)));
-}
-
-template<typename TN>
-void ValToUnionVirtual(Picoc *pc, UnionAnyValuePointer Val1,TN newValue){
-	 *(static_cast<TN*>(static_cast<void*>(Val1)))=newValue;
-}
-
-template<typename TN>
-void ValToUnionAbsolute(Picoc *pc, UnionAnyValuePointer Val1, TN newValue){
-	*(static_cast<TN*>(static_cast<void*>(Val1))) = newValue;
-}
-
-
+void MoveFromAbsoluteToVirtual(Picoc *pc, UnionAnyValuePointerVirtual Target,
+	void* Source, size_t Size);
 struct Value 
 {
 public:
@@ -475,44 +462,7 @@ public:
 	TN getVal(Picoc *pc);
 	template<class TN>
 	void setVal(Picoc *pc,TN newVal);
-
-	//char getVal<char>(Picoc *pc);
-	//void setVal<char>(Picoc *pc, char newVal);
-	//short getVal<short>(Picoc *pc);
-	//void setVal<short>(Picoc *pc,short newVal);
-	//int getVal<int>(Picoc *pc);
-	//void setVal<int>(Picoc *pc, int newValue);
-	//long getVal<long>(Picoc *pc);
-	//void setVal<long>(Picoc *pc, long newVal);
-	//unsigned short getVal<unsigned short>(Picoc *pc);
-	//void setVal<unsigned short>(Picoc *pc, unsigned short newVal);
-	//unsigned int getVal<unsigned int>(Picoc *pc);
-	//void setVal<unsigned int>(Picoc *pc,unsigned int newVal);
-	//unsigned long getVal<unsigned long>(Picoc *pc);
-	//void setVal<unsigned long>(Picoc *pc, unsigned long newVal);
-	//unsigned char getVal<unsigned char>(Picoc *pc);
-	//void setVal<unsigned char>(Picoc *pc, unsigned char newVal);
-#ifndef NO_FP
-	//double Value::getVal<double>(Picoc *pc);
-	//void Value::setVal<double>(Picoc *pc, double newVal);
-
-#endif
-	//PointerType Value::getVal<PointerType>(Picoc *pc);						/* unsafe native pointers */
-	//void Value::setVal<PointerType>(Picoc *pc, PointerType newVal);						/* unsafe native pointers */
-	char * Value::ValPointerChar(Picoc *pc);				  /* unsafe native pointers */
-	void Value::setValPointerChar(Picoc *pc, char * newVal);				  /* unsafe native pointers */
-	char ** Value::ValPointerCharChar(Picoc *pc);				  /* unsafe native pointers */
-	unsigned char *Value::ValPointerUChar(Picoc *pc);      /* unsafe native pointers */
-	double * Value::ValPointerDouble(Picoc *pc);
-	int * Value::ValPointerInt(Picoc *pc);
-	void Value::setValPointerInt(Picoc *pc, int * newval);
 	void Value::ValAssignPointerInt(Picoc *pc, int  newval);
-
-	struct ValueType * ValTypeOfAnyValue(Picoc *pc);
-	void setValTypeOfAnyValue(Picoc *pc, struct ValueType *newVal);
-	//StructFuncDef &ValFuncDef(Picoc *pc);
-	//StructMacroDef &ValMacroDef(Picoc *pc);
-	//const char * &ValIdentifierOfAnyValue(Picoc *pc);
 	char *ValAddressOfData(Picoc *pc);
 
     struct ValueType *TypeOfValue;          /* the type of this value */
@@ -527,9 +477,10 @@ public:
 	void setVal_(UnionAnyValuePointer newVal);
 	UnionAnyValuePointer getValAbsolute();
 	void setValAbsolute(Picoc *pc, UnionAnyValuePointer newVal);
-	UnionAnyValuePointer getValVirtual();
-	void setValVirtual(Picoc *pc, UnionAnyValuePointer newVal);
-	//UnionAnyValuePointer &getVal();
+	UnionAnyValuePointerVirtual getValVirtual();
+	void setValVirtual(Picoc *pc, UnionAnyValuePointerVirtual newVal);
+	void writeToVirtualFromAbsolute(Picoc *pc, void* newVal,size_t Size);
+	void writeToAbsoluteFromVirtual(Picoc *pc, UnionAnyValuePointerVirtual newVal,size_t Size);
 	bool isAbsolute;
 	bool isAnyValueAllocated;
 private:
@@ -550,89 +501,48 @@ public:
 };
 
 template<typename TN>
+TN ValFromUnionVirtual(Picoc *pc, UnionAnyValuePointerVirtual Val1){
+	return *(static_cast<TN*>(static_cast<void*>(Val1)));
+}
+
+template<typename TN>
+TN ValFromUnionAbsolute(Picoc *pc, UnionAnyValuePointer Val1){
+	return *(static_cast<TN*>(static_cast<void*>(Val1)));
+}
+
+template<typename TN>
+void ValToUnionVirtual(Picoc *pc, UnionAnyValuePointerVirtual Val1, TN newValue){
+	*(static_cast<TN*>(static_cast<void*>(Val1))) = newValue;
+}
+
+template<typename TN>
+void ValToUnionAbsolute(Picoc *pc, UnionAnyValuePointer Val1, TN newValue){
+	*(static_cast<TN*>(static_cast<void*>(Val1))) = newValue;
+}
+
+
+template<typename TN>
 TN Value::getVal(Picoc *pc){
-	if (isAbsolute) return ValFromUnionAbsolute<TN>(pc, getValAbsolute()); else //  UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
-		return ValFromUnionVirtual<TN>(pc, getValVirtual());  // Val1->Character();
+	if (this->isAbsolute) 
+		return ValFromUnionAbsolute<TN>(pc, this->getValAbsolute()); 
+	else 
+		return ValFromUnionVirtual<TN>(pc, this->getValVirtual());
 };
 template<typename TN>
 void Value::setVal(Picoc *pc,TN newValue){
-	if (isAbsolute) ValToUnionAbsolute<TN>(pc, getValAbsolute(),newValue); else //  UnionAnyValuePointer Val1 = isAbsolute ? getValAbsolute() : getValVirtual();
-		ValToUnionVirtual<TN>(pc, getValVirtual(),newValue);  // Val1->Character();
+	if (this->isAbsolute) 
+		ValToUnionAbsolute<TN>(pc, this->getValAbsolute(),newValue); 
+	else 
+		ValToUnionVirtual<TN>(pc, this->getValVirtual(),newValue);
 };
+
 struct ValueAbs : public Value
 {
 public:
 	ValueAbs();
-	/* char getVal<char>(Picoc *pc);
-	void setVal<char>(Picoc *pc, char newVal);
-	short getVal<short>(Picoc *pc);
-	void setVal<short>(Picoc *pc, short newVal);
-	int getVal<int>(Picoc *pc);
-	void setVal<int>(Picoc *pc, int newValue);
-	long getVal<long>(Picoc *pc);
-	void setVal<long>(Picoc *pc, long newVal);
-	unsigned short getVal<unsigned short>(Picoc *pc);
-	void setVal<unsigned short>(Picoc *pc, unsigned short newVal);
-	unsigned int getVal<unsigned int>(Picoc *pc);
-	void setVal<unsigned int>(Picoc *pc, unsigned int newVal);
-	unsigned long getVal<unsigned long>(Picoc *pc);
-	void setVal<unsigned long>(Picoc *pc, unsigned long newVal);
-	unsigned char getVal<unsigned char>(Picoc *pc);
-	void setVal<unsigned char>(Picoc *pc, unsigned char newVal);
-#ifndef NO_FP
-	double Value::getVal<double>(Picoc *pc);
-	void Value::setVal<double>(Picoc *pc, double newVal);
-
-#endif
-	PointerType Value::getVal<PointerType>(Picoc *pc);						// * unsafe native pointers 
-	void Value::setVal<PointerType>(Picoc *pc, PointerType newVal);						//* unsafe native pointers 
-	char * Value::ValPointerChar(Picoc *pc);				  //* unsafe native pointers 
-	void Value::setValPointerChar(Picoc *pc, char * newVal);				  //* unsafe native pointers 
-	char ** Value::ValPointerCharChar(Picoc *pc);				  //* unsafe native pointers 
-	unsigned char *Value::ValPointerUChar(Picoc *pc);      //* unsafe native pointers 
-	double * Value::ValPointerDouble(Picoc *pc);
-	int * Value::ValPointerInt(Picoc *pc);
-	void Value::setValPointerInt(Picoc *pc, int * newval);
-	void Value::ValAssignPointerInt(Picoc *pc, int  newval);
-
-	struct ValueType * ValTypeOfAnyValue(Picoc *pc);
-	void setValTypeOfAnyValue(Picoc *pc, struct ValueType *newVal);
-	*/
 	StructFuncDef &ValFuncDef(Picoc *pc);
 	StructMacroDef &ValMacroDef(Picoc *pc);
 	const char * &ValIdentifierOfAnyValue(Picoc *pc);
-	/*
-	char *ValAddressOfData(Picoc *pc);
-
-	struct ValueType *TypeOfValue;          //* the type of this value 
-	struct Value *LValueFrom;       //* if an LValue, this is a Value our LValue is contained within (or NULL) 
-	char ValOnHeap;                 //* this Value is on the heap 
-	char ValOnStack;                //* the AnyValue is on the stack along with this Value 
-	char AnyValOnHeap;              //* the AnyValue is separately allocated from the Value on the heap 
-	char IsLValue;                  //* is modifiable and is allocated somewhere we can usefully modify it 
-	int ScopeID;                    //* to know when it goes out of scope 
-	char OutOfScope;
-	UnionAnyValuePointer getVal_();
-	void setVal_(UnionAnyValuePointer newVal);
-	UnionAnyValuePointer getValAbsolute();
-	void setValAbsolute(UnionAnyValuePointer newVal);
-	UnionAnyValuePointer getValVirtual();
-	void setValVirtual(UnionAnyValuePointer newVal);
-	//UnionAnyValuePointer &getVal();
-private:
-	UnionAnyValuePointer Val_;            //* pointer to the AnyValue which holds the actual content 
-public:
-	//* expression.c 
-	long ExpressionCoerceInteger(Picoc *pc);
-	unsigned long ExpressionCoerceUnsignedInteger(Picoc *pc);
-#ifndef NO_FP
-	double ExpressionCoerceFP(Picoc *pc);
-#endif
-
-	// type.c 
-	int TypeSizeValue(int Compact);
-	int TypeStackSizeValue();
-	*/
 };
 
 /* hash table data structure */
@@ -640,7 +550,6 @@ struct TableEntry
 {
 public:
 	TableEntry();
-    //struct TableEntry *Next;        /* next item in this hash chain */
     const char *DeclFileName;       /* where the variable was declared */
     unsigned short DeclLine;
     unsigned short DeclColumn;

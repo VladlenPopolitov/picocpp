@@ -434,7 +434,7 @@ int ParseState::TypeParseFront(struct ValueType **Typ, int *IsStatic)
         case TokenIdentifier:
             /* we already know it's a typedef-defined type because we got here */
             VariableGet( LexerValue->ValIdentifierOfAnyValue(pc), &VarValue);
-            *Typ = VarValue->ValTypeOfAnyValue(pc);
+            *Typ = VarValue->getVal<struct ValueType*>(pc);
             break;
 
         default: ParserCopy(Parser, &Before); return FALSE;

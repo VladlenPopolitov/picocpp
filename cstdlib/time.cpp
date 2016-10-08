@@ -67,7 +67,7 @@ void StdTime(struct ParseState *Parser, struct Value *ReturnValue, struct Value 
 void StdStrftime(struct ParseState *Parser, struct Value *ReturnValue, struct Value **Param, int NumArgs)
 {
 	Picoc *pc = Parser->pc;
-	ReturnValue->setVal<int>(pc, strftime(static_cast<char*>(Param[0]->getVal<PointerType>(pc)), Param[1]->getVal<int>(pc), Param[2]->ValPointerChar(pc), 
+	ReturnValue->setVal<int>(pc, strftime(static_cast<char*>(Param[0]->getVal<PointerType>(pc)), Param[1]->getVal<int>(pc), Param[2]->getVal<char*>(pc), 
 		static_cast<tm*>(Param[3]->getVal<PointerType>(pc))));
 }
 
@@ -129,12 +129,12 @@ void StdTimeSetupFunc(Picoc *pc)
     temp.TypeCreateOpaqueStruct( pc->TableStrRegister( "tm"), sizeof(struct tm));
     
     /* define CLK_PER_SEC etc. */
-    temp.VariableDefinePlatformVar("CLOCKS_PER_SEC", &pc->IntType, (UnionAnyValuePointer )&CLOCKS_PER_SECValue, FALSE);
+	temp.VariableDefinePlatformVar("CLOCKS_PER_SEC", &pc->IntType, (UnionAnyValuePointer)&CLOCKS_PER_SECValue, FALSE, sizeof(CLOCKS_PER_SECValue));
 #ifdef CLK_PER_SEC
-    temp.VariableDefinePlatformVar("CLK_PER_SEC", &pc->IntType, (UnionAnyValuePointer )&CLK_PER_SECValue, FALSE);
+	temp.VariableDefinePlatformVar("CLK_PER_SEC", &pc->IntType, (UnionAnyValuePointer )&CLK_PER_SECValue, FALSE, sizeof(CLOCKS_PER_SECValue));
 #endif
 #ifdef CLK_TCK
-    temp.VariableDefinePlatformVar("CLK_TCK", &pc->IntType, (UnionAnyValuePointer )&CLK_TCKValue, FALSE);
+	temp.VariableDefinePlatformVar("CLK_TCK", &pc->IntType, (UnionAnyValuePointer)&CLK_TCKValue, FALSE, sizeof(CLK_TCKValue));
 #endif
 }
 
