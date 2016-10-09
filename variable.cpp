@@ -21,16 +21,7 @@ static void MyAssert_(bool condition){
 
 /* initialise the variable system */
 void Picoc::VariableInit()
-{
-	Picoc *pc = this;
-	// obsolete (pc->GlobalTable).TableInitTable( &(pc->GlobalHashTable)[0], GLOBAL_TABLE_SIZE, true);
-	//(pc->GlobalTable).TableInitTable(&(pc->GlobalMapTable));
-
-	// obsolete (pc->StringLiteralTable).TableInitTable(&pc->StringLiteralHashTable[0], STRING_LITERAL_TABLE_SIZE, true);
-	// obsolete (pc->StringLiteralTable).TableInitTable(&pc->StringLiteralMapTable);
-
-	// obsolete pc->TopStackFrame = nullptr;
-}
+{}
 
 /* deallocate the contents of a variable */
 void Picoc::VariableFree(struct Value *ValueIn)
@@ -71,7 +62,9 @@ void Picoc::VariableTableCleanup(struct Table *HashTable)
 
 	Picoc *pc = this;
 	HashTable->TableFree(pc, [](Picoc *pc, 
-	 struct TableEntry *Entry) { pc->VariableFree(Entry->p.v.ValInValueEntry); } // call this function and delete entry
+	struct TableEntry *Entry) { 
+		pc->VariableFree(Entry->p.v.ValInValueEntry); Entry->freeValueEntryVal = 0; 
+	} // call this function and delete entry
 	);
 	/*
     struct TableEntry *Entry;
@@ -103,8 +96,7 @@ void Picoc::VariableCleanup()
 void *ParseState::VariableAlloc( int Size, MemoryLocation OnHeap)
 {
 	struct ParseState *Parser = this;
-	/*obsolete Picoc *pc = Parser->pc; */
-    void *NewValue=nullptr;
+	void *NewValue=nullptr;
     
 	switch (OnHeap) {
 	case LocationOnHeap:
@@ -143,7 +135,6 @@ void *ParseState::VariableAlloc( int Size, MemoryLocation OnHeap)
 UnionAnyValuePointerVirtual ParseState::VariableAllocVirtual(int Size, MemoryLocation OnHeap)
 {
 	struct ParseState *Parser = this;
-	/*obsolete Picoc *pc = Parser->pc; */
 	UnionAnyValuePointerVirtual NewValue = nullptr;
 
 	switch (OnHeap) {
@@ -175,20 +166,19 @@ UnionAnyValuePointerVirtual ParseState::VariableAllocVirtual(int Size, MemoryLoc
 struct Value *ParseState::VariableAllocValueAndData(int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap)
 {
 	struct ParseState *Parser = this;
-	/*obsolete Picoc *pc = Parser->pc; */
 	struct Value *NewValue;
 	if (OnHeap == LocationOnStack){
 		NewValue = static_cast<struct Value*>(VariableAlloc(MEM_ALIGN(sizeof(struct Value)) + DataSize, OnHeap));
 		NewValue->valueCreationSource = 3;
 		NewValue->isAnyValueAllocated = false;
-		NewValue->setValAbsolute(pc, (UnionAnyValuePointer)((char *)NewValue + MEM_ALIGN(sizeof(struct Value)))); // obsolete here - must be changed to virtual memory
+		NewValue->setValAbsolute(pc, (UnionAnyValuePointer)((char *)NewValue + MEM_ALIGN(sizeof(struct Value)))); 
 		NewValue->AnyValOnHeap = false;
 		NewValue->isAbsolute = true;
 	} else if (OnHeap == LocationOnStackVirtual){
 		NewValue = static_cast<struct Value*>(VariableAlloc(MEM_ALIGN(sizeof(struct Value)) /* + DataSize */, LocationOnStack /* OnHeap */));
 		NewValue->valueCreationSource = 4;
 			NewValue->isAnyValueAllocated = false;
-			NewValue->setValVirtual(pc, static_cast<UnionAnyValuePointerVirtual>(VariableAllocVirtual(DataSize, LocationOnStackVirtual))); // obsolete here - must be changed to virtual memory
+			NewValue->setValVirtual(pc, static_cast<UnionAnyValuePointerVirtual>(VariableAllocVirtual(DataSize, LocationOnStackVirtual))); 
 			NewValue->AnyValOnHeap = false;
 			NewValue->isAbsolute = false;
 	}
@@ -197,7 +187,7 @@ struct Value *ParseState::VariableAllocValueAndData(int DataSize, int IsLValue, 
 		NewValue->valueCreationSource = 5;
 		UnionAnyValuePointer newData = static_cast<UnionAnyValuePointer>(VariableAlloc(DataSize, OnHeap));
 		NewValue->isAnyValueAllocated = false;
-		NewValue->setValAbsolute(pc,newData); // obsolete here - must be changed to virtual memory
+		NewValue->setValAbsolute(pc,newData); 
 		NewValue->isAnyValueAllocated = true;
 		NewValue->AnyValOnHeap = (OnHeap == LocationOnStack) ? false : true;
 		NewValue->isAbsolute = true;
@@ -207,14 +197,12 @@ struct Value *ParseState::VariableAllocValueAndData(int DataSize, int IsLValue, 
 		UnionAnyValuePointerVirtual newData = static_cast<UnionAnyValuePointerVirtual>(VariableAllocVirtual(DataSize, OnHeap));
 		NewValue->valueCreationSource = 6;
 		NewValue->isAnyValueAllocated = false;
-		NewValue->setValVirtual(pc, newData); // obsolete here - must be changed to virtual memory
+		NewValue->setValVirtual(pc, newData); 
 		NewValue->isAnyValueAllocated = true;
 		NewValue->AnyValOnHeap = (OnHeap == LocationOnStack) ? false : true;
 		NewValue->isAbsolute = false;
 	}
-//	obsolete NewValue->setVal((UnionAnyValuePointer)(static_cast<char *>(VariableAlloc(Parser,  DataSize, LocationVirtual)))); // obsolete here - must be changed to virtual memory
 	NewValue->ValOnHeap = OnHeap;
-	//NewValue->AnyValOnHeap =  (OnHeap == LocationOnStack) ? false : true;
     NewValue->ValOnStack = !OnHeap;
     NewValue->IsLValue = IsLValue;
     NewValue->LValueFrom = LValueFrom;
@@ -229,11 +217,10 @@ struct Value *ParseState::VariableAllocValueAndData(int DataSize, int IsLValue, 
 struct ValueAbs *ParseState::VariableAllocValueAndDataAbsolute(int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap)
 {
 	struct ParseState *Parser = this;
-	/*obsolete Picoc *pc = Parser->pc; */
 	struct ValueAbs *NewValue = static_cast<struct ValueAbs*>(VariableAlloc(MEM_ALIGN(sizeof(struct ValueAbs)) + DataSize, OnHeap));
 	NewValue->valueCreationSource = 7;
-	NewValue->setValAbsolute(pc, (UnionAnyValuePointer)((char *)NewValue + MEM_ALIGN(sizeof(struct ValueAbs)))); // obsolete here - must be changed to virtual memory
-	//	NewValue->setVal((UnionAnyValuePointer)(static_cast<char *>(VariableAlloc(Parser,  DataSize, LocationVirtual)))); // obsolete here - must be changed to virtual memory
+	NewValue->setValAbsolute(pc, (UnionAnyValuePointer)((char *)NewValue + MEM_ALIGN(sizeof(struct ValueAbs)))); 
+	//	NewValue->setVal((UnionAnyValuePointer)(static_cast<char *>(VariableAlloc(Parser,  DataSize, LocationVirtual)))); 
 	NewValue->ValOnHeap = OnHeap;
 	NewValue->AnyValOnHeap = FALSE;
 	NewValue->ValOnStack = !OnHeap;
@@ -254,13 +241,10 @@ struct ValueAbs *ParseState::VariableAllocValueAndDataAbsolute(int DataSize, int
 struct Value *ParseState::VariableAllocValueFromType(struct ValueType *Typ, int IsLValue,
 struct Value *LValueFrom, MemoryLocation OnHeap)
 {
-	/*obsolete struct ParseState *Parser = this; */
-	/*obsolete Picoc *pc = Parser->pc; */
-    int Size = TypeSize(Typ, Typ->ArraySize, FALSE);
+	int Size = TypeSize(Typ, Typ->ArraySize, FALSE);
     struct Value *NewValue = VariableAllocValueAndData( Size, IsLValue, LValueFrom, OnHeap);
     assert(Size >= 0 || Typ == &pc->VoidType);
     NewValue->TypeOfValue = Typ;
-    
     return NewValue;
 }
 
@@ -268,24 +252,23 @@ struct Value *LValueFrom, MemoryLocation OnHeap)
 struct Value *ParseState::VariableAllocValueAndCopy(struct Value *FromValue, MemoryLocation OnHeap)
 {
 	struct ParseState *Parser = this;
-	/*obsolete Picoc *pc = Parser->pc;  */
-    struct ValueType *DType = FromValue->TypeOfValue;
+	struct ValueType *DType = FromValue->TypeOfValue;
     struct Value *NewValue;
     char TmpBuf[MAX_TMP_COPY_BUF];
 	int CopySize = FromValue->TypeSizeValue(TRUE);
 
     assert(CopySize <= MAX_TMP_COPY_BUF);
 	if (OnHeap == LocationOnHeap || OnHeap == LocationOnStack){
-		memcpy((void *)&TmpBuf[0], static_cast<void *>(FromValue->isAbsolute ? FromValue->getValAbsolute() : FromValue->getValVirtual()), CopySize); // obsolete value
+		memcpy((void *)&TmpBuf[0], static_cast<void *>(FromValue->isAbsolute ? FromValue->getValAbsolute() : FromValue->getValVirtual()), CopySize); 
 		NewValue = VariableAllocValueAndData(CopySize, FromValue->IsLValue, FromValue->LValueFrom, OnHeap);
 		NewValue->TypeOfValue = DType;
-		memcpy((void *)NewValue->getValAbsolute(), (void *)&TmpBuf[0], CopySize); // obsolete value
+		memcpy((void *)NewValue->getValAbsolute(), (void *)&TmpBuf[0], CopySize); 
 	}
 	else {
-		memcpy((void *)&TmpBuf[0], static_cast<void *>(FromValue->isAbsolute ? FromValue->getValAbsolute():  FromValue->getValVirtual()), CopySize); // obsolete value
+		memcpy((void *)&TmpBuf[0], static_cast<void *>(FromValue->isAbsolute ? FromValue->getValAbsolute():  FromValue->getValVirtual()), CopySize); 
 		NewValue = VariableAllocValueAndData(CopySize, FromValue->IsLValue, FromValue->LValueFrom, OnHeap);
 		NewValue->TypeOfValue = DType;
-		memcpy((void *)NewValue->getValVirtual(), (void *)&TmpBuf[0], CopySize); // obsolete value
+		memcpy((void *)NewValue->getValVirtual(), (void *)&TmpBuf[0], CopySize); 
 	}
     
     return NewValue;
@@ -379,22 +362,12 @@ void ParseState::VariableRealloc(struct Value *FromValue, int NewSize)
 	else {
 		VariableReallocVirtual(FromValue, NewSize);
 	}
-    // obsolete if (FromValue->AnyValOnHeap)
-	// obsolete 	Parser->pc->HeapFreeMem(FromValue->getValVirtual());
-    // setValVirtual will release current value    
-	
-	//struct ParseState *Parser = this;
-	//FromValue->setValVirtual(pc, static_cast<UnionAnyValuePointer >(VariableAllocVirtual(NewSize, LocationOnHeapVirtual)));
-    //FromValue->AnyValOnHeap = TRUE; 
 }
 
 /* reallocate a variable so its data has a new size */
 void ParseState::VariableReallocAbsolute(struct Value *FromValue, int NewSize)
 {
 	struct ParseState *Parser = this;
-	// obsolete if (FromValue->AnyValOnHeap)
-	// obsolete 	Parser->pc->HeapFreeMem(FromValue->getValVirtual());
-	// setValVirtual will release current value    
 	FromValue->setValAbsolute(pc, static_cast<UnionAnyValuePointer >(VariableAlloc(NewSize, LocationOnHeap)));
 	FromValue->valueCreationSource = 12;
 	FromValue->AnyValOnHeap = TRUE;
@@ -403,9 +376,6 @@ void ParseState::VariableReallocAbsolute(struct Value *FromValue, int NewSize)
 void ParseState::VariableReallocVirtual(struct Value *FromValue, int NewSize)
 {
 	struct ParseState *Parser = this;
-	// obsolete if (FromValue->AnyValOnHeap)
-	// obsolete 	Parser->pc->HeapFreeMem(FromValue->getValVirtual());
-	// setValVirtual will release current value    
 	FromValue->setValVirtual(pc, static_cast<UnionAnyValuePointerVirtual >(VariableAllocVirtual(NewSize, LocationOnHeapVirtual)));
 	FromValue->valueCreationSource = 13;
 	FromValue->AnyValOnHeap = TRUE;
@@ -416,9 +386,6 @@ void ParseState::VariableReallocVirtual(struct Value *FromValue, int NewSize)
 void ParseState::VariableRealloc(struct ValueAbs *FromValue, int NewSize)
 {
 	struct ParseState *Parser = this;
-	// obsolete if (FromValue->AnyValOnHeap)
-	// obsolete 	Parser->pc->HeapFreeMem(FromValue->getValVirtual());
-	// setValVirtual will release current value    
 	FromValue->setValAbsolute(pc,  static_cast<UnionAnyValuePointer >(VariableAlloc( NewSize, LocationOnHeap)));
 	FromValue->valueCreationSource = 14;
 	FromValue->AnyValOnHeap = TRUE;
@@ -552,7 +519,6 @@ struct Value *ParseState::VariableDefine(const char *Ident, struct Value *InitVa
 struct Value *ParseState::VariableDefineButIgnoreIdentical( const char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit)
 {
 	struct ParseState *Parser = this;
-    /*obsolete Picoc *pc = Parser->pc; */
     struct Value *ExistingValue;
     const char *DeclFileName;
     int DeclLine;
@@ -666,7 +632,6 @@ void ParseState::VariableDefinePlatformVar(const char *Ident, struct ValueType *
 	UnionAnyValuePointer FromValue, int IsWritable, size_t VarSize)
 {
 	struct ParseState *Parser = this;
-	/*obsolete Picoc *pc = Parser->pc; */
 	int Size = TypeSize(Typ, Typ->ArraySize, FALSE);
 	struct ParseState tempParserForPlatformVar;
 	tempParserForPlatformVar.setScopeID(-1);
@@ -692,7 +657,6 @@ void ParseState::VariableDefinePlatformVarFromPointer(const char *Ident, struct 
 	UnionAnyValuePointer FromValue, int IsWritable, size_t VarSize)
 {
 	struct ParseState *Parser = this;
-	/*obsolete Picoc *pc = Parser->pc; */
 	int Size = TypeSize(Typ, Typ->ArraySize, FALSE);
 	struct ParseState tempParserForPlatformVar;
 	tempParserForPlatformVar.setScopeID(-1);
@@ -772,17 +736,11 @@ void ParseState::VariableStackFrameAdd(const char *FuncName, int NumParams)
 		NewFrameParameters = nullptr;
 	}
 
-	// obsolete NewFrame = new(NewFrame) StructStackFrame; // C++ in-place constructor
-    ParserCopy(&NewFrame->ReturnParser, Parser);
+	ParserCopy(&NewFrame->ReturnParser, Parser);
     NewFrame->FuncName = FuncName;
 	NewFrame->Parameter = NewFrameParameters;
-//obsolete	NewFrame->LocalTable.TableInitTable(&NewFrame->LocalHashTable[0], LOCAL_TABLE_SIZE, FALSE);
-	// obsolete NewFrame->LocalTable.TableInitTable(&NewFrame->LocalMapTable);
-
     NewFrame->PreviousStackFrame = Parser->pc->TopStackFrame();
-	//newFrameToPush = *NewFrame; // it is new
-	Parser->pc->pushStackFrame(newFrameToPush); // it is new, next line obsolete
-    // obsolete Parser->pc->TopStackFrame = NewFrame;	
+	Parser->pc->pushStackFrame(newFrameToPush); // it is new
 }
 
 
@@ -795,9 +753,7 @@ void ParseState::VariableStackFramePop()
         
     ParserCopy(Parser, &Parser->pc->TopStackFrame()->ReturnParser);
 	StructStackFrame *previousStack = Parser->pc->TopStackFrame()->PreviousStackFrame;
-	// obsolete Parser->pc->TopStackFrame()->~StackFrame(); // obsolete
 	Parser->pc->popStackFrame();
-	// obsolete Parser->pc->TopStackFrame = previousStack; // obsolete  Parser->pc->TopStackFrame->PreviousStackFrame;
 	Parser->pc->HeapPopStackFrame();
 }
 

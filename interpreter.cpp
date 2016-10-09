@@ -352,21 +352,30 @@ void ParseState::setTemp(Picoc *newPc){
 	setScopeID(-1);
 }
 
-TableEntry::TableEntry() : // obsolete  Next{},        /* next item in this hash chain */
+TableEntry::TableEntry() :   
 DeclFileName{},       /* where the variable was declared */
 DeclLine{}, DeclColumn{},
-identifier_{}{
+identifier_{}, freeValueEntryVal{0}{
 	p.b.FileName = nullptr;
 	p.b.Line = 0;
 	p.b.CharacterPos = 0;
 }
 
+TableEntry::~TableEntry(){
+	if (freeValueEntryVal==1){
+	/*	if (p.v.ValInValueEntry->isAbsolute){
+			assert(p.v.ValInValueEntry->isAbsolute);
+			//free(p.v.ValInValueEntry);
+			freeValueEntryVal = 0;
+		}
+		*/
+	}
+}
+
 
 Table::Table() :  
 hashTable_{}
-{
-// obsolete 	hashTable_ = &publicMap;
-}
+{}
 
 Table::~Table(){
 	TableFree();
@@ -408,9 +417,6 @@ LocalTable { in.LocalTable}
 Picoc_Struct::Picoc_Struct(size_t StackSize) :
 GlobalTable{},
 CleanupTokenList{  },
-// obsolete GlobalHashTable{},
-// obsolete GlobalMapTable{},
-
 /* lexer global data */
 InteractiveHead{ nullptr },
 InteractiveTail{ nullptr },
@@ -419,14 +425,9 @@ LexUseStatementPrompt{},
 LexAnyValue{},
 LexValue{},
 ReservedWordTable{},
-// obsolete ReservedWordHashTable{},
-// obsolete ReservedWordMapTable{},
 /* the table of string literal values */
 StringLiteralTable{},
-// obsolete StringLiteralHashTable{},
-// obsolete StringLiteralMapTable{},
 /* the stack */
-//obsolete TopStackFrame{},
 topStackFrame_{},
 
 /* the value passed to exit() */
@@ -488,8 +489,6 @@ VoidPtrType{},
 
 /* debugger */
 BreakpointTable{},
-// obsolete BreakpointHashTable{},
-// obsolete BreakpointMapTable{},
 BreakpointCount{},
 DebugManualBreak{},
 
@@ -508,7 +507,7 @@ IntAlignBytes{}
 	PicocInitialise(StackSize); 
 }
 Picoc_Struct::~Picoc_Struct(){ 
-	PicocCleanup(); 
+	this->PicocCleanup(); 
 }
 
 StructStackFrame *Picoc_Struct::TopStackFrame(){

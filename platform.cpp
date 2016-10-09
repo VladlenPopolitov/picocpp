@@ -32,8 +32,6 @@ void Picoc::PicocInitialise( int StackSize)
 /* free memory */
 void Picoc::PicocCleanup()
 {
-	//Picoc *pc = this;
-	// obsolete  DebugCleanup();  // table distr BreakpointTable
 #ifndef NO_HASH_INCLUDE
     IncludeCleanup();
 #endif
@@ -41,7 +39,6 @@ void Picoc::PicocCleanup()
     LexCleanup(); 
 	VariableCleanup(); // table distr : VariableTableCleanup(&pc->GlobalTable); StringLiteralTable
     TypeCleanup();
-	// obsolete TableStrFree(); // table distr StringTable
     HeapCleanup();
     PlatformCleanup();
 }
@@ -73,8 +70,8 @@ void Picoc::PicocCallMain(int argc, char **argv)
     if (FuncValue->ValFuncDef(pc).NumParams != 0)
     {
         /* define the arguments */
-        temp.VariableDefinePlatformVar( "__argc", &pc->IntType, (UnionAnyValuePointer )&argc, FALSE,sizeof(argc));
-        //temp.VariableDefinePlatformVar( "__argv", pc->CharPtrPtrType, (UnionAnyValuePointer )&argv, FALSE,sizeof(argv)*argc);
+		Value *varValue = nullptr;
+		temp.VariableDefinePlatformVar("__argc", &pc->IntType, (UnionAnyValuePointer)&argc, FALSE, sizeof(argc));
 		//1. create argv vector
 		std::vector<UnionAnyValuePointerVirtual> argvVector;
 		//2. for every arg in 1-argc do:
@@ -84,7 +81,7 @@ void Picoc::PicocCallMain(int argc, char **argv)
 			//2.2 DefinePlatformVar for it
 			temp.VariableDefinePlatformVarFromPointer(argv_i.c_str(), pc->CharPtrType, (UnionAnyValuePointer)&(argv[i]), FALSE, strlen(argv[i])+1);
 			//2.3 get virtual address of its platform var
-			Value *varValue=nullptr;
+			varValue = nullptr;
 			temp.VariableGet(TableStrRegister(argv_i.c_str()), &varValue);
 			//2.4 push virtual address to argv vector
 			if (varValue){
@@ -102,7 +99,7 @@ void Picoc::PicocCallMain(int argc, char **argv)
 			//(UnionAnyValuePointer)&argv,
 			(UnionAnyValuePointer)&argv_data,
 			FALSE, sizeof(UnionAnyValuePointerVirtual)*argc);
-		Value *varValue = nullptr;
+		varValue = nullptr;
 		temp.VariableGet(TableStrRegister("__argv"), &varValue);
 
 	}

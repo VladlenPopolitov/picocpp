@@ -89,9 +89,7 @@ void Picoc::LexInit()
 	Picoc *pc = this;
     int Count;
     
-	// obsolete pc->ReservedWordTable.TableInitTable(&pc->ReservedWordHashTable[0], sizeof(ReservedWords) / sizeof(struct ReservedWord) * 2, TRUE);
-	// obsolete pc->ReservedWordTable.TableInitTable(&pc->ReservedWordMapTable);
-    for (Count = 0; Count < sizeof(ReservedWords) / sizeof(struct ReservedWord); Count++)
+	for (Count = 0; Count < sizeof(ReservedWords) / sizeof(struct ReservedWord); Count++)
     {
 		pc->ReservedWordTable.TableSet(TableStrRegister(ReservedWords[Count].Word), (struct Value *)&ReservedWords[Count], nullptr, 0, 0);
     }
@@ -108,13 +106,7 @@ void Picoc::LexInit()
 /* deallocate */
 void Picoc::LexCleanup()
 {
-	Picoc *pc = this;
-	// obsolete int Count;
-
     LexInteractiveClear( nullptr);
-
-	// obsolete  for (Count = 0; Count < sizeof(ReservedWords) / sizeof(struct ReservedWord); Count++)
-	// obsolete     TableDelete(&pc->ReservedWordTable, TableStrRegister(ReservedWords[Count].Word));
 }
 
 /* check if a word is a reserved word - used while scanning */
@@ -645,7 +637,6 @@ enum LexToken ParseState::LexGetRawToken(struct ValueAbs **Value, int IncPos)
     enum LexToken Token = TokenNone;
     int ValueSize;
     char *Prompt = NULL;
-    /*obsolete Picoc *pc = Parser->pc; */
     
     do
     { 

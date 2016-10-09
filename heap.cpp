@@ -26,10 +26,10 @@ void Picoc::HeapInit( int StackOrHeapSize)
     int AlignOffset = 0;
 	int AlignOffsetVirtual = 0;
 #ifdef USE_MALLOC_STACK
-	pc->HeapMemory = new unsigned char[StackOrHeapSize]; // obsolete  static_cast<unsigned char*>(malloc(StackOrHeapSize));
+	pc->HeapMemory = new unsigned char[StackOrHeapSize]; 
     pc->HeapBottom = nullptr;                     /* the bottom of the (downward-growing) heap */
     pc->HeapStackTop = nullptr;                          /* the top of the stack */
-	pc->HeapMemoryVirtual = new unsigned char[StackOrHeapSize]; // obsolete  static_cast<unsigned char*>(malloc(StackOrHeapSize));
+	pc->HeapMemoryVirtual = new unsigned char[StackOrHeapSize]; 
 	pc->HeapBottomVirtual = nullptr;                     /* the bottom of the (downward-growing) heap */
 	pc->HeapStackTopVirtual = nullptr;                          /* the top of the stack */
 
@@ -65,8 +65,8 @@ void Picoc::HeapCleanup()
 {
 	Picoc *pc = this;
 #ifdef USE_MALLOC_STACK
-	delete[] pc->HeapMemoryVirtual; // obsolete free(pc->HeapMemory);
-	delete[] pc->HeapMemory; // obsolete free(pc->HeapMemory);
+	delete[] pc->HeapMemoryVirtual; 
+	delete[] pc->HeapMemory; 
 #endif
 }
 
@@ -140,7 +140,6 @@ void Picoc::HeapPushStackFrame()
 #ifdef DEBUG_HEAP
     printf("Adding stack frame at 0x%lx\n", (unsigned long)pc->HeapStackTop);
 #endif
-    // obsolete *(void **)pc->HeapStackTop = pc->CurrentStackFrame;
     pc->CurrentStackFrame.push_back( pc->HeapStackTop );
     pc->HeapStackTop = (void *)((char *)pc->HeapStackTop + MEM_ALIGN(sizeof(ALIGN_TYPE)));
 	pc->CurrentStackFrameVirtual.push_back(pc->HeapStackTopVirtual);
@@ -149,16 +148,13 @@ void Picoc::HeapPushStackFrame()
 }
 
 /* pop the current stack frame, freeing all memory in the frame. can return NULL */
-/* obsolete bool */ 
 void Picoc::HeapPopStackFrame()
 {
 	Picoc *pc = this;
-    //obsolete if (  *(void **)pc->CurrentStackFrame != nullptr)
-	if( !pc->CurrentStackFrame.empty())
+    if( !pc->CurrentStackFrame.empty())
 	{
 		pc->HeapStackTop = pc->CurrentStackFrame.back();
 		pc->CurrentStackFrame.pop_back();
-        // obsolete pc->CurrentStackFrame = *(void **)pc->CurrentStackFrame;
 #ifdef DEBUG_HEAP
         printf("Popping stack frame back to 0x%lx\n", (unsigned long)pc->HeapStackTop);
 #endif
@@ -168,14 +164,10 @@ void Picoc::HeapPopStackFrame()
 	{
 		pc->HeapStackTopVirtual = pc->CurrentStackFrameVirtual.back();
 		pc->CurrentStackFrameVirtual.pop_back();
-		// obsolete pc->CurrentStackFrame = *(void **)pc->CurrentStackFrame;
 #ifdef DEBUG_HEAP
 		printf("Popping stack frame back to 0x%lx\n", (unsigned long)pc->HeapStackTop);
 #endif
-		/* return obsolete true */;
 	}
-	/*else
-        return  obsolete false */;
 }
 
 void *Picoc::HeapAllocVirtualMem(int Size)

@@ -238,7 +238,6 @@ private:
 		double ParseState::ExpressionAssignFP(struct Value *DestValue, double FromFP);
 		void ParseState::ExpressionStackPushValueNode(struct ExpressionStack **StackTop, struct Value *ValueLoc);
 		struct Value *ParseState::ExpressionStackPushValueByType(struct ExpressionStack **StackTop, struct ValueType *PushType);
-		// obsolete void ExpressionStackPushValue(struct ParseState *Parser, struct ExpressionStack **StackTop, struct Value *PushValue);
 		void ParseState::ExpressionStackPushValue(struct ExpressionStack **StackTop, struct Value *PushValue);
 		void ParseState::ExpressionStackPushLValue(struct ExpressionStack **StackTop, struct Value *PushValue, int Offset);
 		void ParseState::ExpressionStackPushDereference(struct ExpressionStack **StackTop, struct Value *DereferenceValue);
@@ -273,17 +272,12 @@ private:
 public:
 			void *VariableAlloc( int Size, MemoryLocation OnHeap);
 			UnionAnyValuePointer VariableAllocVirtual(int Size, MemoryLocation OnHeap);
-			//void VariableStackPop(struct ParseState *Parser, struct Value *Var);
 			struct Value *VariableAllocValueAndData( int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap);
 			struct ValueAbs *VariableAllocValueAndDataAbsolute(int DataSize, int IsLValue, struct Value *LValueFrom, MemoryLocation OnHeap);
 			struct Value *VariableAllocValueAndCopy(struct Value *FromValue, MemoryLocation OnHeap);
 			struct Value *VariableAllocValueFromType( struct ValueType *Typ, int IsLValue,
 			struct Value *LValueFrom, MemoryLocation OnHeap);
-			//struct Value *VariableAllocValueFromExistingData(struct ParseState *Parser, struct ValueType *Typ, UnionAnyValuePointer FromValue, int IsLValue, struct Value *LValueFrom);
-			//struct Value *VariableAllocValueShared(struct ParseState *Parser, struct Value *FromValue);
 			struct Value *VariableDefine( const char *Ident, struct Value *InitValue, struct ValueType *Typ, int MakeWritable);
-			//struct Value *VariableDefineButIgnoreIdentical(struct ParseState *Parser, char *Ident, struct ValueType *Typ, int IsStatic, int *FirstVisit);
-			//void VariableRealloc(struct ParseState *Parser, struct Value *FromValue, int NewSize);
 			void VariableGet( const char *Ident, struct Value **LVal);
 			void VariableGet(const char *Ident, struct ValueAbs **LVal);
 			void VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
@@ -291,14 +285,11 @@ public:
 			void VariableDefinePlatformVarFromPointer(const char *Ident, struct ValueType *Typ,
 				UnionAnyValuePointer FromValue, int IsWritable, size_t Size);
 
-			//void VariableStackFrameAdd(struct ParseState *Parser, const char *FuncName, int NumParams);
-			//void VariableStackFramePop(struct ParseState *Parser);
 			struct ValueType *TypeAdd( struct ValueType *ParentType, enum BaseType Base, int ArraySize,
 				const char *Identifier, int Sizeof, int AlignBytes);
 			struct ValueType *TypeGetMatching( struct ValueType *ParentType, enum BaseType Base,
 				int ArraySize, const char *Identifier, int AllowDuplicates);
 			struct ValueType *TypeCreateOpaqueStruct( const char *StructName, int Size);
-			//obsolete int TypeIsForwardDeclared(struct ParseState *Parser, struct ValueType *Typ);
 };
 
 /* values */
@@ -550,10 +541,12 @@ struct TableEntry
 {
 public:
 	TableEntry();
+	~TableEntry();
     const char *DeclFileName;       /* where the variable was declared */
     unsigned short DeclLine;
     unsigned short DeclColumn;
 	std::string identifier_;
+	char freeValueEntryVal;
     union TableEntryPayload
     {
         struct ValueEntry
@@ -630,9 +623,7 @@ public:
     struct Value **Parameter;               /* array of parameter values */
     int NumParams;                          /* the number of parameters */
     std::shared_ptr<struct Table> LocalTable;                /* the local variables and parameters */
-    //obsolete struct TableEntry *LocalHashTable[LOCAL_TABLE_SIZE];
-	//obsolete std::map<std::string,struct TableEntry *> LocalMapTable;
-	StructStackFrame *PreviousStackFrame;  /* the next lower stack frame */
+    StructStackFrame *PreviousStackFrame;  /* the next lower stack frame */
 };
 
 /* lexer state */
@@ -692,7 +683,6 @@ struct CleanupTokenNode
 {
     void *Tokens;
     const char *SourceText;
-    //  obsolete struct CleanupTokenNode *Next;
 };
 
 /* linked list of lexical tokens used in interactive mode */
@@ -711,7 +701,6 @@ struct IncludeLibrary
     void (*SetupFunction)(Picoc *pc);
     struct LibraryFunction *FuncList;
     const char *SetupCSource;
-   // obsolete struct IncludeLibrary *NextLib;
 };
 
 const int FREELIST_BUCKETS = 8;                          /* freelists for 4, 8, 12 ... 32 byte allocs */
@@ -727,12 +716,8 @@ public:
 	~Picoc_Struct();
     /* parser global data */
     struct Table GlobalTable;
-    //obsolete struct CleanupTokenNode *CleanupTokenList;
-	std::list<struct CleanupTokenNode> CleanupTokenList;
+    std::list<struct CleanupTokenNode> CleanupTokenList;
 
-    // obsolete struct TableEntry *GlobalHashTable[GLOBAL_TABLE_SIZE];
-	// obsolete std::map<std::string, struct TableEntry *> GlobalMapTable;
-    
     /* lexer global data */
     struct TokenLine *InteractiveHead;
     struct TokenLine *InteractiveTail;
@@ -741,14 +726,9 @@ public:
     UnionAnyValue LexAnyValue;
     struct ValueAbs LexValue;
     struct Table ReservedWordTable;
-    // obsolete struct TableEntry *ReservedWordHashTable[RESERVED_WORD_TABLE_SIZE];
-	// obsolete std::map<std::string, struct TableEntry *> ReservedWordMapTable;
     /* the table of string literal values */
     struct Table StringLiteralTable;
-	// obsolete struct TableEntry *StringLiteralHashTable[STRING_LITERAL_TABLE_SIZE];
-	// obsolete std::map<std::string, struct TableEntry *> StringLiteralMapTable;
-    
-    /* the stack */
+	/* the stack */
     StructStackFrame *TopStackFrame();
 	void pushStackFrame(StructStackFrame &newFrame);
 	void popStackFrame();
@@ -760,8 +740,7 @@ public:
     int PicocExitValue;
 
     /* a list of libraries we can include */
-    // obsolete struct IncludeLibrary *IncludeLibList;
-	std::vector<struct IncludeLibrary> IncludeLibList;
+    std::vector<struct IncludeLibrary> IncludeLibList;
 
     /* heap memory */
 #ifdef USE_MALLOC_STACK
@@ -818,9 +797,7 @@ public:
 
     /* debugger */
     struct Table BreakpointTable;
-	// obsolete  struct TableEntry *BreakpointHashTable[BREAKPOINT_TABLE_SIZE];
-	// obsolete std::map<std::string, struct TableEntry *> BreakpointMapTable;
-    int BreakpointCount;
+	int BreakpointCount;
     int DebugManualBreak;
     
     /* C library */
@@ -843,9 +820,7 @@ public:
     
     /* string table */
     struct Table StringTable;
-	// obsolete  struct TableEntry *StringHashTable[STRING_TABLE_SIZE];
-	// obsolete std::map<std::string, struct TableEntry *> StringMapTable;
-    const char *StrEmpty;
+	const char *StrEmpty;
 	/* platform.c */
 	void PicocCallMain(int argc, char **argv);
 
@@ -882,27 +857,13 @@ public:
 	enum LexToken LexScanGetToken(struct LexState *Lexer, struct ValueAbs **Value);
 	void *LexTokenise(struct LexState *Lexer, int *TokenLen);
 	/* parse.c */
-	/* the following are defined in picoc.h:
-	* void PicocParse(const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource);
-	* void PicocParseInteractive(); */
 	void PicocParseInteractiveNoStartPrompt( int EnableDebugger);
-	//enum ParseResult ParseStatement(struct ParseState *Parser, int CheckTrailingSemicolon);
-	//struct Value *ParseFunctionDefinition(struct ParseState *Parser, struct ValueType *ReturnType, char *Identifier);
 	void ParseCleanup();
-	//void ParserCopyPos(struct ParseState *To, struct ParseState *From);
-	//void ParserCopy(struct ParseState *To, struct ParseState *From);
-	//added
 	void PicocParse(const char *FileName, const char *Source, int SourceLen, int RunIt, int CleanupNow, int CleanupSource, int EnableDebugger);
 	void PicocParseInteractive();
 	/* type.c */
 	void TypeInit();
 	void TypeCleanup();
-	//int TypeSize(struct ValueType *Typ, int ArraySize, int Compact);
-	// obsolete int TypeLastAccessibleOffset( struct Value *Val);
-	//int TypeParseFront(struct ParseState *Parser, struct ValueType **Typ, int *IsStatic);
-	//void TypeParseIdentPart(struct ParseState *Parser, struct ValueType *BasicTyp, struct ValueType **Typ, char **Identifier);
-	//void TypeParse(struct ParseState *Parser, struct ValueType **Typ, char **Identifier, int *IsStatic);
-	//added
 	void TypeAddBaseType(struct ValueType *TypeNode, enum BaseType Base, int Sizeof, int AlignBytes);
 	void TypeCleanupNode(struct ValueType *Typ);
 	/* heap.c */
@@ -913,7 +874,6 @@ public:
 	bool HeapPopStack( void *Addr, int Size);
 	void HeapUnpopStack( int Size);
 	void HeapPushStackFrame();
-	/*obsolete bool  */
 	void HeapPopStackFrame();
 	void *HeapAllocMem( int Size);
 	void *HeapAllocVirtualMem(int Size);
@@ -940,33 +900,16 @@ public:
 		double *FromValue, int IsWritable);
 	void Picoc::VariableDefinePlatformVarFromPointer(const char *Ident, struct ValueType *Typ,
 		UnionAnyValuePointer FromValue, int IsWritable, size_t Size);
-	//void *VariableDereferencePointer(struct ParseState *Parser, struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, struct ValueType **DerefType, int *DerefIsLValue);
-	//int VariableScopeBegin(struct ParseState * Parser, int* PrevScopeID);
-	//void VariableScopeEnd(struct ParseState * Parser, int ScopeID, int PrevScopeID);
 	/* clibrary.c */
 	void BasicIOInit();
 	void LibraryInit();
 	void LibraryAdd( struct Table *GlobalTable, const char *LibraryName, struct LibraryFunction *FuncList);
 	void CLibraryInit();
 	/* platform.c */
-	/* the following are defined in picoc.h:
-	* void PicocCallMain(int argc, char **argv);
-	* int PicocPlatformSetExitPoint();
-	* void PicocInitialise(int StackSize);
-	* void PicocCleanup();
-	* void PicocPlatformScanFile(const char *FileName);
-	* extern int PicocExitValue; */
-	//void ProgramFail(struct ParseState *Parser, const char *Message, ...);
 	void ProgramFailNoParser( const char *Message, ...);
-	//void AssignFail(struct ParseState *Parser, const char *Format, struct ValueType *Type1, struct ValueType *Type2, int Num1, int Num2, const char *FuncName, int ParamNo);
 	void LexFail( struct LexState *Lexer, const char *Message, ...);
 	void PlatformInit();
 	void PlatformCleanup();
-	//char *PlatformGetLine(char *Buf, int MaxLen, const char *Prompt);
-	//int PlatformGetCharacter();
-	//void PlatformPutc(unsigned char OutCh, union OutputStreamInfo *);
-	//void PlatformPrintf(IOFILE *Stream, const char *Format, ...);
-	//void PlatformVPrintf(IOFILE *Stream, const char *Format, va_list Args);
 	void PlatformExit( int ExitVal, const char*message);
 	const char *PlatformMakeTempName( char *TempNameBuffer);
 	void PlatformLibraryInit();
@@ -975,7 +918,6 @@ public:
 	void IncludeCleanup();
 	void IncludeRegister( const char *IncludeName, void(*SetupFunction)(Picoc *pc), struct LibraryFunction *FuncList, const char *SetupCSource);
 	void IncludeFile( const char *Filename);
-	//add 
 	void PicocIncludeAllSystemHeaders();
 	/* debug.c */
 	void DebugInit();
@@ -990,7 +932,6 @@ private:
 	public:
 	int PointerAlignBytes;
 	int IntAlignBytes;
-
 };
 
 
