@@ -933,8 +933,13 @@ public:
 	struct Value *VariableStringLiteralGet( const char *Ident);
 	void VariableStringLiteralDefine( const char *Ident, struct Value *Val);
 	void VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
-		UnionAnyValuePointer FromValue, int IsWritable);
-
+		UnionAnyValuePointer FromValue, int IsWritable,size_t Size);
+	void Picoc::VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
+		int *FromValue, int IsWritable);
+	void Picoc::VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
+		double *FromValue, int IsWritable);
+	void Picoc::VariableDefinePlatformVarFromPointer(const char *Ident, struct ValueType *Typ,
+		UnionAnyValuePointer FromValue, int IsWritable, size_t Size);
 	//void *VariableDereferencePointer(struct ParseState *Parser, struct Value *PointerValue, struct Value **DerefVal, int *DerefOffset, struct ValueType **DerefType, int *DerefIsLValue);
 	//int VariableScopeBegin(struct ParseState * Parser, int* PrevScopeID);
 	//void VariableScopeEnd(struct ParseState * Parser, int ScopeID, int PrevScopeID);

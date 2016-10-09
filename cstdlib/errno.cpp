@@ -330,326 +330,326 @@ void StdErrnoSetupFunc(Picoc *pc)
 {
     /* defines */
 #ifdef EACCES
-    pc->VariableDefinePlatformVar( "EACCES", &pc->IntType, (UnionAnyValuePointer )&EACCESValue, FALSE);
+    pc->VariableDefinePlatformVar( "EACCES", &pc->IntType, &EACCESValue, FALSE);
 #endif
 
 #ifdef EADDRINUSE
-    pc->VariableDefinePlatformVar( "EADDRINUSE", &pc->IntType, (UnionAnyValuePointer )&EADDRINUSEValue, FALSE);
+    pc->VariableDefinePlatformVar( "EADDRINUSE", &pc->IntType, &EADDRINUSEValue, FALSE);
 #endif
 
 #ifdef EADDRNOTAVAIL
-    pc->VariableDefinePlatformVar( "EADDRNOTAVAIL", &pc->IntType, (UnionAnyValuePointer )&EADDRNOTAVAILValue, FALSE);
+    pc->VariableDefinePlatformVar( "EADDRNOTAVAIL", &pc->IntType, &EADDRNOTAVAILValue, FALSE);
 #endif
 
 #ifdef EAFNOSUPPORT
-    pc->VariableDefinePlatformVar( "EAFNOSUPPORT", &pc->IntType, (UnionAnyValuePointer )&EAFNOSUPPORTValue, FALSE);
+    pc->VariableDefinePlatformVar( "EAFNOSUPPORT", &pc->IntType, &EAFNOSUPPORTValue, FALSE);
 #endif
 
 #ifdef EAGAIN
-    pc->VariableDefinePlatformVar( "EAGAIN", &pc->IntType, (UnionAnyValuePointer )&EAGAINValue, FALSE);
+    pc->VariableDefinePlatformVar( "EAGAIN", &pc->IntType, &EAGAINValue, FALSE);
 #endif
 
 #ifdef EALREADY
-    pc->VariableDefinePlatformVar( "EALREADY", &pc->IntType, (UnionAnyValuePointer )&EALREADYValue, FALSE);
+    pc->VariableDefinePlatformVar( "EALREADY", &pc->IntType, &EALREADYValue, FALSE);
 #endif
 
 #ifdef EBADF
-    pc->VariableDefinePlatformVar( "EBADF", &pc->IntType, (UnionAnyValuePointer )&EBADFValue, FALSE);
+    pc->VariableDefinePlatformVar( "EBADF", &pc->IntType, &EBADFValue, FALSE);
 #endif
 
 #ifdef EBADMSG
-    pc->VariableDefinePlatformVar( "EBADMSG", &pc->IntType, (UnionAnyValuePointer )&EBADMSGValue, FALSE);
+    pc->VariableDefinePlatformVar( "EBADMSG", &pc->IntType, &EBADMSGValue, FALSE);
 #endif
 
 #ifdef EBUSY
-    pc->VariableDefinePlatformVar( "EBUSY", &pc->IntType, (UnionAnyValuePointer )&EBUSYValue, FALSE);
+    pc->VariableDefinePlatformVar( "EBUSY", &pc->IntType, &EBUSYValue, FALSE);
 #endif
 
 #ifdef ECANCELED
-    pc->VariableDefinePlatformVar( "ECANCELED", &pc->IntType, (UnionAnyValuePointer )&ECANCELEDValue, FALSE);
+    pc->VariableDefinePlatformVar( "ECANCELED", &pc->IntType, &ECANCELEDValue, FALSE);
 #endif
 
 #ifdef ECHILD
-    pc->VariableDefinePlatformVar( "ECHILD", &pc->IntType, (UnionAnyValuePointer )&ECHILDValue, FALSE);
+    pc->VariableDefinePlatformVar( "ECHILD", &pc->IntType, &ECHILDValue, FALSE);
 #endif
 
 #ifdef ECONNABORTED
-    pc->VariableDefinePlatformVar( "ECONNABORTED", &pc->IntType, (UnionAnyValuePointer )&ECONNABORTEDValue, FALSE);
+    pc->VariableDefinePlatformVar( "ECONNABORTED", &pc->IntType, &ECONNABORTEDValue, FALSE);
 #endif
 
 #ifdef ECONNREFUSED
-    pc->VariableDefinePlatformVar( "ECONNREFUSED", &pc->IntType, (UnionAnyValuePointer )&ECONNREFUSEDValue, FALSE);
+    pc->VariableDefinePlatformVar( "ECONNREFUSED", &pc->IntType, &ECONNREFUSEDValue, FALSE);
 #endif
 
 #ifdef ECONNRESET
-    pc->VariableDefinePlatformVar( "ECONNRESET", &pc->IntType, (UnionAnyValuePointer )&ECONNRESETValue, FALSE);
+    pc->VariableDefinePlatformVar( "ECONNRESET", &pc->IntType, &ECONNRESETValue, FALSE);
 #endif
 
 #ifdef EDEADLK
-    pc->VariableDefinePlatformVar( "EDEADLK", &pc->IntType, (UnionAnyValuePointer )&EDEADLKValue, FALSE);
+    pc->VariableDefinePlatformVar( "EDEADLK", &pc->IntType, &EDEADLKValue, FALSE);
 #endif
 
 #ifdef EDESTADDRREQ
-    pc->VariableDefinePlatformVar( "EDESTADDRREQ", &pc->IntType, (UnionAnyValuePointer )&EDESTADDRREQValue, FALSE);
+    pc->VariableDefinePlatformVar( "EDESTADDRREQ", &pc->IntType, &EDESTADDRREQValue, FALSE);
 #endif
 
 #ifdef EDOM
-    pc->VariableDefinePlatformVar( "EDOM", &pc->IntType, (UnionAnyValuePointer )&EDOMValue, FALSE);
+    pc->VariableDefinePlatformVar( "EDOM", &pc->IntType, &EDOMValue, FALSE);
 #endif
 
 #ifdef EDQUOT
-    pc->VariableDefinePlatformVar( "EDQUOT", &pc->IntType, (UnionAnyValuePointer )&EDQUOTValue, FALSE);
+    pc->VariableDefinePlatformVar( "EDQUOT", &pc->IntType, &EDQUOTValue, FALSE);
 #endif
 
 #ifdef EEXIST
-    pc->VariableDefinePlatformVar( "EEXIST", &pc->IntType, (UnionAnyValuePointer )&EEXISTValue, FALSE);
+    pc->VariableDefinePlatformVar( "EEXIST", &pc->IntType, &EEXISTValue, FALSE);
 #endif
 
 #ifdef EFAULT
-    pc->VariableDefinePlatformVar( "EFAULT", &pc->IntType, (UnionAnyValuePointer )&EFAULTValue, FALSE);
+    pc->VariableDefinePlatformVar( "EFAULT", &pc->IntType, &EFAULTValue, FALSE);
 #endif
 
 #ifdef EFBIG
-    pc->VariableDefinePlatformVar( "EFBIG", &pc->IntType, (UnionAnyValuePointer )&EFBIGValue, FALSE);
+    pc->VariableDefinePlatformVar( "EFBIG", &pc->IntType, &EFBIGValue, FALSE);
 #endif
 
 #ifdef EHOSTUNREACH
-    pc->VariableDefinePlatformVar( "EHOSTUNREACH", &pc->IntType, (UnionAnyValuePointer )&EHOSTUNREACHValue, FALSE);
+    pc->VariableDefinePlatformVar( "EHOSTUNREACH", &pc->IntType, &EHOSTUNREACHValue, FALSE);
 #endif
 
 #ifdef EIDRM
-    pc->VariableDefinePlatformVar( "EIDRM", &pc->IntType, (UnionAnyValuePointer )&EIDRMValue, FALSE);
+    pc->VariableDefinePlatformVar( "EIDRM", &pc->IntType, &EIDRMValue, FALSE);
 #endif
 
 #ifdef EILSEQ
-    pc->VariableDefinePlatformVar( "EILSEQ", &pc->IntType, (UnionAnyValuePointer )&EILSEQValue, FALSE);
+    pc->VariableDefinePlatformVar( "EILSEQ", &pc->IntType, &EILSEQValue, FALSE);
 #endif
 
 #ifdef EINPROGRESS
-    pc->VariableDefinePlatformVar( "EINPROGRESS", &pc->IntType, (UnionAnyValuePointer )&EINPROGRESSValue, FALSE);
+    pc->VariableDefinePlatformVar( "EINPROGRESS", &pc->IntType, &EINPROGRESSValue, FALSE);
 #endif
 
 #ifdef EINTR
-    pc->VariableDefinePlatformVar( "EINTR", &pc->IntType, (UnionAnyValuePointer )&EINTRValue, FALSE);
+    pc->VariableDefinePlatformVar( "EINTR", &pc->IntType, &EINTRValue, FALSE);
 #endif
 
 #ifdef EINVAL
-    pc->VariableDefinePlatformVar( "EINVAL", &pc->IntType, (UnionAnyValuePointer )&EINVALValue, FALSE);
+    pc->VariableDefinePlatformVar( "EINVAL", &pc->IntType, &EINVALValue, FALSE);
 #endif
 
 #ifdef EIO
-    pc->VariableDefinePlatformVar( "EIO", &pc->IntType, (UnionAnyValuePointer )&EIOValue, FALSE);
+    pc->VariableDefinePlatformVar( "EIO", &pc->IntType, &EIOValue, FALSE);
 #endif
 
 #ifdef EISCONN
-    pc->VariableDefinePlatformVar( "EISCONN", &pc->IntType, (UnionAnyValuePointer )&EISCONNValue, FALSE);
+    pc->VariableDefinePlatformVar( "EISCONN", &pc->IntType, &EISCONNValue, FALSE);
 #endif
 
 #ifdef EISDIR
-    pc->VariableDefinePlatformVar( "EISDIR", &pc->IntType, (UnionAnyValuePointer )&EISDIRValue, FALSE);
+    pc->VariableDefinePlatformVar( "EISDIR", &pc->IntType, &EISDIRValue, FALSE);
 #endif
 
 #ifdef ELOOP
-    pc->VariableDefinePlatformVar( "ELOOP", &pc->IntType, (UnionAnyValuePointer )&ELOOPValue, FALSE);
+    pc->VariableDefinePlatformVar( "ELOOP", &pc->IntType, &ELOOPValue, FALSE);
 #endif
 
 #ifdef EMFILE
-    pc->VariableDefinePlatformVar( "EMFILE", &pc->IntType, (UnionAnyValuePointer )&EMFILEValue, FALSE);
+    pc->VariableDefinePlatformVar( "EMFILE", &pc->IntType, &EMFILEValue, FALSE);
 #endif
 
 #ifdef EMLINK
-    pc->VariableDefinePlatformVar( "EMLINK", &pc->IntType, (UnionAnyValuePointer )&EMLINKValue, FALSE);
+    pc->VariableDefinePlatformVar( "EMLINK", &pc->IntType, &EMLINKValue, FALSE);
 #endif
 
 #ifdef EMSGSIZE
-    pc->VariableDefinePlatformVar( "EMSGSIZE", &pc->IntType, (UnionAnyValuePointer )&EMSGSIZEValue, FALSE);
+    pc->VariableDefinePlatformVar( "EMSGSIZE", &pc->IntType, &EMSGSIZEValue, FALSE);
 #endif
 
 #ifdef EMULTIHOP
-    pc->VariableDefinePlatformVar( "EMULTIHOP", &pc->IntType, (UnionAnyValuePointer )&EMULTIHOPValue, FALSE);
+    pc->VariableDefinePlatformVar( "EMULTIHOP", &pc->IntType, &EMULTIHOPValue, FALSE);
 #endif
 
 #ifdef ENAMETOOLONG
-    pc->VariableDefinePlatformVar( "ENAMETOOLONG", &pc->IntType, (UnionAnyValuePointer )&ENAMETOOLONGValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENAMETOOLONG", &pc->IntType, &ENAMETOOLONGValue, FALSE);
 #endif
 
 #ifdef ENETDOWN
-    pc->VariableDefinePlatformVar( "ENETDOWN", &pc->IntType, (UnionAnyValuePointer )&ENETDOWNValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENETDOWN", &pc->IntType, &ENETDOWNValue, FALSE);
 #endif
 
 #ifdef ENETRESET
-    pc->VariableDefinePlatformVar( "ENETRESET", &pc->IntType, (UnionAnyValuePointer )&ENETRESETValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENETRESET", &pc->IntType, &ENETRESETValue, FALSE);
 #endif
 
 #ifdef ENETUNREACH
-    pc->VariableDefinePlatformVar( "ENETUNREACH", &pc->IntType, (UnionAnyValuePointer )&ENETUNREACHValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENETUNREACH", &pc->IntType, &ENETUNREACHValue, FALSE);
 #endif
 
 #ifdef ENFILE
-    pc->VariableDefinePlatformVar( "ENFILE", &pc->IntType, (UnionAnyValuePointer )&ENFILEValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENFILE", &pc->IntType, &ENFILEValue, FALSE);
 #endif
 
 #ifdef ENOBUFS
-    pc->VariableDefinePlatformVar( "ENOBUFS", &pc->IntType, (UnionAnyValuePointer )&ENOBUFSValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOBUFS", &pc->IntType, &ENOBUFSValue, FALSE);
 #endif
 
 #ifdef ENODATA
-    pc->VariableDefinePlatformVar( "ENODATA", &pc->IntType, (UnionAnyValuePointer )&ENODATAValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENODATA", &pc->IntType, &ENODATAValue, FALSE);
 #endif
 
 #ifdef ENODEV
-    pc->VariableDefinePlatformVar( "ENODEV", &pc->IntType, (UnionAnyValuePointer )&ENODEVValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENODEV", &pc->IntType, &ENODEVValue, FALSE);
 #endif
 
 #ifdef ENOENT
-    pc->VariableDefinePlatformVar( "ENOENT", &pc->IntType, (UnionAnyValuePointer )&ENOENTValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOENT", &pc->IntType, &ENOENTValue, FALSE);
 #endif
 
 #ifdef ENOEXEC
-    pc->VariableDefinePlatformVar( "ENOEXEC", &pc->IntType, (UnionAnyValuePointer )&ENOEXECValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOEXEC", &pc->IntType, &ENOEXECValue, FALSE);
 #endif
 
 #ifdef ENOLCK
-    pc->VariableDefinePlatformVar( "ENOLCK", &pc->IntType, (UnionAnyValuePointer )&ENOLCKValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOLCK", &pc->IntType, &ENOLCKValue, FALSE);
 #endif
 
 #ifdef ENOLINK
-    pc->VariableDefinePlatformVar( "ENOLINK", &pc->IntType, (UnionAnyValuePointer )&ENOLINKValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOLINK", &pc->IntType, &ENOLINKValue, FALSE);
 #endif
 
 #ifdef ENOMEM
-    pc->VariableDefinePlatformVar( "ENOMEM", &pc->IntType, (UnionAnyValuePointer )&ENOMEMValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOMEM", &pc->IntType, &ENOMEMValue, FALSE);
 #endif
 
 #ifdef ENOMSG
-    pc->VariableDefinePlatformVar( "ENOMSG", &pc->IntType, (UnionAnyValuePointer )&ENOMSGValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOMSG", &pc->IntType, &ENOMSGValue, FALSE);
 #endif
 
 #ifdef ENOPROTOOPT
-    pc->VariableDefinePlatformVar( "ENOPROTOOPT", &pc->IntType, (UnionAnyValuePointer )&ENOPROTOOPTValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOPROTOOPT", &pc->IntType, &ENOPROTOOPTValue, FALSE);
 #endif
 
 #ifdef ENOSPC
-    pc->VariableDefinePlatformVar( "ENOSPC", &pc->IntType, (UnionAnyValuePointer )&ENOSPCValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOSPC", &pc->IntType, &ENOSPCValue, FALSE);
 #endif
 
 #ifdef ENOSR
-    pc->VariableDefinePlatformVar( "ENOSR", &pc->IntType, (UnionAnyValuePointer )&ENOSRValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOSR", &pc->IntType, &ENOSRValue, FALSE);
 #endif
 
 #ifdef ENOSTR
-    pc->VariableDefinePlatformVar( "ENOSTR", &pc->IntType, (UnionAnyValuePointer )&ENOSTRValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOSTR", &pc->IntType, &ENOSTRValue, FALSE);
 #endif
 
 #ifdef ENOSYS
-    pc->VariableDefinePlatformVar( "ENOSYS", &pc->IntType, (UnionAnyValuePointer )&ENOSYSValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOSYS", &pc->IntType, &ENOSYSValue, FALSE);
 #endif
 
 #ifdef ENOTCONN
-    pc->VariableDefinePlatformVar( "ENOTCONN", &pc->IntType, (UnionAnyValuePointer )&ENOTCONNValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOTCONN", &pc->IntType, &ENOTCONNValue, FALSE);
 #endif
 
 #ifdef ENOTDIR
-    pc->VariableDefinePlatformVar( "ENOTDIR", &pc->IntType, (UnionAnyValuePointer )&ENOTDIRValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOTDIR", &pc->IntType, &ENOTDIRValue, FALSE);
 #endif
 
 #ifdef ENOTEMPTY
-    pc->VariableDefinePlatformVar( "ENOTEMPTY", &pc->IntType, (UnionAnyValuePointer )&ENOTEMPTYValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOTEMPTY", &pc->IntType, &ENOTEMPTYValue, FALSE);
 #endif
 
 #ifdef ENOTRECOVERABLE
-    pc->VariableDefinePlatformVar( "ENOTRECOVERABLE", &pc->IntType, (UnionAnyValuePointer )&ENOTRECOVERABLEValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOTRECOVERABLE", &pc->IntType, &ENOTRECOVERABLEValue, FALSE);
 #endif
 
 #ifdef ENOTSOCK
-    pc->VariableDefinePlatformVar( "ENOTSOCK", &pc->IntType, (UnionAnyValuePointer )&ENOTSOCKValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOTSOCK", &pc->IntType, &ENOTSOCKValue, FALSE);
 #endif
 
 #ifdef ENOTSUP
-    pc->VariableDefinePlatformVar( "ENOTSUP", &pc->IntType, (UnionAnyValuePointer )&ENOTSUPValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOTSUP", &pc->IntType, &ENOTSUPValue, FALSE);
 #endif
 
 #ifdef ENOTTY
-    pc->VariableDefinePlatformVar( "ENOTTY", &pc->IntType, (UnionAnyValuePointer )&ENOTTYValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENOTTY", &pc->IntType, &ENOTTYValue, FALSE);
 #endif
 
 #ifdef ENXIO
-    pc->VariableDefinePlatformVar( "ENXIO", &pc->IntType, (UnionAnyValuePointer )&ENXIOValue, FALSE);
+    pc->VariableDefinePlatformVar( "ENXIO", &pc->IntType, &ENXIOValue, FALSE);
 #endif
 
 #ifdef EOPNOTSUPP
-    pc->VariableDefinePlatformVar( "EOPNOTSUPP", &pc->IntType, (UnionAnyValuePointer )&EOPNOTSUPPValue, FALSE);
+    pc->VariableDefinePlatformVar( "EOPNOTSUPP", &pc->IntType, &EOPNOTSUPPValue, FALSE);
 #endif
 
 #ifdef EOVERFLOW
-    pc->VariableDefinePlatformVar( "EOVERFLOW", &pc->IntType, (UnionAnyValuePointer )&EOVERFLOWValue, FALSE);
+    pc->VariableDefinePlatformVar( "EOVERFLOW", &pc->IntType, &EOVERFLOWValue, FALSE);
 #endif
 
 #ifdef EOWNERDEAD
-    pc->VariableDefinePlatformVar( "EOWNERDEAD", &pc->IntType, (UnionAnyValuePointer )&EOWNERDEADValue, FALSE);
+    pc->VariableDefinePlatformVar( "EOWNERDEAD", &pc->IntType, &EOWNERDEADValue, FALSE);
 #endif
 
 #ifdef EPERM
-    pc->VariableDefinePlatformVar( "EPERM", &pc->IntType, (UnionAnyValuePointer )&EPERMValue, FALSE);
+    pc->VariableDefinePlatformVar( "EPERM", &pc->IntType, &EPERMValue, FALSE);
 #endif
 
 #ifdef EPIPE
-    pc->VariableDefinePlatformVar( "EPIPE", &pc->IntType, (UnionAnyValuePointer )&EPIPEValue, FALSE);
+    pc->VariableDefinePlatformVar( "EPIPE", &pc->IntType, &EPIPEValue, FALSE);
 #endif
 
 #ifdef EPROTO
-    pc->VariableDefinePlatformVar( "EPROTO", &pc->IntType, (UnionAnyValuePointer )&EPROTOValue, FALSE);
+    pc->VariableDefinePlatformVar( "EPROTO", &pc->IntType, &EPROTOValue, FALSE);
 #endif
 
 #ifdef EPROTONOSUPPORT
-    pc->VariableDefinePlatformVar( "EPROTONOSUPPORT", &pc->IntType, (UnionAnyValuePointer )&EPROTONOSUPPORTValue, FALSE);
+    pc->VariableDefinePlatformVar( "EPROTONOSUPPORT", &pc->IntType, &EPROTONOSUPPORTValue, FALSE);
 #endif
 
 #ifdef EPROTOTYPE
-    pc->VariableDefinePlatformVar( "EPROTOTYPE", &pc->IntType, (UnionAnyValuePointer )&EPROTOTYPEValue, FALSE);
+    pc->VariableDefinePlatformVar( "EPROTOTYPE", &pc->IntType, &EPROTOTYPEValue, FALSE);
 #endif
 
 #ifdef ERANGE
-    pc->VariableDefinePlatformVar( "ERANGE", &pc->IntType, (UnionAnyValuePointer )&ERANGEValue, FALSE);
+    pc->VariableDefinePlatformVar( "ERANGE", &pc->IntType, &ERANGEValue, FALSE);
 #endif
 
 #ifdef EROFS
-    pc->VariableDefinePlatformVar( "EROFS", &pc->IntType, (UnionAnyValuePointer )&EROFSValue, FALSE);
+    pc->VariableDefinePlatformVar( "EROFS", &pc->IntType, &EROFSValue, FALSE);
 #endif
 
 #ifdef ESPIPE
-    pc->VariableDefinePlatformVar( "ESPIPE", &pc->IntType, (UnionAnyValuePointer )&ESPIPEValue, FALSE);
+    pc->VariableDefinePlatformVar( "ESPIPE", &pc->IntType, &ESPIPEValue, FALSE);
 #endif
 
 #ifdef ESRCH
-    pc->VariableDefinePlatformVar( "ESRCH", &pc->IntType, (UnionAnyValuePointer )&ESRCHValue, FALSE);
+    pc->VariableDefinePlatformVar( "ESRCH", &pc->IntType, &ESRCHValue, FALSE);
 #endif
 
 #ifdef ESTALE
-    pc->VariableDefinePlatformVar( "ESTALE", &pc->IntType, (UnionAnyValuePointer )&ESTALEValue, FALSE);
+    pc->VariableDefinePlatformVar( "ESTALE", &pc->IntType, &ESTALEValue, FALSE);
 #endif
 
 #ifdef ETIME
-    pc->VariableDefinePlatformVar( "ETIME", &pc->IntType, (UnionAnyValuePointer )&ETIMEValue, FALSE);
+    pc->VariableDefinePlatformVar( "ETIME", &pc->IntType, &ETIMEValue, FALSE);
 #endif
 
 #ifdef ETIMEDOUT
-    pc->VariableDefinePlatformVar( "ETIMEDOUT", &pc->IntType, (UnionAnyValuePointer )&ETIMEDOUTValue, FALSE);
+    pc->VariableDefinePlatformVar( "ETIMEDOUT", &pc->IntType, &ETIMEDOUTValue, FALSE);
 #endif
 
 #ifdef ETXTBSY
-    pc->VariableDefinePlatformVar( "ETXTBSY", &pc->IntType, (UnionAnyValuePointer )&ETXTBSYValue, FALSE);
+    pc->VariableDefinePlatformVar( "ETXTBSY", &pc->IntType, &ETXTBSYValue, FALSE);
 #endif
 
 #ifdef EWOULDBLOCK
-    pc->VariableDefinePlatformVar( "EWOULDBLOCK", &pc->IntType, (UnionAnyValuePointer )&EWOULDBLOCKValue, FALSE);
+    pc->VariableDefinePlatformVar( "EWOULDBLOCK", &pc->IntType, &EWOULDBLOCKValue, FALSE);
 #endif
 
 #ifdef EXDEV
-    pc->VariableDefinePlatformVar( "EXDEV", &pc->IntType, (UnionAnyValuePointer )&EXDEVValue, FALSE);
+    pc->VariableDefinePlatformVar( "EXDEV", &pc->IntType, &EXDEVValue, FALSE);
 #endif
 
-    pc->VariableDefinePlatformVar( "errno", &pc->IntType, (UnionAnyValuePointer )&errno, TRUE);
+    pc->VariableDefinePlatformVar( "errno", &pc->IntType, &errno, TRUE);
 }
 
 #endif /* !BUILTIN_MINI_STDLIB */

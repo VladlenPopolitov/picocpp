@@ -673,12 +673,12 @@ void ParseState::VariableDefinePlatformVar(const char *Ident, struct ValueType *
 	tempParserForPlatformVar.pc = pc;
     struct Value *SomeValue = tempParserForPlatformVar.VariableAllocValueAndData( Size, IsWritable, nullptr, LocationOnHeapVirtual);
     SomeValue->TypeOfValue = Typ;
-	//if (IsWritable){
-		SomeValue->setValVirtual(pc,  FromValue ); //@todo FromValue must be moved to virtual memory
-	//}
-	//else { @todo
-	//	SomeValue->writeToVirtualFromAbsolute(Parser->pc, FromValue, VarSize); // moved to virtual memroy 
-	//}
+	if (VarSize==0){
+		SomeValue->setValVirtual(pc,  FromValue ); // FromValue from virtual memory. It is used only for static variables
+	}
+	else {
+		SomeValue->writeToVirtualFromAbsolute(Parser->pc, FromValue, VarSize); // moved to virtual memroy 
+	}
     if (!pc->TableSet( (pc->TopStackFrame() == nullptr) ? &pc->GlobalTable : pc->TopStackFrame()->LocalTable.get(), 
 		pc->TableStrRegister( Ident), SomeValue, 
 		Parser ? Parser->FileName : nullptr, 
@@ -697,15 +697,28 @@ void ParseState::VariableDefinePlatformVarFromPointer(const char *Ident, struct 
 	struct ParseState tempParserForPlatformVar;
 	tempParserForPlatformVar.setScopeID(-1);
 	tempParserForPlatformVar.pc = pc;
-	struct Value *SomeValue = tempParserForPlatformVar.VariableAllocValueAndData(VarSize + sizeof(UnionAnyValuePointerVirtual),
-		IsWritable, nullptr, LocationOnHeapVirtual);
-	SomeValue->TypeOfValue = Typ;
-	UnionAnyValuePointerVirtual buffer = SomeValue->getValVirtual();
-	buffer = buffer + sizeof(UnionAnyValuePointerVirtual);
-	MoveFromAbsoluteToVirtual(pc, buffer, FromValue, VarSize);
-	MoveFromAbsoluteToVirtual(pc, SomeValue->getValVirtual(), &buffer, sizeof(UnionAnyValuePointerVirtual));
-	//SomeValue->setValVirtual(pc,  FromValue ); //@todo FromValue must be moved to virtual memory
+	struct Value *SomeValue;
+
+	if (VarSize > 0){
+		// alocate memory for ointer and data 
+		SomeValue = tempParserForPlatformVar.VariableAllocValueAndData(VarSize + sizeof(UnionAnyValuePointerVirtual),
+			IsWritable, nullptr, LocationOnHeapVirtual);
+		UnionAnyValuePointerVirtual buffer = SomeValue->getValVirtual();
+		// add 4 bytes to buffer
+		buffer = static_cast<UnionAnyValuePointerVirtual>(static_cast<void*>(static_cast<char*>(static_cast<void*>(buffer)) + sizeof(UnionAnyValuePointerVirtual)));
+		MoveFromAbsoluteToVirtual(pc, buffer, FromValue->Pointer(), VarSize);
+		MoveFromAbsoluteToVirtual(pc, SomeValue->getValVirtual(), &buffer, sizeof(UnionAnyValuePointerVirtual));
+	}
+	else {
+		//do not allocate memory for data, use current pointer - future problem
+		SomeValue = tempParserForPlatformVar.VariableAllocValueAndData(0,
+			IsWritable, nullptr, LocationOnHeapVirtual);
+		// stil bug is here (while the problem of stdio implementation is not resolved)
+		SomeValue->setValVirtual(pc,  FromValue ); //@todo FromValue must be moved to virtual memory
+	}
 	//SomeValue->writeToVirtualFromAbsolute(Parser->pc, FromValue, VarSize); // moved to virtual memroy 
+	SomeValue->TypeOfValue = Typ;
+
 	if (!pc->TableSet((pc->TopStackFrame() == nullptr) ? &pc->GlobalTable : pc->TopStackFrame()->LocalTable.get(),
 		pc->TableStrRegister(Ident), SomeValue,
 		Parser ? Parser->FileName : nullptr,
@@ -828,11 +841,35 @@ PointerType ParseState::VariableDereferencePointer(struct Value *PointerValue,
 }
 
 	void Picoc::VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
-		UnionAnyValuePointer FromValue, int IsWritable){
-		size_t Size = TypeSize(Typ, Typ->ArraySize, FALSE);
+		UnionAnyValuePointer FromValue, int IsWritable,size_t Size){
+		//size_t Size = TypeSize(Typ, Typ->ArraySize, FALSE);
 		struct ParseState temp;
 		temp.setScopeID(-1);
 		temp.pc = this;
 		temp.VariableDefinePlatformVar(Ident, Typ, FromValue, IsWritable,Size);
 
+	}
+
+	void Picoc::VariableDefinePlatformVarFromPointer(const char *Ident, struct ValueType *Typ,
+		UnionAnyValuePointer FromValue, int IsWritable, size_t Size){
+		//size_t Size = TypeSize(Typ, Typ->ArraySize, FALSE);
+		struct ParseState temp;
+		temp.setScopeID(-1);
+		temp.pc = this;
+		temp.VariableDefinePlatformVarFromPointer(Ident, Typ, FromValue, IsWritable, Size);
+
+	}
+
+
+
+	void Picoc::VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
+		int *FromValue, int IsWritable){
+		VariableDefinePlatformVar(Ident, Typ,
+			static_cast<UnionAnyValuePointer>(static_cast<void*>(FromValue)), IsWritable, sizeof(int));
+	}
+
+	void Picoc::VariableDefinePlatformVar(const char *Ident, struct ValueType *Typ,
+		double *FromValue, int IsWritable){
+		VariableDefinePlatformVar(Ident, Typ,
+			static_cast<UnionAnyValuePointer>(static_cast<void*>(FromValue)), IsWritable, sizeof(double));
 	}

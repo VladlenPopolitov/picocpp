@@ -74,8 +74,38 @@ void Picoc::PicocCallMain(int argc, char **argv)
     {
         /* define the arguments */
         temp.VariableDefinePlatformVar( "__argc", &pc->IntType, (UnionAnyValuePointer )&argc, FALSE,sizeof(argc));
-        temp.VariableDefinePlatformVar( "__argv", pc->CharPtrPtrType, (UnionAnyValuePointer )&argv, FALSE,sizeof(argv)*argc);
-    }
+        //temp.VariableDefinePlatformVar( "__argv", pc->CharPtrPtrType, (UnionAnyValuePointer )&argv, FALSE,sizeof(argv)*argc);
+		//1. create argv vector
+		std::vector<UnionAnyValuePointerVirtual> argvVector;
+		//2. for every arg in 1-argc do:
+		for (int i = 0; i < argc; ++i){
+			//2.1 create variable argv[i] and assign value to it
+			std::string argv_i = "argv[" + std::to_string(i) + "]";
+			//2.2 DefinePlatformVar for it
+			temp.VariableDefinePlatformVarFromPointer(argv_i.c_str(), pc->CharPtrType, (UnionAnyValuePointer)&(argv[i]), FALSE, strlen(argv[i])+1);
+			//2.3 get virtual address of its platform var
+			Value *varValue=nullptr;
+			temp.VariableGet(TableStrRegister(argv_i.c_str()), &varValue);
+			//2.4 push virtual address to argv vector
+			if (varValue){
+				UnionAnyValuePointerVirtual buffer = varValue->getValVirtual();
+				buffer = static_cast<UnionAnyValuePointerVirtual>(static_cast<void*>(
+					static_cast<char*>(static_cast<void*>(buffer)) + sizeof(UnionAnyValuePointerVirtual)));
+
+				argvVector.push_back(buffer);
+			}
+		}
+		//3 Define Platform var for argv vector
+		argvVector.push_back(0);
+		UnionAnyValuePointer argv_data = static_cast<UnionAnyValuePointer>(const_cast<void*>(static_cast<void*>(argvVector.data())));
+		temp.VariableDefinePlatformVarFromPointer("__argv", pc->CharPtrPtrType,
+			//(UnionAnyValuePointer)&argv,
+			(UnionAnyValuePointer)&argv_data,
+			FALSE, sizeof(UnionAnyValuePointerVirtual)*argc);
+		Value *varValue = nullptr;
+		temp.VariableGet(TableStrRegister("__argv"), &varValue);
+
+	}
 
     if (FuncValue->ValFuncDef(pc).ReturnType == &pc->VoidType)
     {

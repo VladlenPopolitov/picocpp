@@ -17,14 +17,15 @@ void Picoc::LibraryInit()
 	Picoc *pc = this;
     /* define the version number macro */
     pc->VersionString = TableStrRegister( PICOC_VERSION);
-    VariableDefinePlatformVar( "PICOC_VERSION", pc->CharPtrType, (UnionAnyValuePointer )&pc->VersionString, FALSE);
+	VariableDefinePlatformVarFromPointer("PICOC_VERSION", pc->CharPtrType, (UnionAnyValuePointer)&pc->VersionString, FALSE, 
+		strlen(pc->VersionString) + 1);
 
     /* define endian-ness macros */
     BigEndian = ((*(char*)&__ENDIAN_CHECK__) == 0);
     LittleEndian = ((*(char*)&__ENDIAN_CHECK__) == 1);
 
-    VariableDefinePlatformVar( "BIG_ENDIAN", &pc->IntType, (UnionAnyValuePointer )&BigEndian, FALSE);
-    VariableDefinePlatformVar( "LITTLE_ENDIAN", &pc->IntType, (UnionAnyValuePointer )&LittleEndian, FALSE);
+    VariableDefinePlatformVar( "BIG_ENDIAN", &pc->IntType, &BigEndian, FALSE);
+    VariableDefinePlatformVar( "LITTLE_ENDIAN", &pc->IntType, &LittleEndian, FALSE);
 }
 
 /* add a library */
